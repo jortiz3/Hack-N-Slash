@@ -1,97 +1,393 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
-public class Character : MonoBehaviour {
+//Should i?  -> unfreeze rigidbody z axis on flinch, freeze once reoriented
+//add knockback meter if attacking with weapon; physically attacking always knocks back
 
-	public enum Direction { Left, Right }
+[RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
+public abstract class Character : MonoBehaviour {
 
-	[Range(0.1f, 20f)]
-	public float moveSpeed = 0.5f;
+	public static Player player;
 
-	private int health;
-	public int maxHealth = 25;
+	private static Transform characterParent;
+	protected static Transform cameraCanvas;
+	private static float defaultFlinchTime = 1.5f;
 
-	public int baseDamage;
+	[SerializeField]
+	private float moveSpeed;
 
-	private float hitTimer;
-	private float knockbackTimer;
+	private Rigidbody2D rb2D;
+	private Animator anim;
+	private SpriteRenderer sr;
 
-	protected bool onGround;
+	private Color defaultSRColor;
 
-	private Direction facing;
+	private float groundDetectDist;
+	private float groundLandingDelay;
 
-	private Rigidbody2D rb;
+	private Weapon weapon;
 
-	public int Health { get { return health; } }
-	public bool OnGround { get { return onGround; } set { onGround = value; } }
-	public Direction Facing { get { return facing; } }
+	private int hp;
+	[SerializeField]
+	protected int maxhp;
 
-	// Initialization
-	void Start () {
-		health = maxHealth;
+	private Slider hpSlider;
 
-		rb = gameObject.GetComponent<Rigidbody2D> ();
+	private float attackTimer; //used to delay attacks and as the time until the attack expires
+	private float flinchTimer; //'air-time' after being hit
+	private float invulnTimer; //timespan of invulnerability
 
-		if (rb == null)
-			Debug.Log (gameObject.name + " does not have component 'Rigidbody2D' when it needs one!");
+	[SerializeField]
+	protected float baseAttackForce = 25f;
 
-		InitializeCharacter ();
+	protected Slider attackTimerSlider; //used to visually display the timer to the player
+	[SerializeField]
+	private Color sliderColor_default = Color.white;
+	[SerializeField]
+	private Color sliderColor_critical = Color.white;
+
+	private bool critAvailable;
+
+	private Text statText;
+
+	public bool isFacingRight { get { return !sr.flipX; } }
+	public bool isFacingLeft { get { return !isFacingRight; } }
+	public bool isJumping { get { return anim.GetBool ("Jump"); } }
+	public bool isFalling { get { return anim.GetBool ("Falling"); } }
+	public bool isOnGround { get { return !isJumping && !isFalling ? true : false; } }
+	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
+	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
+	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+
+	protected void Initialize () {
+		if (cameraCanvas == null)
+			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
+		if (characterParent == null)
+			characterParent = GameObject.FindGameObjectWithTag ("Character Parent").transform;
+
+		transform.SetParent (characterParent);
+
+		rb2D = gameObject.GetComponent<Rigidbody2D> ();
+		anim = gameObject.GetComponent<Animator> ();
+		sr = gameObject.GetComponent<SpriteRenderer> ();
+
+		defaultSRColor = sr.color;
+
+		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<BoxCollider2D>().size.y)) + 0.05f;
+		groundLandingDelay = 0f;
+
+		hp = maxhp;
+		hpSlider = (GameObject.Instantiate (Resources.Load ("hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
+		hpSlider.gameObject.name = gameObject.name + "'s hp slider";
+		hpSlider.maxValue = maxhp;
+		hpSlider.gameObject.SetActive (false);
+
+		statText = (GameObject.Instantiate(Resources.Load("statusText"), cameraCanvas) as GameObject).GetComponent<Text>();
+		statText.gameObject.name = gameObject.name + "'s status text";
+		statText.gameObject.SetActive (false);
+
+		weapon = gameObject.GetComponentInChildren<Weapon> ();
+
+		if (attackTimerSlider != null) {
+			if (weapon != null)
+				attackTimerSlider.maxValue = weapon.currentAttackDelay.y;
+			attackTimerSlider.gameObject.SetActive (false);
+		}
 	}
 
-	void Update () {
-		UpdateCharacter ();
-
-		if (hitTimer > 0)
-			hitTimer -= Time.deltaTime;
-		if (knockbackTimer > 0)
-			knockbackTimer -= Time.deltaTime;
-	}
+	protected void UpdateAnimations() {
 		
-	protected virtual void InitializeCharacter() {/*intentionally left blank*/}
+		if (rb2D.velocity.y < -0.0001f) {
+			anim.SetBool ("Falling", true);
+			anim.SetBool ("Jump", true);
+			if (weapon != null)
+				weapon.Fall ();
+		} else if (rb2D.velocity.y > 0.0001f) {
+			anim.SetBool ("Falling", false);
+			anim.SetBool ("Jump", true);
+		} else if (!isOnGround) { //velocity is ~0 && we aren't flagged as on the ground
+			RaycastHit2D hit = Physics2D.Raycast (new Vector2(transform.position.x, transform.position.y),
+				Vector2.down, groundDetectDist, LayerMask.GetMask("World")); //check if any 'world' objects are just below character
 
-	protected virtual void UpdateCharacter() {/*intentionally left blank*/}
+			if (hit != null)
+				groundLandingDelay += Time.fixedDeltaTime;
 
-	/// <summary>
-	/// Move the specified direction. Provided direction must be normalized.
-	/// </summary>
-	/// <param name="direction">Direction.</param>
-	protected void Move(Vector2 direction) {
-		if (direction.x >= 0) { //positive x is to the right
-			if (knockbackTimer <= 0) {//if we are not being knocked back
-				if (facing == Direction.Left) //if we are changing directions, stop movement to keep the character from 'slipping and sliding'
-					rb.velocity = new Vector2 (0, rb.velocity.y);
+			if (isFalling || groundLandingDelay >= 0.5f)
+				LandOnGround ();
+		}
+
+		if (anim.GetBool("Attack_Expire") && !isAttacking) {
+			anim.SetBool ("Attack_Expire", false);
+			anim.SetBool ("Run", false);
+			anim.SetBool ("Idle", true);
+
+			if (weapon != null)
+				weapon.Attack_Available ();
+		}
+
+		if (attackTimer > 0) {
+			attackTimer -= Time.fixedDeltaTime;
+
+
+			if (attackTimer < weapon.currentAttackDelay.y - weapon.currentHitboxEnableRange.x
+				&& attackTimer > weapon.currentAttackDelay.y - weapon.currentHitboxEnableRange.y)
+				weapon.Hitbox_Enable ();
+			else
+				weapon.Hitbox_Disable();
+
+			if (attackTimerSlider != null) {
+				attackTimerSlider.value = attackTimer;
+
+				if (attackTimer < weapon.currentAttackDelay.y - weapon.currentCritRange.x
+					&& attackTimer > weapon.currentAttackDelay.y - weapon.currentCritRange.y) {
+					if (!critAvailable) {
+						attackTimerSlider.fillRect.GetComponent<Image> ().color = sliderColor_critical;
+						critAvailable = true;
+					}
+				} else {
+					if (critAvailable) {
+						attackTimerSlider.fillRect.GetComponent<Image> ().color = sliderColor_default;
+						critAvailable = false;
+					}
+				}
+
+				attackTimerSlider.transform.position = transform.position + (Vector3.down * groundDetectDist);
+
+				if (!attackTimerSlider.gameObject.activeSelf)
+					attackTimerSlider.gameObject.SetActive (true);
 			}
+		} else if (isAttacking) {
+			AttackExpire ();
+		}
+		
+		if (isFlinching) {
+			if (!sr.color.Equals (Color.red))
+				sr.color = Color.red;
 
-			facing = Direction.Right; //set the direction we are moving towards
-		} else {
-			if (knockbackTimer <= 0) {
-				if (facing == Direction.Right)
-					rb.velocity = new Vector2 (0, rb.velocity.y);
+			hpSlider.transform.position = transform.position + (Vector3.up * groundDetectDist);
+			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.1f));
+
+			if (!hpSlider.IsActive())
+				hpSlider.gameObject.SetActive (true);
+
+			if (!statText.gameObject.activeSelf)
+				statText.gameObject.SetActive (true);
+
+			flinchTimer -= Time.fixedDeltaTime;
+		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
+			if (hp > 0) {
+				sr.color = defaultSRColor;
+				hpSlider.gameObject.SetActive (false);
+				statText.gameObject.SetActive (false);
+			} else {
+				Die ();
 			}
+		}
 			
-			facing = Direction.Left;
+		if (isInvulnerable) {
+			invulnTimer -= Time.fixedDeltaTime;
 		}
-
-		rb.AddForce (direction * moveSpeed * 1000.0f); //add the movement force to the object
 	}
 
-	public void AddKnockback(Vector2 force) {
-		rb.AddForce (force);
-		knockbackTimer = force.magnitude;
+	protected void Move(int xDir) {
+		if (!isAttacking) {
+			xDir = Mathf.Clamp(xDir, -1, 1);
+
+			if (xDir < 0) {//if moving left
+				sr.flipX = true;
+
+				if (weapon != null) {
+					weapon.FaceLeft ();
+				}
+			} else if (xDir > 0) {
+				sr.flipX = false;
+
+				if (weapon != null) {
+					weapon.FaceRight ();
+				}
+			}
+
+			if (!isFlinching) { //if character hasn't been hit recently
+				rb2D.velocity = new Vector2 (xDir * moveSpeed, rb2D.velocity.y); //move normally; set velocity
+				if (xDir != 0) { //if character is moving
+					anim.SetBool ("Run", true);
+					anim.SetBool ("Idle", false);
+
+					if (weapon != null)
+						weapon.Move ();
+				} else { //else character is idle
+					anim.SetBool ("Run", false);
+					anim.SetBool ("Idle", true);
+
+					if (weapon != null)
+						weapon.Idle ();
+				}
+			} else { //character has been hit recently
+				if ((rb2D.velocity.x < moveSpeed / 2f && xDir > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && xDir < 0))
+					rb2D.AddForce (new Vector2 (xDir * moveSpeed, 0)); //only able to make slight adjustments mid-air;
+			}
+		}
 	}
 
-	//called when weapon hitbox triggered
-	public void ReceiveHit(int damage) {
-		if (hitTimer > 0)
-			return;
 
-		health -= damage;
+	protected void Attack(string triggerName) {
+		if (!isFlinching) {
+			if (weapon != null) {
+				if (attackTimer < (weapon.currentAttackDelay.y - weapon.currentAttackDelay.x) && !anim.GetBool ("Attack_Expire")) {
+					
+					weapon.Attack (triggerName);
+					anim.SetTrigger (triggerName);
 
-		if (health <= 0) {
-			Destroy (gameObject); //later play animation and delay object destroy
-			return;
+					if (triggerName.Equals ("Attack_Forward")) { //if swinging forward (aka power attack)
+						if (Mathf.Abs (rb2D.velocity.x) < moveSpeed / 2f) { //if not going too fast -- don't want to be skating across world with power attacks
+							if (isFacingRight) {
+								rb2D.AddForce (new Vector2 (weapon.attackForce, 0f));
+							} else {
+								rb2D.AddForce (new Vector2 (-weapon.attackForce, 0f));
+							}
+						}
+					} else if (triggerName.Equals ("Attack_Backward")) {
+						sr.flipX = !sr.flipX;
+						weapon.FaceToggle ();
+					}
+
+					attackTimer = weapon.currentAttackDelay.y;
+
+					if (attackTimerSlider != null)
+						attackTimerSlider.maxValue = attackTimer;
+				}
+			} else {
+				anim.SetTrigger ("Attack");
+				anim.SetBool ("Run", false);
+				anim.SetBool ("Idle", false);
+
+				if (Mathf.Abs (rb2D.velocity.x) < 2f) { //if character isn't moving too fast
+					if (!sr.flipX) //facing right
+						rb2D.AddForce (new Vector2 (baseAttackForce, 0)); //add some 'umph' to the attack
+					else
+						rb2D.AddForce (new Vector2 (-baseAttackForce, 0));
+				}
+			}
+		}
+	}
+
+	private void AttackExpire() {
+		anim.SetBool ("Attack_Expire", true);
+
+		if (weapon != null)
+			weapon.Attack_Expire ();
+
+		if (attackTimerSlider != null) {
+			attackTimerSlider.gameObject.SetActive (false);
 		}
 
-		hitTimer = 1f;
+		attackTimer = 0;
+	}
+
+	protected void Jump() {
+		if (!isAttacking && !isJumping) {
+			anim.SetBool ("Jump", true);
+
+			if (weapon != null)
+				weapon.Jump ();
+		
+			rb2D.AddForce (Vector2.up * 300);
+		}
+	}
+
+	protected void LandOnGround() {
+		anim.SetBool ("Jump", false);
+		anim.SetBool ("Falling", false);
+
+		if (weapon != null)
+			weapon.Land ();
+
+		groundLandingDelay = 0;
+	}
+
+	public void OnCollisionEnter2D(Collision2D otherObj) {
+		if (otherObj.gameObject.tag.Equals ("Player")) { //if the other object is the player
+			if (!isFlinching) { //and this isn't flinching
+				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
+			}
+		}
+	}
+
+	public void ReceiveDamageFrom(Character c) {
+		float forceMagnitude = (c.rb2D.velocity.magnitude + 1) * 50;
+		Vector2 knockbackDir = rb2D.position - c.rb2D.position;
+
+		if (!c.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
+			knockbackDir.y = 0f; //don't move vertically
+		} else {
+			knockbackDir.y = knockbackDir.x * 2f;
+		}
+
+		rb2D.velocity = Vector2.zero; //stop current movement
+		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
+
+		if (!isInvulnerable) { //enemies typically never invulnerable
+			if (!isFlinching) {
+				if (gameObject.tag.Equals ("Player")) {
+					flinchTimer = defaultFlinchTime / 2f;
+				} else {
+					flinchTimer = defaultFlinchTime;
+				}
+			}
+
+			float damage = 0;
+
+			if (c.weapon != null) { //if the character has a weapon
+				damage += c.weapon.Damage; //add weapon damage
+			} else {
+				damage += c.rb2D.mass * 15f; //damage based on mass
+			}
+
+			if (c.critAvailable) {
+				damage *= 1.25f;
+
+				statText.text = "-" + (int)damage + "\nCritical Hit!";
+				statText.color = sliderColor_critical;
+			} else {
+				statText.text = "-" + (int)damage;
+				statText.color = sliderColor_default;
+			}
+
+			hp -= (int)(damage); //take away the appropriate health
+
+			hpSlider.value = hp;
+
+			if (gameObject.tag.Equals ("Player")) //player receives temporary invulnerability when damaged
+				invulnTimer = 1f;
+
+			AttackExpire ();
+		}
+	}
+
+	protected virtual void Die() {
+		Destroy (hpSlider.gameObject);
+		Destroy (statText.gameObject);
+		Destroy (gameObject);
+	}
+
+	protected void Respawn(Vector3 location) {
+		hp = maxhp;
+		hpSlider.value = hp;
+
+		if (gameObject.tag.Equals ("Player")) //player receives temporary invulnerability when respawning
+			invulnTimer = 1f;
+
+		AttackExpire ();
+
+		transform.position = location;
+	}
+
+	protected void AddTorque (float torque) {
+		rb2D.AddTorque (torque);
+	}
+
+	protected void StopRotation() {
+		rb2D.angularVelocity = 0;
 	}
 }
