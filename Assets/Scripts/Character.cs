@@ -3,7 +3,8 @@ using UnityEngine.UI;
 using System.Collections;
 
 //Should i?  -> unfreeze rigidbody z axis on flinch, freeze once reoriented
-//add knockback meter if attacking with weapon; physically attacking always knocks back
+//add knockback meter if attacking with weapon; physically attacking always knocks back?
+//update or not based on GameManager.currGameState
 
 [RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
 public abstract class Character : MonoBehaviour {
@@ -60,6 +61,8 @@ public abstract class Character : MonoBehaviour {
 	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
 
+	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
+
 	protected void Initialize () {
 		if (cameraCanvas == null)
 			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
@@ -78,12 +81,12 @@ public abstract class Character : MonoBehaviour {
 		groundLandingDelay = 0f;
 
 		hp = maxhp;
-		hpSlider = (GameObject.Instantiate (Resources.Load ("hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
+		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
 		hpSlider.gameObject.name = gameObject.name + "'s hp slider";
 		hpSlider.maxValue = maxhp;
 		hpSlider.gameObject.SetActive (false);
 
-		statText = (GameObject.Instantiate(Resources.Load("statusText"), cameraCanvas) as GameObject).GetComponent<Text>();
+		statText = (GameObject.Instantiate(Resources.Load("UI/statusText"), cameraCanvas) as GameObject).GetComponent<Text>();
 		statText.gameObject.name = gameObject.name + "'s status text";
 		statText.gameObject.SetActive (false);
 
@@ -106,14 +109,10 @@ public abstract class Character : MonoBehaviour {
 		} else if (rb2D.velocity.y > 0.0001f) {
 			anim.SetBool ("Falling", false);
 			anim.SetBool ("Jump", true);
-		} else if (!isOnGround) { //velocity is ~0 && we aren't flagged as on the ground
-			RaycastHit2D hit = Physics2D.Raycast (new Vector2(transform.position.x, transform.position.y),
-				Vector2.down, groundDetectDist, LayerMask.GetMask("World")); //check if any 'world' objects are just below character
+		} else if (!isOnGround && isFalling) { //velocity is ~0 && we haven't moved vertically for a bit
+			groundLandingDelay += Time.fixedDeltaTime;
 
-			if (hit != null)
-				groundLandingDelay += Time.fixedDeltaTime;
-
-			if (isFalling || groundLandingDelay >= 0.5f)
+			if (groundLandingDelay >= 0.15f)
 				LandOnGround ();
 		}
 
@@ -234,7 +233,7 @@ public abstract class Character : MonoBehaviour {
 	protected void Attack(string triggerName) {
 		if (!isFlinching) {
 			if (weapon != null) {
-				if (attackTimer < (weapon.currentAttackDelay.y - weapon.currentAttackDelay.x) && !anim.GetBool ("Attack_Expire")) {
+				if (attackTimer < (weapon.currentAttackDelay.y - weapon.currentAttackDelay.x) && !anim.GetBool ("Attack_Expire")) { //attackTimer starts at max value, so we need to make sure the min delay is upheld
 					
 					weapon.Attack (triggerName);
 					anim.SetTrigger (triggerName);
@@ -247,9 +246,15 @@ public abstract class Character : MonoBehaviour {
 								rb2D.AddForce (new Vector2 (-weapon.attackForce, 0f));
 							}
 						}
-					} else if (triggerName.Equals ("Attack_Backward")) {
-						sr.flipX = !sr.flipX;
-						weapon.FaceToggle ();
+					} else if (triggerName.Equals ("Attack_Backward")) { //if swinging backward
+						sr.flipX = !sr.flipX; //flip the sprite
+						weapon.FaceToggle (); //flip the weapon sprite
+					}
+
+					if (attackTimer < weapon.currentCritRange.y && weapon.currentCritRange.x < attackTimer) { //if the player timed the attack correctly
+						critAvailable = true; //they get a critical hit
+					} else {
+						critAvailable = false;
 					}
 
 					attackTimer = weapon.currentAttackDelay.y;
@@ -307,6 +312,12 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	public void OnCollisionEnter2D(Collision2D otherObj) {
+		if (otherObj.transform.position.y < transform.position.y) { //if other object is below
+			if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
+				LandOnGround();
+			}
+		}
+
 		if (otherObj.gameObject.tag.Equals ("Player")) { //if the other object is the player
 			if (!isFlinching) { //and this isn't flinching
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
@@ -337,12 +348,36 @@ public abstract class Character : MonoBehaviour {
 			}
 
 			float damage = 0;
+			float difficultyDamageModifier = 1f;
 
-			if (c.weapon != null) { //if the character has a weapon
-				damage += c.weapon.Damage; //add weapon damage
-			} else {
-				damage += c.rb2D.mass * 15f; //damage based on mass
+			if (gameObject.tag.Equals ("Player")) { //player takes more damage based on difficulty
+				switch (GameManager.currDifficulty) {
+				case GameDifficulty.Easiest:
+					difficultyDamageModifier = 0.5f;
+					break;
+				case GameDifficulty.Easy:
+					difficultyDamageModifier = 0.8f;
+					break;
+				case GameDifficulty.Normal:
+					difficultyDamageModifier = 1f;
+					break;
+				case GameDifficulty.Masochist:
+					damage = maxhp;
+					break;
+				}
+
+				invulnTimer = 1f; //player receives temporary invulnerability when damaged
 			}
+
+			if (damage == 0) {
+				if (c.weapon != null) { //if the character has a weapon
+					damage += c.weapon.Damage; //add weapon damage
+				} else {
+					damage += c.rb2D.mass * 15f; //damage based on mass
+				}
+			}
+
+			damage *= difficultyDamageModifier;
 
 			if (c.critAvailable) {
 				damage *= 1.25f;
@@ -358,14 +393,11 @@ public abstract class Character : MonoBehaviour {
 
 			hpSlider.value = hp;
 
-			if (gameObject.tag.Equals ("Player")) //player receives temporary invulnerability when damaged
-				invulnTimer = 1f;
-
 			AttackExpire ();
 		}
 	}
 
-	protected virtual void Die() {
+	public virtual void Die() {
 		Destroy (hpSlider.gameObject);
 		Destroy (statText.gameObject);
 		Destroy (gameObject);

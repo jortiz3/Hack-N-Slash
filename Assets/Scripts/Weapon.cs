@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-//determine the current index for ranges based on current animation
-
 [RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Animator))]
 public class Weapon : MonoBehaviour {
 
@@ -37,7 +35,7 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("Hitbox offset when the player is facing right.")]
 	private Vector2 hitboxOffsetRight;
 
-	public int Damage { get { return damage; } } //use weapon rarity and swingforce to increase base damage
+	public int Damage { get { return damage; } }
 	public Vector2 currentAttackDelay { get { return currAttackDelay; } }
 	public Vector2 currentHitboxEnableRange { get { return currhbEnableRange; } }
 	public Vector2 currentCritRange { get { return currCritRange; } }
@@ -92,7 +90,7 @@ public class Weapon : MonoBehaviour {
 	/// Returns the name of the trigger to call for the character animation.
 	/// </summary>
 	public void Attack(string triggerName) {
-		if (!bc2D.enabled) { //only occurs when we haven't attacked yet -- all attacks are towards the same direction anyways
+		if (!bc2D.enabled) { //only flips hitbox when it is not active
 			if (sr.flipX) {
 				bc2D.offset = hitboxOffsetLeft;
 			} else {
@@ -100,8 +98,8 @@ public class Weapon : MonoBehaviour {
 			}
 		}
 
-		anim.SetTrigger (triggerName);
-		anim.SetBool ("Run", false);
+		anim.SetTrigger (triggerName); //trigger the animation
+		anim.SetBool ("Run", false); //ensure other bools don't get in the way
 		anim.SetBool ("Idle", false);
 
 		//get current animation, set currAnim to appropriate index

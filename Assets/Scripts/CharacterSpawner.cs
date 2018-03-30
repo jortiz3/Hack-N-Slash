@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
+//move spawn locations to each Spawn struct
+
 public class CharacterSpawner : MonoBehaviour {
 	
 	[SerializeField]
@@ -30,21 +32,20 @@ public class CharacterSpawner : MonoBehaviour {
 	private Vector2 spawnTimeRange;
 	private float spawnTimer;
 
-	private int totalSpawns;
+	private int remainingSpawns;
 
-	public bool Depleted { get { return totalSpawns <= 0 ? true : false; } }
+	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
 
 	// Use this for initialization
 	void Start () {
 		currLocation = 0;
 		currSpawn = 0;
 
-		totalSpawns = 0;
+		remainingSpawns = 0;
 		for (int i = 0; i < spawnList.Length; i++)
-			totalSpawns += spawnList [i].quantity;
+			remainingSpawns += spawnList [i].quantity;
 	}
-	
-	// Update is called once per frame
+
 	void Update () {
 		if (!Depleted) {
 			if (spawnTimer > 0) {
@@ -72,7 +73,7 @@ public class CharacterSpawner : MonoBehaviour {
 
 		GameObject.Instantiate (spawnList [currSpawn].character.gameObject, spawnLocations [currLocation].position, Quaternion.Euler(Vector3.zero));
 
-		totalSpawns--;
+		remainingSpawns--;
 		spawnList [currSpawn].quantity--;
 
 		if (sequentialSpawnLocations) {

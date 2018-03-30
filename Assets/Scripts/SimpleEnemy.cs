@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SimpleEnemy : Character {
+public class SimpleEnemy : Character { //simple enemy that always moves towards the player
 
 	private float pauseTime;
 	private float currPauseDelay;
