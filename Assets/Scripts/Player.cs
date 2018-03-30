@@ -4,7 +4,6 @@ using System.Collections;
 
 //change from keyboard to touch input
 //--tap>>jump
-//--directional swipe>>directional attack
 
 public class Player : Character {
 
@@ -41,15 +40,36 @@ public class Player : Character {
 
 					switch (currTouch.phase) {
 					case TouchPhase.Stationary:
-						//if deltatime > 0.15f
-						//if touchpos.x > player.x
-						//move right
-						//if touchpos.x < player.x
-						//move left
+						if (currTouch.deltaTime > 0.15f) {
+							if (currTouch.position.x > transform.position.x + 5) {
+								Move (1);
+							} else if (currTouch.position.x < transform.position.x - 5) {
+								Move (-1);
+							} else {
+								Move (0);
+							}
+						}
 						break;
 					case TouchPhase.Moved:
 						if (currTouch.deltaTime < 0.3f && currTouch.deltaPosition.magnitude > 50) {
-							//get attack direction
+
+							float angle = Mathf.Acos(Vector2.Dot(Vector2.right, currTouch.deltaPosition));
+
+							if (angle < 0.78 || angle >= 5.49) { //swipe right
+								if (isFacingRight)
+									Attack ("Attack_Forward");
+								else
+									Attack ("Attack_Backward");
+							} else if (angle < 2.35) { //swipe up
+								Attack ("Attack_Up");
+							} else if (angle < 3.92) { //swipe left
+								if (isFacingLeft)
+									Attack ("Attack_Forward");
+								else
+									Attack ("Attack_Backward");
+							} else if (angle < 5.49) { //swipe down
+								Attack ("Attack_Down");
+							}
 						}
 						break;
 					case TouchPhase.Ended:
