@@ -1,0 +1,203 @@
+fileFormatVersion: 2
+guid: 705c4efe92e05044f863e973ba0c492c
+timeCreated: 1483930837
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: Longsword_0
+    21300002: Longsword_1
+    21300004: Longsword_2
+    21300006: Longsword_3
+    21300008: Longsword_4
+    21300010: Longsword_5
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 30
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: Longsword_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 45
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 0, y: 3.5}
+        - {x: -4, y: -1.5}
+        - {x: -10, y: -13.5}
+        - {x: -11, y: -17.5}
+        - {x: -11, y: -20.5}
+        - {x: -5, y: -20.5}
+        - {x: 7, y: -10.5}
+        - {x: 7, y: 2.5}
+        - {x: 4, y: 3.5}
+    - name: Longsword_1
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 45
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 0, y: 1.5}
+        - {x: -4, y: -3.5}
+        - {x: -10, y: -15.5}
+        - {x: -11, y: -19.5}
+        - {x: -11, y: -22.5}
+        - {x: -5, y: -22.5}
+        - {x: 7, y: -12.5}
+        - {x: 7, y: 0.5}
+        - {x: 4, y: 1.5}
+    - name: Longsword_2
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 45
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 0, y: 5.5}
+        - {x: -4, y: 0.5}
+        - {x: -10, y: -11.5}
+        - {x: -11, y: -15.5}
+        - {x: -11, y: -18.5}
+        - {x: -5, y: -18.5}
+        - {x: 7, y: -8.5}
+        - {x: 7, y: 4.5}
+        - {x: 4, y: 5.5}
+    - name: Longsword_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -8, y: 10.5}
+        - {x: -11, y: 7.5}
+        - {x: -11, y: -14.5}
+        - {x: -1, y: -22.5}
+        - {x: 25, y: -22.5}
+        - {x: 28, y: -19.5}
+        - {x: 28, y: 5.5}
+        - {x: 22, y: 10.5}
+      - - {x: -23, y: -8.5}
+        - {x: -30, y: -9.5}
+        - {x: -30, y: -17.5}
+        - {x: -20, y: -19.5}
+        - {x: -6, y: -19.5}
+        - {x: -1, y: -16.5}
+        - {x: -1, y: -10.5}
+        - {x: -6, y: -8.5}
+    - name: Longsword_4
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 0
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 16, y: 13.5}
+        - {x: -2, y: 13.5}
+        - {x: -2, y: -22.5}
+        - {x: 21, y: -22.5}
+        - {x: 30, y: -13.5}
+        - {x: 30, y: 1.5}
+        - {x: 29, y: 5.5}
+      - - {x: -30, y: -14.5}
+        - {x: -28, y: -16.5}
+        - {x: -5, y: -16.5}
+        - {x: -5, y: -10.5}
+        - {x: -6, y: -8.5}
+        - {x: -9, y: -7.5}
+        - {x: -30, y: -7.5}
+    - name: Longsword_5
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 0
+        width: 60
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 16, y: 22.5}
+        - {x: 13, y: 21.5}
+        - {x: -1, y: -15.5}
+        - {x: -1, y: -22.5}
+        - {x: 28, y: -22.5}
+        - {x: 30, y: -17.5}
+        - {x: 30, y: 22.5}
+      - - {x: -21, y: 16.5}
+        - {x: -25, y: 16.5}
+        - {x: -26, y: 14.5}
+        - {x: -26, y: 8.5}
+        - {x: -9, y: -5.5}
+        - {x: -7, y: -5.5}
+        - {x: -2, y: -4.5}
+        - {x: 1, y: -3.5}
+        - {x: 1, y: 0.5}
+        - {x: -3, y: 8.5}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
