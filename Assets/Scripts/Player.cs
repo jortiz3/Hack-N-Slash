@@ -1,13 +1,49 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Player : Character {
+	struct TouchInfo {
+		float startTime;
+		Vector2 startPosition;
+
+		public TouchInfo(float StartTime, Vector2 StartPosition) {
+			startTime = StartTime;
+			startPosition = StartPosition;
+		}
+
+		public string GetEndPhase (float EndTime, Vector2 EndPosition) {
+			float deltaTime = EndTime - startTime;
+			Vector2 deltaPosition = EndPosition - startPosition;
+
+			if (deltaPosition.magnitude > 100) { //if the swipe is long enough
+				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
+				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
+
+				if (angle < 0.78 || angle >= 5.49) {
+					return "swipe_right";
+				} else if (angle < 2.35) {
+					return "swipe_up";
+				} else if (angle < 3.92) {
+					return "swipe_left";
+				} else if (angle < 5.49) {
+					return "swipe_down";
+				}
+			} else if (deltaTime < 0.12f) { //briefly tapped the screen
+				return "jump";
+			}
+
+			return "";
+		}
+	}
 
 	[SerializeField]
 	private bool infiniteRespawn;
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
+
+	private List<TouchInfo> touchInfo;
 
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
 
@@ -23,7 +59,9 @@ public class Player : Character {
 
 		attackTimerSlider = (GameObject.Instantiate (Resources.Load ("UI/attackTimerSlider"), cameraCanvas) as GameObject).GetComponent<Slider>();
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
-		
+
+		touchInfo = new List<TouchInfo> ();
+
 		Initialize ();
 	}
 
@@ -35,50 +73,55 @@ public class Player : Character {
 					currTouch = Input.GetTouch (i);
 
 					switch (currTouch.phase) {
-					case TouchPhase.Stationary:
-						if (currTouch.deltaTime > 0.12f) { //holding for 0.12 seconds
-							if (currTouch.position.x > transform.position.x + 5) { //holding to the right of the character
-								Move (1);
-							} else if (currTouch.position.x < transform.position.x - 5) { //holding to the left of the character
-								Move (-1);
-							} else {
-								Move (0);
-							}
-						}
+					case TouchPhase.Began:
+						touchInfo.Insert (i, new TouchInfo (Time.time, currTouch.position));
 						break;
-					case TouchPhase.Moved:
-						if (currTouch.deltaTime < 0.3f && currTouch.deltaPosition.magnitude > 30) { //if the touch moved quickly and at least 30 pixels
+					case TouchPhase.Stationary:
+						Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
 
-							float angle = Mathf.Acos(Vector2.Dot(Vector2.right, currTouch.deltaPosition)); //dot product gets us the cosine of the angle between vectors; so we get the arccosine to get the angle (in radians)
-
-							if (angle < 0.78 || angle >= 5.49) { //swipe right
-								if (isFacingRight)
-									Attack ("Attack_Forward");
-								else
-									Attack ("Attack_Backward");
-							} else if (angle < 2.35) { //swipe up
-								Attack ("Attack_Up");
-							} else if (angle < 3.92) { //swipe left
-								if (isFacingLeft)
-									Attack ("Attack_Forward");
-								else
-									Attack ("Attack_Backward");
-							} else if (angle < 5.49) { //swipe down
-								Attack ("Attack_Down");
-							}
+						if (temp.x > transform.position.x + 10) { //holding to the right of the character
+							Move (1);
+						} else if (temp.x < transform.position.x - 10) { //holding to the left of the character
+							Move (-1);
 						}
 						break;
 					case TouchPhase.Ended:
-						if (currTouch.tapCount >= 1)
+						string endPhase = touchInfo [i].GetEndPhase (Time.time, currTouch.position);
+
+						switch (endPhase) {
+						case "swipe_left":
+							if (isFacingLeft)
+								Attack ("Attack_Forward");
+							else
+								Attack ("Attack_Backward");
+							break;
+						case "swipe_right":
+							if (isFacingRight)
+								Attack ("Attack_Forward");
+							else
+								Attack ("Attack_Backward");
+							break;
+						case "swipe_up":
+							Attack ("Attack_Up");
+							break;
+						case "swipe_down":
+							Attack ("Attack_Down");
+							break;
+						case "jump":
 							Jump ();
-						/*else if (currTouch.deltaPosition.magnitude < 30) //not sure if will need to end movement
-							Move (0);*/
+							break;
+						default:
+							Move (0);
+							break;
+						}
+
+						touchInfo.RemoveAt (i);
 						break;
 					}
 				}
 			}
 
-			#region PCControls
+			#if UNITY_EDITOR
 			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
 				Move ((int)Input.GetAxisRaw ("Horizontal"));
 			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
@@ -106,7 +149,7 @@ public class Player : Character {
 
 			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
 				Jump ();
-			#endregion
+			#endif
 		}
 	}
 
