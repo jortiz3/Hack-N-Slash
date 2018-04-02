@@ -2,9 +2,6 @@
 using UnityEngine.UI;
 using System.Collections;
 
-//change from keyboard to touch input
-//--tap>>jump
-
 public class Player : Character {
 
 	[SerializeField]
@@ -32,18 +29,17 @@ public class Player : Character {
 
 	void Update () {
 		if (GameManager.currGameState == GameState.Active) {
-
-			if (Input.touchCount > 0) {
+			if (Input.touchCount > 0) { //if the player is touching the screen
 				Touch currTouch;
 				for (int i = 0; i < Input.touchCount; i++) {
 					currTouch = Input.GetTouch (i);
 
 					switch (currTouch.phase) {
 					case TouchPhase.Stationary:
-						if (currTouch.deltaTime > 0.15f) {
-							if (currTouch.position.x > transform.position.x + 5) {
+						if (currTouch.deltaTime > 0.12f) { //holding for 0.12 seconds
+							if (currTouch.position.x > transform.position.x + 5) { //holding to the right of the character
 								Move (1);
-							} else if (currTouch.position.x < transform.position.x - 5) {
+							} else if (currTouch.position.x < transform.position.x - 5) { //holding to the left of the character
 								Move (-1);
 							} else {
 								Move (0);
@@ -51,9 +47,9 @@ public class Player : Character {
 						}
 						break;
 					case TouchPhase.Moved:
-						if (currTouch.deltaTime < 0.3f && currTouch.deltaPosition.magnitude > 50) {
+						if (currTouch.deltaTime < 0.3f && currTouch.deltaPosition.magnitude > 30) { //if the touch moved quickly and at least 30 pixels
 
-							float angle = Mathf.Acos(Vector2.Dot(Vector2.right, currTouch.deltaPosition));
+							float angle = Mathf.Acos(Vector2.Dot(Vector2.right, currTouch.deltaPosition)); //dot product gets us the cosine of the angle between vectors; so we get the arccosine to get the angle (in radians)
 
 							if (angle < 0.78 || angle >= 5.49) { //swipe right
 								if (isFacingRight)
@@ -73,10 +69,10 @@ public class Player : Character {
 						}
 						break;
 					case TouchPhase.Ended:
-						if (currTouch.tapCount >= 2)
+						if (currTouch.tapCount >= 1)
 							Jump ();
-						break;
-					case TouchPhase.Canceled:
+						/*else if (currTouch.deltaPosition.magnitude < 30) //not sure if will need to end movement
+							Move (0);*/
 						break;
 					}
 				}

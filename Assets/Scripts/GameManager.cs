@@ -12,6 +12,7 @@ public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 //start survival game mode
 //wave rest UI
 //--current wave
+//tutorial/help/controls menu in pause and main menu
 
 public class GameManager : MonoBehaviour {
 
