@@ -8,11 +8,19 @@ public enum GameMode { Survival, Story };
 public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 
-//'neutral' enemy for main menu?
-//start survival game mode
-//wave rest UI
-//--current wave
-//tutorial/help/controls menu in pause and main menu
+//To do:
+//-continue survival game mode
+//	--wave rest UI
+//		--current wave
+//		--enemies slain
+//		--currency earned; +1 for clearing; +1 for first time clear; +5 bonus for not dying in 5 rounds; +10 bonus for not dying in 10 rounds; +20, etc.
+//	--wave lose UI
+//		--current wave
+//		--reset wave button needs to delete all enemies and respawn player
+//		--state the winstreak is reset
+//	--background transitions
+//		--bosses??
+//-make the character health bars bigger/scale
 
 public class GameManager : MonoBehaviour {
 

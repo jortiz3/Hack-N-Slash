@@ -79,10 +79,12 @@ public class Player : Character {
 					case TouchPhase.Stationary:
 						Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
 
-						if (temp.x > transform.position.x + 10) { //holding to the right of the character
+						if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
 							Move (1);
-						} else if (temp.x < transform.position.x - 10) { //holding to the left of the character
+						} else if (temp.x < transform.position.x - 0.1f) { //holding to the left of the character
 							Move (-1);
+						} else {
+							Move (0);
 						}
 						break;
 					case TouchPhase.Ended:

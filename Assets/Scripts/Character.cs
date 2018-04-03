@@ -400,6 +400,8 @@ public abstract class Character : MonoBehaviour {
 	public virtual void Die() {
 		Destroy (hpSlider.gameObject);
 		Destroy (statText.gameObject);
+		if (attackTimerSlider != null)
+			Destroy (attackTimerSlider.gameObject);
 		Destroy (gameObject);
 	}
 
