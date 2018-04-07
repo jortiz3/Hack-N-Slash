@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SurvivalSpawner : MonoBehaviour {
 
-	public static int currentWave;
+	private int currentWave;
 
 	[System.Serializable]
 	private struct Spawn {
@@ -30,13 +30,7 @@ public class SurvivalSpawner : MonoBehaviour {
 
 	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
 
-
-	public void Initialize(int wave) {
-		currentWave = wave;
-		spawnTimer = 3f; //gives the player some time to get adjusted
-		remainingSpawns = 0;
-		Character.player.NumberOfRespawnsRemaining = 0;
-	}
+	public int CurrentWave { get { return currentWave; } }
 
 	void Start () {
 		if (GameManager.currSurvivalSpawner == null)
@@ -56,7 +50,7 @@ public class SurvivalSpawner : MonoBehaviour {
 					spawnTimer = Random.Range (spawnTimeRange.x, spawnTimeRange.y);
 				}
 			} else if (Character.numOfEnemies  < 1){
-				GameManager.currGameManager.ShowSurvivalRest ();
+				GameManager.currGameManager.ShowSurvivalRest ("survived");
 			}
 		}
 	}
@@ -74,7 +68,12 @@ public class SurvivalSpawner : MonoBehaviour {
 		spawnList [currSpawn].currqty--;
 	}
 
-	public void StartWave(bool incrementWave) {
+	public void StartWave(int waveNumber) {
+		currentWave = waveNumber;
+		spawnTimer = 3f; //gives the player some time to get adjusted
+		remainingSpawns = 0;
+		Character.player.NumberOfRespawnsRemaining = 0;
+
 		for (int i = 0; i < spawnList.Length; i++) {//for all of our spawns
 			if (spawnList [i].waveAppearance.x <= currentWave && currentWave <= spawnList [i].waveAppearance.y) { //if this should spawn on this wave
 				remainingSpawns += spawnList [i].quantity;//add this quantity to our total remaining spawns
@@ -84,8 +83,5 @@ public class SurvivalSpawner : MonoBehaviour {
 		if (remainingSpawns == 0) { //if there are no spawns this wave
 			//end of survival; AKA won the game
 		}
-
-		if(incrementWave)
-			currentWave++;
 	}
 }

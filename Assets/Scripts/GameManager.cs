@@ -10,17 +10,16 @@ public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 
 //To do:
 //-continue survival game mode
-//	--wave rest UI
-//		--current wave
-//		--enemies slain
 //		--currency earned; +1 for clearing; +1 for first time clear; +5 bonus for not dying in 5 rounds; +10 bonus for not dying in 10 rounds; +20, etc.
-//	--wave lose UI
-//		--current wave
-//		--reset wave button needs to delete all enemies and respawn player
+//		--new enemy warning
+//		--boss wave warning
 //		--state the winstreak is reset
+//		--button for character select
 //	--background transitions
 //		--bosses??
 //-make the character health bars bigger/scale
+//-remove attack timer slider?
+//-bug: enemies can get suck on their side
 
 public class GameManager : MonoBehaviour {
 
@@ -38,6 +37,12 @@ public class GameManager : MonoBehaviour {
 
 	private static string selectedCharacter;
 
+	private Text displayedSurvivalWaveNumber;
+
+	private int selectedSurvivalWave;
+
+	private int highestSurvivalWave;
+
 	void Start () {
 		if (currGameManager == null) {
 			currGameManager = this;
@@ -47,6 +52,11 @@ public class GameManager : MonoBehaviour {
 
 			//load player save data
 			selectedCharacter = "Default Player";
+			highestSurvivalWave = 0;
+
+			selectedSurvivalWave = 1;
+
+			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number").GetComponent<Text> ();
 
 			currGameState = GameState.Menu;
 		} else {
@@ -59,52 +69,68 @@ public class GameManager : MonoBehaviour {
 		currDifficulty = (GameDifficulty)difficulty;
 	}
 
-	public void StartSurvival() {
-		if (SceneManager.GetActiveScene ().name != "Main")
-			SceneManager.LoadScene ("Main");
-		//instantiate the survival spawn
-
-		//destroy all characters
+	private void ClearAllCharacters() {
 		Transform temp = GameObject.FindGameObjectWithTag ("Character Parent").transform;
 		foreach (Transform child in temp) {
 			child.GetComponent<Character>().Die();
 		}
+	}
 
-		//spawn a new player?
+	private void SpawnPlayer() {
 		Instantiate(Resources.Load("Characters/" + selectedCharacter));
+	}
+
+	public void StartSurvival() {
+		if (SceneManager.GetActiveScene ().name != "Main")
+			SceneManager.LoadScene ("Main");
+		ClearAllCharacters();
+
+		//change displayed info on survival panel
 
 		currGameMode = GameMode.Survival;
-		currGameState = GameState.Active;
-		currSurvivalSpawner.Initialize (0);
-		StartNextSurvivalWave ();
-
-		Time.timeScale = 1f;
+		menu.ChangeState ("Survival");
 	}
 
-	public void StartNextSurvivalWave() {
-		currSurvivalSpawner.StartWave (true);
+	public void IncrementSelectedSurvivalWave() {
+		if (selectedSurvivalWave > highestSurvivalWave) {
+			selectedSurvivalWave = highestSurvivalWave + 1;
+		} else {
+			selectedSurvivalWave++;
+		}
+
+		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString (); //update the displayed text
+	}
+
+	public void DecrementSelectedSurvivalWave() {
+		if (selectedSurvivalWave > 1) {
+			selectedSurvivalWave--;
+		}
+
+		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString (); //update the displayed text
+	}
+
+	public void StartSurvivalWave() {
+		ClearAllCharacters (); //clear all remaining enemies
+		SpawnPlayer();
+
+		currSurvivalSpawner.StartWave (selectedSurvivalWave);
+
+		currGameState = GameState.Active;
 		menu.ChangeState ("");
-		currGameState = GameState.Active;
 		Time.timeScale = 1f;
 	}
 
-	public void RestartSurvivalWave() {
-		currSurvivalSpawner.StartWave (false);
-		menu.ChangeState ("");
-		currGameState = GameState.Active;
-		Time.timeScale = 1f;
+	public void ShowSurvivalRest(string waveInfo) { //add parameter to determine whether player survived or lost
+		//update displayed info
+		if (waveInfo.Equals ("survived")) {
+			highestSurvivalWave = currSurvivalSpawner.CurrentWave;
+			selectedSurvivalWave++;
+			displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
+		} else if (waveInfo.Equals ("died")) {
 
-		//spawn player
-	}
+		}
 
-	public void ShowSurvivalRest() {
-		menu.ChangeState ("SurvivalRest");
-		currGameState = GameState.Rest;
-		Time.timeScale = 0f;
-	}
-
-	public void ShowSurvivalLose() {
-		menu.ChangeState ("SurvivalLose");
+		menu.ChangeState ("Survival");
 		currGameState = GameState.Rest;
 		Time.timeScale = 0f;
 	}

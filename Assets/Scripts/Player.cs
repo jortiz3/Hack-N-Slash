@@ -51,6 +51,8 @@ public class Player : Character {
 		if (player != null) //if there is a player already
 			player.Die (); //tell that player to die, there is a new player now
 		player = this; //lets all of the character objects know that this is the player
+
+		Initialize ();
 	}
 
 	void Start() {
@@ -59,10 +61,9 @@ public class Player : Character {
 
 		attackTimerSlider = (GameObject.Instantiate (Resources.Load ("UI/attackTimerSlider"), cameraCanvas) as GameObject).GetComponent<Slider>();
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
+		attackTimerSlider.gameObject.SetActive (false);
 
 		touchInfo = new List<TouchInfo> ();
-
-		Initialize ();
 	}
 
 	void Update () {
@@ -166,7 +167,15 @@ public class Player : Character {
 			Respawn (Vector3.zero);
 			numOfRespawnsRemaining--;
 		} else {
-			GameManager.currGameManager.ShowSurvivalLose ();
+			if (GameManager.currGameState == GameState.Active) {
+				switch (GameManager.currGameMode) {
+				case GameMode.Story:
+					break;
+				case GameMode.Survival:
+					GameManager.currGameManager.ShowSurvivalRest ("died");
+					break;
+				}
+			}
 			base.Die ();
 		}
 	}
