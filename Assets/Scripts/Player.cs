@@ -17,7 +17,7 @@ public class Player : Character {
 			float deltaTime = EndTime - startTime;
 			Vector2 deltaPosition = EndPosition - startPosition;
 
-			if (deltaPosition.magnitude > 140) { //if the swipe is long enough
+			if (deltaPosition.magnitude > 120) { //if the swipe is long enough
 				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
 				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
 
@@ -30,7 +30,7 @@ public class Player : Character {
 				} else if (angle < 5.49) {
 					return "swipe_down";
 				}
-			} else if (deltaTime < 0.12f) { //briefly tapped the screen
+			} else if (deltaTime < 0.15f) { //briefly tapped the screen
 				return "jump";
 			}
 
@@ -67,7 +67,43 @@ public class Player : Character {
 		touchInfo = new List<TouchInfo> ();
 	}
 
+	#if UNITY_EDITOR
 	void Update () {
+		
+		if (GameManager.currGameState == GameState.Active) {
+			
+			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
+				Move ((int)Input.GetAxisRaw ("Horizontal"));
+			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
+				Move (0);
+
+			if (Input.GetButtonDown ("Attack") == true) {//first frame button pressed
+				if (Input.GetAxis ("Vertical") > 0)//holding up
+					Attack ("Attack_Up");
+				else if (Input.GetAxis ("Vertical") < 0)//holding down
+					Attack ("Attack_Down");
+				else if (Input.GetAxis ("Horizontal") > 0) {//holding right
+					if (isFacingRight)
+						Attack ("Attack_Forward");
+					else
+						Attack ("Attack_Backward");
+				} else if (Input.GetAxis ("Horizontal") < 0) {//holding left
+					if (isFacingLeft)
+						Attack ("Attack_Forward");
+					else
+						Attack ("Attack_Backward");
+				} else {
+					Attack ("Attack");
+				}
+			}
+
+			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
+				Jump ();	
+		}
+	}
+	#endif
+
+	void FixedUpdate() {
 		if (GameManager.currGameState == GameState.Active) {
 			if (Input.touchCount > 0) { //if the player is touching the screen
 				Touch currTouch;
@@ -124,40 +160,8 @@ public class Player : Character {
 					}
 				}
 			}
-
-			#if UNITY_EDITOR
-			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
-				Move ((int)Input.GetAxisRaw ("Horizontal"));
-			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
-				Move (0);
-
-			if (Input.GetButtonDown ("Attack") == true) {//first frame button pressed
-				if (Input.GetAxis ("Vertical") > 0)//holding up
-					Attack ("Attack_Up");
-				else if (Input.GetAxis ("Vertical") < 0)//holding down
-					Attack ("Attack_Down");
-				else if (Input.GetAxis ("Horizontal") > 0) {//holding right
-					if (isFacingRight)
-						Attack ("Attack_Forward");
-					else
-						Attack ("Attack_Backward");
-				} else if (Input.GetAxis ("Horizontal") < 0) {//holding left
-					if (isFacingLeft)
-						Attack ("Attack_Forward");
-					else
-						Attack ("Attack_Backward");
-				} else {
-					Attack ("Attack");
-				}
-			}
-
-			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
-				Jump ();
-			#endif
 		}
-	}
 
-	void FixedUpdate() {
 		UpdateAnimations ();
 	}
 
