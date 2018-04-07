@@ -3,19 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SurvivalSpawner : MonoBehaviour {
-
 	private int currentWave;
 
-	[System.Serializable]
-	private struct Spawn {
-		public Character character;
-		[TooltipAttribute("What waves will this character begin to and stop appearing on?")]
-		public Vector2 waveAppearance;
-		public int quantity; //how many to spawn per wave
-		[HideInInspector]
-		public int currqty; //how many left to spawn on this wave
-		public Transform[] spawnLocations;
-	}
+	[SerializeField]
+	private WaveWarning[] waveWarningsList;
 
 	[SerializeField]
 	private Spawn[] spawnList;
@@ -83,5 +74,31 @@ public class SurvivalSpawner : MonoBehaviour {
 		if (remainingSpawns == 0) { //if there are no spawns this wave
 			//end of survival; AKA won the game
 		}
+	}
+
+	public string GetWaveWarning (int waveNumber) {
+		for (int i = 0; i < waveWarningsList.Length; i++) {
+			if (waveWarningsList [i].wave == waveNumber) {
+				return waveWarningsList [i].text;
+			}
+		}
+		return "None";
+	}
+
+	[System.Serializable]
+	private struct WaveWarning {
+		public int wave;
+		public string text;
+	}
+
+	[System.Serializable]
+	private struct Spawn {
+		public Character character;
+		[TooltipAttribute("What waves will this character begin to and stop appearing on?")]
+		public Vector2 waveAppearance;
+		public int quantity; //how many to spawn per wave
+		[HideInInspector]
+		public int currqty; //how many left to spawn on this wave
+		public Transform[] spawnLocations;
 	}
 }

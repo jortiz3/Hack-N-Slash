@@ -17,7 +17,7 @@ public class Player : Character {
 			float deltaTime = EndTime - startTime;
 			Vector2 deltaPosition = EndPosition - startPosition;
 
-			if (deltaPosition.magnitude > 100) { //if the swipe is long enough
+			if (deltaPosition.magnitude > 140) { //if the swipe is long enough
 				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
 				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
 
@@ -61,6 +61,7 @@ public class Player : Character {
 
 		attackTimerSlider = (GameObject.Instantiate (Resources.Load ("UI/attackTimerSlider"), cameraCanvas) as GameObject).GetComponent<Slider>();
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
+		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
 		attackTimerSlider.gameObject.SetActive (false);
 
 		touchInfo = new List<TouchInfo> ();

@@ -10,10 +10,14 @@ class SurvivalSpawnerEditor : Editor {
 
 	SerializedProperty spawnRange;
 
+	SerializedProperty warnings;
+
 	void OnEnable() {
 		spawns = serializedObject.FindProperty ("spawnList");
 
 		spawnRange = serializedObject.FindProperty ("spawnTimeRange");
+
+		warnings = serializedObject.FindProperty ("waveWarningsList");
 	}
 
 	public override void OnInspectorGUI () {
@@ -30,6 +34,10 @@ class SurvivalSpawnerEditor : Editor {
 		EditorGUILayout.Space ();
 
 		EditorGUILayout.PropertyField (spawns, true);
+
+		EditorGUILayout.Space ();
+
+		EditorGUILayout.PropertyField (warnings, true);
 
 		serializedObject.ApplyModifiedProperties ();
 	}

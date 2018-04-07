@@ -84,6 +84,7 @@ public abstract class Character : MonoBehaviour {
 		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
 		hpSlider.gameObject.name = gameObject.name + "'s hp slider";
 		hpSlider.maxValue = maxhp;
+		hpSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
 		hpSlider.gameObject.SetActive (false);
 
 		statText = (GameObject.Instantiate(Resources.Load("UI/statusText"), cameraCanvas) as GameObject).GetComponent<Text>();
