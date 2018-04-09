@@ -10,11 +10,9 @@ public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 
 //To do:
 //-continue survival game mode
-//	--recognize the end of survival mode
-//	--Add custom enemy
+//	--Add custom enemies
 //	--Code Boss
 //	--background transitions
-//-bug: enemies can get suck on their side
 
 public class GameManager : MonoBehaviour {
 
@@ -140,10 +138,12 @@ public class GameManager : MonoBehaviour {
 			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
 				currencyEarned++;
 
-				if (currSurvivalSpawner.CurrentWave % 25 == 0) //first clear of boss wave
-					currencyEarned += 25;
-				if (currSurvivalSpawner.CurrentWave % 100 == 0) //first clear of megaboss wave
-					currencyEarned += 75;
+				if (currSurvivalSpawner.CurrentWave != 0) {
+					if (currSurvivalSpawner.CurrentWave % 25 == 0) //first clear of boss wave
+						currencyEarned += 25;
+					if (currSurvivalSpawner.CurrentWave % 100 == 0) //first clear of megaboss wave
+						currencyEarned += 75;
+				}
 
 				if (!difficultyChanged) {
 					switch (currDifficulty) {
