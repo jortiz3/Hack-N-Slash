@@ -23,10 +23,12 @@ public class SurvivalSpawner : MonoBehaviour {
 	public int NumberOfWaves { get { return waveList.Length; } }
 
 	void Start () {
-		if (GameManager.currSurvivalSpawner == null)
+		if (GameManager.currSurvivalSpawner == null) {
 			GameManager.currSurvivalSpawner = this;
-		else
+			transform.SetParent (GameObject.Find("Spawners").transform);
+		} else {
 			Destroy (gameObject);
+		}
 	}
 
 	void Update () {

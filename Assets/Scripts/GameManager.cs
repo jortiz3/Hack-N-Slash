@@ -86,13 +86,17 @@ public class GameManager : MonoBehaviour {
 		Instantiate(Resources.Load("Characters/" + selectedCharacter));
 	}
 
+	private void SpawnSurvivalSpawner() {
+		Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
+	}
+
 	public void StartSurvival() {
 		if (SceneManager.GetActiveScene ().name != "Main")
 			SceneManager.LoadScene ("Main");
 		ClearAllCharacters();
 
 		//change displayed info on survival panel
-		//spawn survival spawner prefab
+		SpawnSurvivalSpawner();
 
 		difficultyChanged = false;
 		currGameMode = GameMode.Survival;
