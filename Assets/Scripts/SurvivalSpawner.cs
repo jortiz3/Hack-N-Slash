@@ -11,8 +11,6 @@ public class SurvivalSpawner : MonoBehaviour {
 	private int currSpawn;
 	private int currSpawnLoc;
 
-	[SerializeField, Tooltip("Range of time between spawns (Random).")]
-	private Vector2 spawnTimeRange;
 	private float spawnTimer;
 
 	private int remainingSpawns;
@@ -22,7 +20,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	public int CurrentWave { get { return currentWave; } }
 	public int NumberOfWaves { get { return waveList.Length; } }
 
-	void Start () {
+	void Awake () {
 		if (GameManager.currSurvivalSpawner == null) {
 			GameManager.currSurvivalSpawner = this;
 			transform.SetParent (GameObject.Find("Spawners").transform);
@@ -39,7 +37,7 @@ public class SurvivalSpawner : MonoBehaviour {
 				} else {
 					InstantiateSpawn ();
 
-					spawnTimer = Random.Range (spawnTimeRange.x, spawnTimeRange.y);
+					spawnTimer = Random.Range (waveList[currentWave].spawnTimeRange.x, waveList[currentWave].spawnTimeRange.y);
 				}
 			} else if (Character.numOfEnemies  < 1) {
 				GameManager.currGameManager.ShowSurvivalRest ("survived");
@@ -49,7 +47,7 @@ public class SurvivalSpawner : MonoBehaviour {
 
 	private void InstantiateSpawn() {
 		do {
-				currSpawn = Random.Range (0, waveList[currentWave].spawnList.Length - 1);
+				currSpawn = Random.Range (0, waveList[currentWave].spawnList.Length);
 		} while (waveList[currentWave].spawnList [currSpawn].currqty <= 0);
 
 		if (waveList [currentWave].spawnList [currSpawn].spawnLocations.Length > 0) {
@@ -95,6 +93,8 @@ public class SurvivalSpawner : MonoBehaviour {
 	[System.Serializable]
 	private struct Wave {
 		public string waveWarningText;
+		[SerializeField, Tooltip("Range of time between spawns (Random).")]
+		public Vector2 spawnTimeRange;
 		public Spawn[] spawnList;
 	}
 }

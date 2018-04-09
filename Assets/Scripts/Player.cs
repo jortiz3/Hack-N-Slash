@@ -81,14 +81,16 @@ public class Player : Character {
 						touchInfo.Insert (i, new TouchInfo (Time.time, currTouch.position));
 						break;
 					case TouchPhase.Stationary:
-						Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
+						if (touchInfo[i].deltaTime > 0.1f) {
+							Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
 
-						if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
-							Move (1);
-						} else if (temp.x < transform.position.x - 0.1f) { //holding to the left of the character
-							Move (-1);
-						} else {
-							Move (0);
+							if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
+								Move (1);
+							} else if (temp.x < transform.position.x - 0.1f) { //holding to the left of the character
+								Move (-1);
+							} else {
+								Move (0);
+							}
 						}
 						break;
 					case TouchPhase.Ended:
@@ -155,6 +157,8 @@ public class Player : Character {
 	struct TouchInfo {
 		float startTime;
 		Vector2 startPosition;
+
+		public float deltaTime { get { return Time.time - startTime; } }
 
 		public TouchInfo(float StartTime, Vector2 StartPosition) {
 			startTime = StartTime;

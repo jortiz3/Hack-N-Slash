@@ -11,8 +11,7 @@ public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 //To do:
 //-continue survival game mode
 //	--recognize the end of survival mode
-//	--Add custom enemy 
-//	--Remove zombie
+//	--Add custom enemy
 //	--Code Boss
 //	--background transitions
 //-bug: enemies can get suck on their side
