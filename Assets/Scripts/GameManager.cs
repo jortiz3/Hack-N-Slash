@@ -10,6 +10,7 @@ public enum GameState { Menu, Cutscene, Active, Rest, Paused };
 
 //To do:
 //-continue survival game mode
+//	--recognize the end of survival mode
 //	--Add custom enemy 
 //	--Remove zombie
 //	--Code Boss
@@ -91,6 +92,7 @@ public class GameManager : MonoBehaviour {
 		ClearAllCharacters();
 
 		//change displayed info on survival panel
+		//spawn survival spawner prefab
 
 		difficultyChanged = false;
 		currGameMode = GameMode.Survival;
@@ -101,8 +103,8 @@ public class GameManager : MonoBehaviour {
 	public void IncrementSelectedSurvivalWave() {
 		if (selectedSurvivalWave > highestSurvivalWave) { //if the selected wave is higher than possible
 			selectedSurvivalWave = highestSurvivalWave + 1; //set it to the next available wave
-		} else {
-			selectedSurvivalWave++; //otherwise, just increase normally
+		} else if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) { //prevent from incrementing past the amount of waves in survival spawner
+			selectedSurvivalWave++;
 		}
 
 		UpdateSurvivalDisplayText ();
@@ -132,7 +134,7 @@ public class GameManager : MonoBehaviour {
 	public void ShowSurvivalRest(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
 			int currencyEarned = 0;
-			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave - 1) { //player completed the next available wave
+			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
 				currencyEarned++;
 
 				if (currSurvivalSpawner.CurrentWave % 25 == 0) //first clear of boss wave
@@ -151,8 +153,10 @@ public class GameManager : MonoBehaviour {
 					}
 				}
 
-				highestSurvivalWave = currSurvivalSpawner.CurrentWave;
-				selectedSurvivalWave++;
+				highestSurvivalWave = currSurvivalSpawner.CurrentWave + 1;
+
+				if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves)
+					selectedSurvivalWave++;
 			}
 
 			if (currSurvivalSpawner.CurrentWave < 25)

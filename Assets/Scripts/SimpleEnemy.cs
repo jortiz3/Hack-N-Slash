@@ -16,6 +16,9 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 
 	private bool hasFallenOver;
 
+	[SerializeField]
+	private bool thisEnemyIsAbleToJump = true;
+
 	void Start () {
 		Initialize ();
 
@@ -51,23 +54,27 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 					Move (0);
 				}
 
-				if (Mathf.Abs (direction.x) < 2f) {//jump only when horizontally near target
-					if (direction.y > 2f) {//jump only when below target
-						Jump ();
+				if (thisEnemyIsAbleToJump) {
+					if (Mathf.Abs (direction.x) < 2f) {//jump only when horizontally near target
+						if (direction.y > 2f) {//jump only when below target
+							Jump ();
+						}
 					}
 				}
 			} else { //enemy has fallen over
-				if (!isJumping) {
-					if (Mathf.Abs (gameObject.transform.rotation.eulerAngles.z) < 10f) {//stopping state; enemy is upright again
-						hasFallenOver = false;
-					} else {
-						Jump ();
-						AddTorque (transform.rotation.z * 10); //add torque to rigidbody to rotate the enemy
-					}
-				} else if (isFalling) {//on our way down
-					if (Mathf.Abs (transform.rotation.eulerAngles.z) < 10f) { //if close enough to upright
-						transform.rotation = Quaternion.Euler (Vector3.zero); //snap to correct orientation
-						StopRotation (); //halt the spin
+				if (thisEnemyIsAbleToJump) {
+					if (!isJumping) {
+						if (Mathf.Abs (gameObject.transform.rotation.eulerAngles.z) < 10f) {//stopping state; enemy is upright again
+							hasFallenOver = false;
+						} else {
+							Jump ();
+							AddTorque (transform.rotation.z * 10); //add torque to rigidbody to rotate the enemy
+						}
+					} else if (isFalling) {//on our way down
+						if (Mathf.Abs (transform.rotation.eulerAngles.z) < 10f) { //if close enough to upright
+							transform.rotation = Quaternion.Euler (Vector3.zero); //snap to correct orientation
+							StopRotation (); //halt the spin
+						}
 					}
 				}
 			}

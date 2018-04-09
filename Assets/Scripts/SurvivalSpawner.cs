@@ -6,10 +6,8 @@ public class SurvivalSpawner : MonoBehaviour {
 	private int currentWave;
 
 	[SerializeField]
-	private WaveWarning[] waveWarningsList;
+	private Wave[] waveList;
 
-	[SerializeField]
-	private Spawn[] spawnList;
 	private int currSpawn;
 	private int currSpawnLoc;
 
@@ -22,6 +20,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
 
 	public int CurrentWave { get { return currentWave; } }
+	public int NumberOfWaves { get { return waveList.Length; } }
 
 	void Start () {
 		if (GameManager.currSurvivalSpawner == null)
@@ -40,7 +39,7 @@ public class SurvivalSpawner : MonoBehaviour {
 
 					spawnTimer = Random.Range (spawnTimeRange.x, spawnTimeRange.y);
 				}
-			} else if (Character.numOfEnemies  < 1){
+			} else if (Character.numOfEnemies  < 1) {
 				GameManager.currGameManager.ShowSurvivalRest ("survived");
 			}
 		}
@@ -48,57 +47,52 @@ public class SurvivalSpawner : MonoBehaviour {
 
 	private void InstantiateSpawn() {
 		do {
-				currSpawn = Random.Range (0, spawnList.Length - 1);
-		} while (spawnList [currSpawn].currqty <= 0);
+				currSpawn = Random.Range (0, waveList[currentWave].spawnList.Length - 1);
+		} while (waveList[currentWave].spawnList [currSpawn].currqty <= 0);
 
-		currSpawnLoc = Random.Range(0, 10000) % spawnList[currSpawn].spawnLocations.Length;
+		if (waveList [currentWave].spawnList [currSpawn].spawnLocations.Length > 0) {
+			currSpawnLoc = Random.Range (0, 10000) % waveList [currentWave].spawnList [currSpawn].spawnLocations.Length;
+		}
 
-		GameObject.Instantiate (spawnList [currSpawn].character.gameObject, spawnList [currSpawn].spawnLocations[currSpawnLoc].position, Quaternion.Euler(Vector3.zero));
+		GameObject.Instantiate (waveList[currentWave].spawnList [currSpawn].character.gameObject, waveList[currentWave].spawnList [currSpawn].spawnLocations[currSpawnLoc].position, Quaternion.Euler(Vector3.zero));
 
 		remainingSpawns--;
-		spawnList [currSpawn].currqty--;
+		waveList[currentWave].spawnList [currSpawn].currqty--;
 	}
 
 	public void StartWave(int waveNumber) {
-		currentWave = waveNumber;
+		currentWave = waveNumber - 1;
 		spawnTimer = 3f; //gives the player some time to get adjusted
 		remainingSpawns = 0;
 		Character.player.NumberOfRespawnsRemaining = 0;
 
-		for (int i = 0; i < spawnList.Length; i++) {//for all of our spawns
-			if (spawnList [i].waveAppearance.x <= currentWave && currentWave <= spawnList [i].waveAppearance.y) { //if this should spawn on this wave
-				remainingSpawns += spawnList [i].quantity;//add this quantity to our total remaining spawns
-				spawnList[i].currqty = spawnList[i].quantity;//ensure the currqty matches how many should appear this wave
-			}
-		}
-		if (remainingSpawns == 0) { //if there are no spawns this wave
-			//end of survival; AKA won the game
+		for (int i = 0; i < waveList[currentWave].spawnList.Length; i++) {//for all of our spawns
+			remainingSpawns += waveList[currentWave].spawnList [i].quantity;//add this quantity to our total remaining spawns
+			waveList[currentWave].spawnList[i].currqty = waveList[currentWave].spawnList[i].quantity;//ensure the currqty matches how many should appear this wave
 		}
 	}
 
 	public string GetWaveWarning (int waveNumber) {
-		for (int i = 0; i < waveWarningsList.Length; i++) {
-			if (waveWarningsList [i].wave == waveNumber) {
-				return waveWarningsList [i].text;
-			}
+		waveNumber -= 1;
+		if (waveNumber < waveList.Length) {
+			if (waveList [waveNumber].waveWarningText != null || waveList [waveNumber].waveWarningText.Length > 0)
+				return waveList [waveNumber].waveWarningText;
 		}
-		return "None";
-	}
-
-	[System.Serializable]
-	private struct WaveWarning {
-		public int wave;
-		public string text;
+		return "No warnings for this wave. Good luck!";
 	}
 
 	[System.Serializable]
 	private struct Spawn {
 		public Character character;
-		[TooltipAttribute("What waves will this character begin to and stop appearing on?")]
-		public Vector2 waveAppearance;
 		public int quantity; //how many to spawn per wave
 		[HideInInspector]
 		public int currqty; //how many left to spawn on this wave
 		public Transform[] spawnLocations;
+	}
+
+	[System.Serializable]
+	private struct Wave {
+		public string waveWarningText;
+		public Spawn[] spawnList;
 	}
 }

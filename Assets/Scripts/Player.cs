@@ -4,40 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Player : Character {
-	struct TouchInfo {
-		float startTime;
-		Vector2 startPosition;
-
-		public TouchInfo(float StartTime, Vector2 StartPosition) {
-			startTime = StartTime;
-			startPosition = StartPosition;
-		}
-
-		public string GetEndPhase (float EndTime, Vector2 EndPosition) {
-			float deltaTime = EndTime - startTime;
-			Vector2 deltaPosition = EndPosition - startPosition;
-
-			if (deltaPosition.magnitude > 120) { //if the swipe is long enough
-				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
-				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
-
-				if (angle < 0.78 || angle >= 5.49) {
-					return "swipe_right";
-				} else if (angle < 2.35) {
-					return "swipe_up";
-				} else if (angle < 3.92) {
-					return "swipe_left";
-				} else if (angle < 5.49) {
-					return "swipe_down";
-				}
-			} else if (deltaTime < 0.15f) { //briefly tapped the screen
-				return "jump";
-			}
-
-			return "";
-		}
-	}
-
 	[SerializeField]
 	private bool infiniteRespawn;
 	[SerializeField]
@@ -182,6 +148,41 @@ public class Player : Character {
 				}
 			}
 			base.Die ();
+		}
+	}
+
+
+	struct TouchInfo {
+		float startTime;
+		Vector2 startPosition;
+
+		public TouchInfo(float StartTime, Vector2 StartPosition) {
+			startTime = StartTime;
+			startPosition = StartPosition;
+		}
+
+		public string GetEndPhase (float EndTime, Vector2 EndPosition) {
+			float deltaTime = EndTime - startTime;
+			Vector2 deltaPosition = EndPosition - startPosition;
+
+			if (deltaPosition.magnitude > 120) { //if the swipe is long enough
+				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
+				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
+
+				if (angle < 0.78 || angle >= 5.49) {
+					return "swipe_right";
+				} else if (angle < 2.35) {
+					return "swipe_up";
+				} else if (angle < 3.92) {
+					return "swipe_left";
+				} else if (angle < 5.49) {
+					return "swipe_down";
+				}
+			} else if (deltaTime < 0.15f) { //briefly tapped the screen
+				return "jump";
+			}
+
+			return "";
 		}
 	}
 }

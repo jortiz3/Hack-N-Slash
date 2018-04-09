@@ -2,9 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-//Should i?  -> unfreeze rigidbody z axis on flinch, freeze once reoriented
-//add knockback meter if attacking with weapon; physically attacking always knocks back?
-//update or not based on GameManager.currGameState
+//remove collision on death; possibly fall through floor
 
 [RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
 public abstract class Character : MonoBehaviour {
@@ -18,6 +16,7 @@ public abstract class Character : MonoBehaviour {
 	[SerializeField]
 	private float moveSpeed;
 
+	private BoxCollider2D bc2D;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
@@ -71,6 +70,7 @@ public abstract class Character : MonoBehaviour {
 
 		transform.SetParent (characterParent);
 
+		bc2D = gameObject.GetComponent<BoxCollider2D> ();
 		rb2D = gameObject.GetComponent<Rigidbody2D> ();
 		anim = gameObject.GetComponent<Animator> ();
 		sr = gameObject.GetComponent<SpriteRenderer> ();
@@ -166,13 +166,18 @@ public abstract class Character : MonoBehaviour {
 				sr.color = Color.red;
 
 			hpSlider.transform.position = transform.position + (Vector3.up * groundDetectDist);
-			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.1f));
+			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.12f));
 
 			if (!hpSlider.IsActive())
 				hpSlider.gameObject.SetActive (true);
 
 			if (!statText.gameObject.activeSelf)
 				statText.gameObject.SetActive (true);
+
+			if (hp <= 0 && bc2D.enabled) {
+				bc2D.enabled = false;
+				rb2D.gravityScale /= 4f;
+			}
 
 			flinchTimer -= Time.fixedDeltaTime;
 		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
@@ -374,7 +379,7 @@ public abstract class Character : MonoBehaviour {
 				if (c.weapon != null) { //if the character has a weapon
 					damage += c.weapon.Damage; //add weapon damage
 				} else {
-					damage += c.rb2D.mass * 15f; //damage based on mass
+					damage += c.rb2D.mass; //damage based on mass
 				}
 			}
 
