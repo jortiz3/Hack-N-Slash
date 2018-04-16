@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public enum GameMode { Survival, Story };
 public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
-public enum GameState { Menu, Cutscene, Active, Rest, Paused };
+public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-continue survival game mode
@@ -191,7 +191,7 @@ public class GameManager : MonoBehaviour {
 		}
 
 		menu.ChangeState ("Survival");
-		currGameState = GameState.Rest;
+		currGameState = GameState.Menu;
 		Time.timeScale = 0f;
 	}
 
