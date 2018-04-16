@@ -12,7 +12,7 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //-continue survival game mode
 //	--Add custom enemies
 //	--Code Boss
-//	--background transitions
+//-possibly make load level into IEnumerator, fade to load screen, pause for 2 seconds
 
 public class GameManager : MonoBehaviour {
 
@@ -24,10 +24,11 @@ public class GameManager : MonoBehaviour {
 	private bool difficultyChanged;
 
 	public static GameManager currGameManager;
-
 	public static SurvivalSpawner currSurvivalSpawner;
 
 	private static MenuScript menu;
+	private static Transform bgParent;
+	private static Image loadingScreen;
 
 	private static string selectedCharacter;
 
@@ -47,6 +48,8 @@ public class GameManager : MonoBehaviour {
 			DontDestroyOnLoad (gameObject);
 
 			menu = transform.GetChild (0).GetComponent<MenuScript> ();
+			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
+			loadingScreen = bgParent.GetChild (bgParent.childCount - 1).GetComponent<Image> ();
 
 			//load player save data
 			selectedCharacter = "Default Player";
@@ -122,10 +125,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartSurvivalWave() {
-		ClearAllCharacters (); //clear all remaining enemies
-		SpawnPlayer();
-
-		currSurvivalSpawner.StartWave (selectedSurvivalWave);
+		LoadLevel ();
 
 		currGameState = GameState.Active;
 		menu.ChangeState ("");
@@ -201,7 +201,8 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartStory() {
-		//load story scene?
+		LoadLevel ();
+
 		currGameMode = GameMode.Story;
 		currGameState = GameState.Active;
 
@@ -210,6 +211,35 @@ public class GameManager : MonoBehaviour {
 
 	public void SetDifficulty(Dropdown difficulty) {
 		currDifficulty = (GameDifficulty)difficulty.value;
+	}
+
+	private void LoadLevel() {
+		loadingScreen.color = Color.white; //display load screen
+
+		ClearAllCharacters (); //clear all remaining enemies
+		SpawnPlayer();
+
+		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Background");
+
+		if (currGameMode == GameMode.Survival) {
+			if ((selectedSurvivalWave - 1 != currSurvivalSpawner.PreviousWave && selectedSurvivalWave % 25 == 1)//player just started a new wave, and background needs to change
+				|| backgroundIsMissing) { //or if background is missing at the moment
+
+				if (!backgroundIsMissing) { //if we have a background
+					Destroy (bgParent.GetChild (0).gameObject); //destroy current background
+				}
+
+				GameObject.Instantiate (Resources.Load ("Backgrounds/Survival_" + (selectedSurvivalWave - 1)), bgParent);//instantiate background
+				bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
+			}
+
+			currSurvivalSpawner.StartWave (selectedSurvivalWave);
+		} else {
+			//load story level
+		}
+
+		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
+		loadingScreen.color = Color.clear; //hide load screen
 	}
 
 	public void PauseGame() {

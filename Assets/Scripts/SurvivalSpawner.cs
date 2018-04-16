@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SurvivalSpawner : MonoBehaviour {
 	private int currentWave;
+	private int previousWave;
 
 	[SerializeField]
 	private Wave[] waveList;
@@ -18,6 +19,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
 
 	public int CurrentWave { get { return currentWave; } }
+	public int PreviousWave { get { return previousWave; } }
 	public int NumberOfWaves { get { return waveList.Length; } }
 
 	void Awake () {
@@ -61,6 +63,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	}
 
 	public void StartWave(int waveNumber) {
+		previousWave = currentWave;
 		currentWave = waveNumber - 1;
 		spawnTimer = 3f; //gives the player some time to get adjusted
 		remainingSpawns = 0;
@@ -75,7 +78,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	public string GetWaveWarning (int waveNumber) {
 		waveNumber -= 1;
 		if (waveNumber < waveList.Length) {
-			if (waveList [waveNumber].waveWarningText != null || waveList [waveNumber].waveWarningText.Length > 0)
+			if (waveList [waveNumber].waveWarningText != null && waveList [waveNumber].waveWarningText.Length > 0)
 				return waveList [waveNumber].waveWarningText;
 		}
 		return "No warnings for this wave. Good luck!";
