@@ -142,7 +142,7 @@ public class Player : Character {
 				case GameMode.Story:
 					break;
 				case GameMode.Survival:
-					GameManager.currGameManager.ShowSurvivalRest ("died");
+					GameManager.currGameManager.EndSurvivalWave ("died");
 					break;
 				}
 			}

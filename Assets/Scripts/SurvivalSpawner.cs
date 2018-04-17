@@ -42,7 +42,7 @@ public class SurvivalSpawner : MonoBehaviour {
 					spawnTimer = Random.Range (waveList[currentWave].spawnTimeRange.x, waveList[currentWave].spawnTimeRange.y); //randomize the spawn timer
 				}
 			} else if (Character.numOfEnemies < 1) { //if the user has slain all the enemies
-				GameManager.currGameManager.ShowSurvivalRest ("survived");
+				GameManager.currGameManager.EndSurvivalWave ("survived");
 			}
 		}
 	}

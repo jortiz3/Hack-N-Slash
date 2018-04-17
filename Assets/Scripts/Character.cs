@@ -2,8 +2,6 @@
 using UnityEngine.UI;
 using System.Collections;
 
-//remove collision on death; possibly fall through floor
-
 [RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
 public abstract class Character : MonoBehaviour {
 
@@ -237,7 +235,7 @@ public abstract class Character : MonoBehaviour {
 
 
 	protected void Attack(string triggerName) {
-		if (!isFlinching) {
+		if (!isFlinching || gameObject.tag.Equals ("Player")) {
 			if (weapon != null) {
 				if (attackTimer < (weapon.currentAttackDelay.y - weapon.currentAttackDelay.x) && !anim.GetBool ("Attack_Expire")) { //attackTimer starts at max value, so we need to make sure the min delay is upheld
 					
@@ -399,7 +397,8 @@ public abstract class Character : MonoBehaviour {
 
 			hpSlider.value = hp;
 
-			AttackExpire ();
+			if (!gameObject.tag.Equals ("Player"))
+				AttackExpire ();
 		}
 	}
 

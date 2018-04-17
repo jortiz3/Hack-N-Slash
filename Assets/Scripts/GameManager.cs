@@ -27,6 +27,12 @@ public class GameManager : MonoBehaviour {
 	public static SurvivalSpawner currSurvivalSpawner;
 
 	private static MenuScript menu;
+
+	private static Toggle soundToggle;
+	private static Slider bgmSlider;
+	private static Slider sfxSlider;
+	private static Dropdown difficultyDropdown;
+
 	private static Transform bgParent;
 	private static Image loadingScreen;
 
@@ -40,7 +46,17 @@ public class GameManager : MonoBehaviour {
 	private int highestSurvivalWave;
 	private int currSurvivalStreak;
 
-	private int currency;
+	private static int currency;
+
+	public static string SelectedCharacter { get { return selectedCharacter; } }
+
+	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
+	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
+	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
+
+	public int Currency { get { return currency; } }
+	public int HighestSurvivalWave { get { return highestSurvivalWave; } }
+	public int CurrentSurvivalStreak { get { return currSurvivalStreak; } }
 
 	void Start () {
 		if (currGameManager == null) {
@@ -51,14 +67,27 @@ public class GameManager : MonoBehaviour {
 			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
 			loadingScreen = bgParent.GetChild (bgParent.childCount - 1).GetComponent<Image> ();
 
-			//load player save data
-			selectedCharacter = "Default Player";
-			highestSurvivalWave = 0;
-			currency = 0;
+			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
+			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
+			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
+			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
+
+			PlayerData loadedData = DataPersistence.Load (); //load player save data
+
+			if (loadedData != null) {
+				selectedCharacter = loadedData.selectedCharacter;
+				currency = loadedData.currency;
+				highestSurvivalWave = loadedData.highestSurvivalWave;
+				currSurvivalStreak = loadedData.survivalStreak;
+			} else {
+				selectedCharacter = "Default Player";
+				highestSurvivalWave = 0;
+				currSurvivalStreak = 0;
+				currency = 0;
+			}
+
 
 			selectedSurvivalWave = 1;
-
-			currSurvivalStreak = 0;
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number").GetComponent<Text> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
@@ -68,11 +97,6 @@ public class GameManager : MonoBehaviour {
 		} else {
 			Destroy (gameObject);
 		}
-	}
-
-	public void UpdateGameDifficulty(int difficulty) {
-		currDifficulty = (GameDifficulty)difficulty;
-		difficultyChanged = true;
 	}
 
 	private void ClearAllCharacters() {
@@ -95,10 +119,8 @@ public class GameManager : MonoBehaviour {
 			SceneManager.LoadScene ("Main");
 		ClearAllCharacters();
 
-		//change displayed info on survival panel
 		SpawnSurvivalSpawner();
 
-		difficultyChanged = false;
 		currGameMode = GameMode.Survival;
 		UpdateSurvivalDisplayText ();
 		menu.ChangeState ("Survival");
@@ -132,11 +154,11 @@ public class GameManager : MonoBehaviour {
 		Time.timeScale = 1f;
 	}
 
-	public void ShowSurvivalRest(string waveInfo) {
+	public void EndSurvivalWave(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
-			int currencyEarned = 0;
+			int currencyEarned = 0; //track how much currency we earned
 			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
-				currencyEarned++;
+				currencyEarned++; //1 currency for completing for the first time
 
 				if (currSurvivalSpawner.CurrentWave != 0) {
 					if (currSurvivalSpawner.CurrentWave % 25 == 0) //first clear of boss wave
@@ -145,54 +167,56 @@ public class GameManager : MonoBehaviour {
 						currencyEarned += 75;
 				}
 
-				if (!difficultyChanged) {
+				if (!difficultyChanged) { //if the player didn't alter the difficulty
 					switch (currDifficulty) {
-					case GameDifficulty.Normal:
+					case GameDifficulty.Normal://remained on normal entire wave
 						currencyEarned += 2;
 						break;
-					case GameDifficulty.Masochist:
+					case GameDifficulty.Masochist://remained on masochist entire wave
 						currencyEarned += 5;
 						break;
 					}
 				}
 
-				highestSurvivalWave = currSurvivalSpawner.CurrentWave + 1;
+				highestSurvivalWave = currSurvivalSpawner.CurrentWave + 1; //update highest survival wave completed
 
-				if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves)
-					selectedSurvivalWave++;
+				if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
+					selectedSurvivalWave++; //encourage them to play the next one
 			}
 
-			if (currSurvivalSpawner.CurrentWave < 25)
+			if (currSurvivalSpawner.CurrentWave < 25) //easier waves only give +1
 				currencyEarned++;
-			else if (currSurvivalSpawner.CurrentWave < 50)
+			else if (currSurvivalSpawner.CurrentWave < 50) //harder +2
 				currencyEarned += 2;
-			else if (currSurvivalSpawner.CurrentWave < 75)
+			else if (currSurvivalSpawner.CurrentWave < 75) //even harder +3
 				currencyEarned += 3;
-			else if (currSurvivalSpawner.CurrentWave < 100)
+			else if (currSurvivalSpawner.CurrentWave < 100) //just mean +4
 				currencyEarned += 4;
-			else
+			else //ludicrous +5
 				currencyEarned += 5;
 
-			currSurvivalStreak++;
+			currSurvivalStreak++; //increase their survival streak
 
-			if (currSurvivalStreak % 5 == 0)
+			if (currSurvivalStreak % 5 == 0) //bonuses for surviving multiple waves in a row
 				currencyEarned += 5;
 			if (currSurvivalStreak % 20 == 0)
 				currencyEarned += 20;
 			if (currSurvivalStreak % 100 == 0)
 				currencyEarned += 300;
 
-			currency += currencyEarned;
-			UpdateSurvivalDisplayText ();
+			currency += currencyEarned; //add the currency earned
+			UpdateSurvivalDisplayText (); //inform the player how much they earned
 			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency! You now have: " + currency + "\n+1 survival streak (" + currSurvivalStreak + ")";
 		} else if (waveInfo.Equals ("died")) {
 			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
-			currSurvivalStreak = 0;
+			currSurvivalStreak = 0; //reset survival streak
 		}
 
 		menu.ChangeState ("Survival");
 		currGameState = GameState.Menu;
-		Time.timeScale = 0f;
+		Time.timeScale = 0f; //freeze game
+
+		DataPersistence.Save (); //save the game no matter what
 	}
 
 	private void UpdateSurvivalDisplayText() {
@@ -210,11 +234,19 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
-		currDifficulty = (GameDifficulty)difficulty.value;
+		SetDifficulty (difficulty.value);
+	}
+
+	public void SetDifficulty (int value) {
+		currDifficulty = (GameDifficulty)value;
+		difficultyDropdown.value = value;
+		difficultyChanged = true;
 	}
 
 	private void LoadLevel() {
 		loadingScreen.color = Color.white; //display load screen
+
+		difficultyChanged = false;
 
 		ClearAllCharacters (); //clear all remaining enemies
 		SpawnPlayer();
