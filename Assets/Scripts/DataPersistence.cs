@@ -9,19 +9,13 @@ public class DataPersistence {
 	private static string saveLocation = Application.persistentDataPath + "/meta.dat";
 	
 	public static void Save() {
-		PlayerPrefs.SetInt("Difficulty", (int)GameManager.currDifficulty);
-		PlayerPrefs.SetInt ("Sound Enabled", GameManager.SoundEnabled ? 1 : 0);
-
-		PlayerPrefs.SetFloat("BGM Volume", GameManager.BGMVolume);
-		PlayerPrefs.SetFloat ("SFX Volume", GameManager.SFXVolume);
-
-		PlayerPrefs.Save ();
+		SavePlayerPrefs ();
 
 		FileStream file;
-		if (File.Exists (saveLocation)) {
-			file = File.OpenWrite (saveLocation);
+		if (File.Exists (saveLocation)) { //check to see if the game has been saved before
+			file = File.OpenWrite (saveLocation); //open the file if so
 		} else {
-			file = File.Create (saveLocation);
+			file = File.Create (saveLocation); //if not, create the file
 		}
 
 		PlayerData playerData = new PlayerData ();
@@ -36,28 +30,38 @@ public class DataPersistence {
 		file.Close ();
 	}
 
+	public static void SavePlayerPrefs() {
+		PlayerPrefs.SetInt("Difficulty", (int)GameManager.currDifficulty); //set difficulty to playerprefs
+		PlayerPrefs.SetInt ("Sound Enabled", GameManager.SoundEnabled ? 1 : 0); //set bool as an integer to playerprefs
+
+		PlayerPrefs.SetFloat("BGM Volume", GameManager.BGMVolume); //set background music volume to playerprefs
+		PlayerPrefs.SetFloat ("SFX Volume", GameManager.SFXVolume); //set sound effects volume to playerprefs
+
+		PlayerPrefs.Save (); //save the playerpref changes
+	}
+
 	public static PlayerData Load() {
-		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty"));
-		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false;
-
-		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume");
-		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume");
-
 		FileStream file;
 		if (File.Exists (saveLocation)) {
 			file = File.OpenRead (saveLocation);
 		} else {
-			return null;
+			return null; //nothing to load if there is no file; skip loading playerprefs
 		}
 
+		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty")); //set the game difficulty using the stored playerpref
+		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
+
+		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume"); //set the background music volume using the stored playerpref
+		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume"); //set the sound effects volume using the stored playerpref
+
 		BinaryFormatter formatter = new BinaryFormatter ();
-		return (PlayerData)formatter.Deserialize (file);
+		return (PlayerData)formatter.Deserialize (file); //get the playerdata from the file, send the data to the gameManager who called the method
 	}
 }
 
 [Serializable]
 public class PlayerData { //all of the player data that will be stored in a file
-	public string fileVersion; //will be used to verify whether file was tampered with
+	public string fileVersion;
 
 	public string selectedCharacter;
 

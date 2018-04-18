@@ -11,8 +11,12 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //To do:
 //-continue survival game mode
 //	--Add custom enemies
+//		--bear
+//		--armadillo
+//	--Make Enemy Class : Character
+//		--attributes all enemies will have
+//	--Charge Enemy
 //	--Code Boss
-//-possibly make load level into IEnumerator, fade to load screen, pause for 2 seconds
 
 public class GameManager : MonoBehaviour {
 
@@ -69,8 +73,14 @@ public class GameManager : MonoBehaviour {
 
 			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
 			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
+			bgmSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
 			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
+			sfxSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
 			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
+
+			Vector2 contentSize = new Vector2 (0, Screen.height * 0.1f);
+			difficultyDropdown.template.GetComponent<ScrollRect> ().content.sizeDelta = contentSize;
+			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
 
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 
@@ -122,6 +132,7 @@ public class GameManager : MonoBehaviour {
 		SpawnSurvivalSpawner();
 
 		currGameMode = GameMode.Survival;
+		currGameState = GameState.Menu;
 		UpdateSurvivalDisplayText ();
 		menu.ChangeState ("Survival");
 	}
@@ -147,15 +158,14 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartSurvivalWave() {
-		LoadLevel ();
-
-		currGameState = GameState.Active;
-		menu.ChangeState ("");
-		Time.timeScale = 1f;
+		StartCoroutine(LoadLevel());
 	}
 
 	public void EndSurvivalWave(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
+			if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
+				selectedSurvivalWave++; //encourage them to play the next one
+			
 			int currencyEarned = 0; //track how much currency we earned
 			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
 				currencyEarned++; //1 currency for completing for the first time
@@ -179,9 +189,6 @@ public class GameManager : MonoBehaviour {
 				}
 
 				highestSurvivalWave = currSurvivalSpawner.CurrentWave + 1; //update highest survival wave completed
-
-				if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
-					selectedSurvivalWave++; //encourage them to play the next one
 			}
 
 			if (currSurvivalSpawner.CurrentWave < 25) //easier waves only give +1
@@ -225,12 +232,11 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartStory() {
-		LoadLevel ();
+		ClearAllCharacters();
 
 		currGameMode = GameMode.Story;
-		currGameState = GameState.Active;
-
-		Time.timeScale = 1f;
+		currGameState = GameState.Menu;
+		menu.ChangeState ("Story");
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
@@ -243,7 +249,7 @@ public class GameManager : MonoBehaviour {
 		difficultyChanged = true;
 	}
 
-	private void LoadLevel() {
+	private IEnumerator LoadLevel() {
 		loadingScreen.color = Color.white; //display load screen
 
 		difficultyChanged = false;
@@ -263,6 +269,8 @@ public class GameManager : MonoBehaviour {
 
 				GameObject.Instantiate (Resources.Load ("Backgrounds/Survival_" + (selectedSurvivalWave - 1)), bgParent);//instantiate background
 				bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
+
+				yield return new WaitForSeconds(1);
 			}
 
 			currSurvivalSpawner.StartWave (selectedSurvivalWave);
@@ -272,6 +280,10 @@ public class GameManager : MonoBehaviour {
 
 		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
 		loadingScreen.color = Color.clear; //hide load screen
+
+		currGameState = GameState.Active;
+		menu.ChangeState ("");
+		Time.timeScale = 1f;
 	}
 
 	public void PauseGame() {
@@ -288,6 +300,10 @@ public class GameManager : MonoBehaviour {
 	public void ReturnToMainMenu() {
 		currGameState = GameState.Menu;
 		menu.ChangeState ("Main");
+	}
+
+	public void SaveSettings() {
+		DataPersistence.SavePlayerPrefs ();
 	}
 
 	public void ExitToDesktop () {

@@ -46,7 +46,7 @@ public class CloudScript : MonoBehaviour {
 			speed = new Vector3(Random.Range (-0.005f, -0.001f), 0);
 		}
 
-		delay = Random.Range (1f, 120f);
+		delay = Random.Range (1f, 60f);
 
 	}
 }
