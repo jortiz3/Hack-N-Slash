@@ -9,7 +9,7 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 	[SerializeField, Tooltip("Pause delay is the time between pauses. This range allows for variation in delay.")]
 	private Vector2 pauseDelayRange = Vector2.zero;
 
-	private Vector3 targetLocation;
+	protected Vector3 targetLocation;
 	[SerializeField, Tooltip("Target delay determines how often this enemy searches for the target position.")]
 	private float targetIdentifyDelay = 2f;
 	private float currTargetIdentifyDelay;
@@ -22,11 +22,18 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 	void Start () {
 		Initialize ();
 
-		currPauseDelay = GeneratePauseDelay ();
+		GeneratePauseDelay ();
 	}
 
-	void Update () {
+	void Update() {
+		UpdateEnemy ();
+	}
 
+	void FixedUpdate() {
+		UpdateAnimations ();
+	}
+
+	protected virtual void UpdateEnemy () {
 		if (currTargetIdentifyDelay > 0) { //delay finding target
 			currTargetIdentifyDelay -= Time.deltaTime;
 		} else { //find target
@@ -44,38 +51,10 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 				hasFallenOver = true;
 
 			if (!hasFallenOver) {
-				Vector3 direction = targetLocation - transform.position;
-
-				if (direction.x > 0.4f) {//target is to the right
-					Move (1);
-				} else if (direction.x < -0.4f) {//target is to the left
-					Move (-1);
-				} else {//target is close enough
-					Move (0);
-				}
-
-				if (thisEnemyIsAbleToJump) {
-					if (Mathf.Abs (direction.x) < 2f) {//jump only when horizontally near target
-						if (direction.y > 2f) {//jump only when below target
-							Jump ();
-						}
-					}
-				}
+				Move ();
 			} else { //enemy has fallen over
 				if (thisEnemyIsAbleToJump) {
-					if (!isJumping) {
-						if (Mathf.Abs (gameObject.transform.rotation.eulerAngles.z) < 10f) {//stopping state; enemy is upright again
-							hasFallenOver = false;
-						} else {
-							Jump ();
-							AddTorque (transform.rotation.z * 10); //add torque to rigidbody to rotate the enemy
-						}
-					} else if (isFalling) {//on our way down
-						if (Mathf.Abs (transform.rotation.eulerAngles.z) < 10f) { //if close enough to upright
-							transform.rotation = Quaternion.Euler (Vector3.zero); //snap to correct orientation
-							StopRotation (); //halt the spin
-						}
-					}
+					KipUp ();
 				}
 			}
 
@@ -88,11 +67,47 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 		}
 	}
 
-	void FixedUpdate() {
-		UpdateAnimations ();
+	protected virtual void Move() {
+		Vector3 direction = targetLocation - transform.position;
+
+		if (direction.x > 0.4f) {//target is to the right
+			Move (1);
+		} else if (direction.x < -0.4f) {//target is to the left
+			Move (-1);
+		} else {//target is close enough
+			Move (0);
+		}
+
+		if (thisEnemyIsAbleToJump) {
+			if (Mathf.Abs (direction.x) < 2f) {//jump only when horizontally near target
+				if (direction.y > 2f) {//jump only when below target
+					Jump ();
+				}
+			}
+		}
+	}
+
+	protected virtual void KipUp() {
+		if (!isJumping) {
+			if (Mathf.Abs (gameObject.transform.rotation.eulerAngles.z) < 10f) {//stopping state; enemy is upright again
+				hasFallenOver = false;
+			} else {
+				Jump ();
+				AddTorque (transform.rotation.z * 10); //add torque to rigidbody to rotate the enemy
+			}
+		} else if (isFalling) {//on our way down
+			if (Mathf.Abs (transform.rotation.eulerAngles.z) < 10f) { //if close enough to upright
+				transform.rotation = Quaternion.Euler (Vector3.zero); //snap to correct orientation
+				StopRotation (); //halt the spin
+			}
+		}
 	}
 
 	private float GeneratePauseDelay() {
 		return Random.Range (pauseDelayRange.x, pauseDelayRange.y);
+	}
+
+	protected void PauseMovement() {
+		currPauseDelay = 0;
 	}
 }

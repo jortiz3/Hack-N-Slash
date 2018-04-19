@@ -49,6 +49,8 @@ public abstract class Character : MonoBehaviour {
 
 	private Text statText;
 
+	public Vector2 Velocity { get { return rb2D.velocity; } }
+
 	public bool isFacingRight { get { return !sr.flipX; } }
 	public bool isFacingLeft { get { return !isFacingRight; } }
 	public bool isJumping { get { return anim.GetBool ("Jump"); } }
@@ -243,7 +245,7 @@ public abstract class Character : MonoBehaviour {
 					anim.SetTrigger (triggerName);
 
 					if (triggerName.Equals ("Attack_Forward")) { //if swinging forward (aka power attack)
-						if (Mathf.Abs (rb2D.velocity.x) < moveSpeed / 2f) { //if not going too fast -- don't want to be skating across world with power attacks
+						if (!gameObject.tag.Equals ("Player") || Mathf.Abs (rb2D.velocity.x) < moveSpeed / 2f) { //if not going too fast -- don't want to be skating across world with power attacks
 							if (isFacingRight) {
 								rb2D.AddForce (new Vector2 (weapon.attackForce, 0f));
 							} else {

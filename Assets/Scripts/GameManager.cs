@@ -79,6 +79,7 @@ public class GameManager : MonoBehaviour {
 			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
 
 			Vector2 contentSize = new Vector2 (0, Screen.height * 0.1f);
+			difficultyDropdown.template.sizeDelta = contentSize * difficultyDropdown.options.Count;
 			difficultyDropdown.template.GetComponent<ScrollRect> ().content.sizeDelta = contentSize;
 			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
 
