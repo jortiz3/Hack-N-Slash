@@ -12,10 +12,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //-continue survival game mode
 //	--Add custom enemies
 //		--bear
-//		--armadillo
-//	--Make Enemy Class : Character
-//		--attributes all enemies will have
-//	--Charge Enemy
 //	--Code Boss
 
 public class GameManager : MonoBehaviour {

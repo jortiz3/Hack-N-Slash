@@ -7,7 +7,7 @@ public class ChargeEnemy : SimpleEnemy {
 	private float chargeDistance;
 
 	protected override void UpdateEnemy () {
-		if (!isAttacking || Velocity.magnitude < 1)
+		if (!isAttacking)
 			base.UpdateEnemy ();
 	}
 
