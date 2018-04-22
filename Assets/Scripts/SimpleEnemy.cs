@@ -6,7 +6,7 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 
 	private float pauseTime;
 	private float currPauseDelay;
-	[SerializeField, Tooltip("Pause delay is the time between pauses. This range allows for variation in delay.")]
+	[SerializeField, Tooltip("Time between pauses -- How long will this enemy stay active before pausing (Random.Range)")]
 	private Vector2 pauseDelayRange = Vector2.zero;
 
 	protected Vector3 targetLocation;

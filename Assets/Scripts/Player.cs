@@ -3,10 +3,6 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-//animation bugs:
-//	--attack forwards/backwards from run/idle
-//	--getting damaged while attacking
-
 public class Player : Character {
 	[SerializeField]
 	private bool infiniteRespawn;

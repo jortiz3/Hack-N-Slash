@@ -10,9 +10,22 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-continue survival game mode
-//	--Add custom enemies
-//		--bear
 //	--Code Boss
+//		--wave of enemies prior to boss spawns?
+//		--cutscene played when spawned??
+//		--inherit from character class?
+//		--ability to disable knockback
+//		--shorter flinch time
+//		--ability to spawn enemies
+//		--hp bar displayed at the bottom?
+//		--Script delegates so behavior can be set in the inspector?
+//--Character Class
+//	--recognize if damage from weapon or touching enemy
+//--Player Mechanics
+//	--multiple control schemes
+//		--Option 1: tilt to move, tap to jump, swipe to attack
+//		--Option 2: press and hold to move, tap button on screen to jump, swipe to attack
+//
 
 public class GameManager : MonoBehaviour {
 
@@ -91,6 +104,11 @@ public class GameManager : MonoBehaviour {
 				highestSurvivalWave = 0;
 				currSurvivalStreak = 0;
 				currency = 0;
+
+				SetDifficulty (2);
+				SoundEnabled = true;
+				BGMVolume = 1f;
+				SFXVolume = 1f;
 			}
 
 
