@@ -5,8 +5,25 @@ using System.Collections;
 using System.Runtime.Serialization.Formatters.Binary;
 
 public class DataPersistence {
-
 	private static string saveLocation = Application.persistentDataPath + "/meta.dat";
+
+	public static PlayerData Load() {
+		FileStream file;
+		if (File.Exists (saveLocation)) {
+			file = File.OpenRead (saveLocation);
+		} else {
+			return null; //nothing to load if there is no file; skip loading playerprefs
+		}
+
+		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty")); //set the game difficulty using the stored playerpref
+		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
+
+		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume"); //set the background music volume using the stored playerpref
+		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume"); //set the sound effects volume using the stored playerpref
+
+		BinaryFormatter formatter = new BinaryFormatter ();
+		return (PlayerData)formatter.Deserialize (file); //get the playerdata from the file, send the data to the gameManager who called the method
+	}
 	
 	public static void Save() {
 		SavePlayerPrefs ();
@@ -39,33 +56,4 @@ public class DataPersistence {
 
 		PlayerPrefs.Save (); //save the playerpref changes
 	}
-
-	public static PlayerData Load() {
-		FileStream file;
-		if (File.Exists (saveLocation)) {
-			file = File.OpenRead (saveLocation);
-		} else {
-			return null; //nothing to load if there is no file; skip loading playerprefs
-		}
-
-		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty")); //set the game difficulty using the stored playerpref
-		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
-
-		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume"); //set the background music volume using the stored playerpref
-		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume"); //set the sound effects volume using the stored playerpref
-
-		BinaryFormatter formatter = new BinaryFormatter ();
-		return (PlayerData)formatter.Deserialize (file); //get the playerdata from the file, send the data to the gameManager who called the method
-	}
-}
-
-[Serializable]
-public class PlayerData { //all of the player data that will be stored in a file
-	public string fileVersion;
-
-	public string selectedCharacter;
-
-	public int currency;
-	public int highestSurvivalWave;
-	public int survivalStreak;
 }

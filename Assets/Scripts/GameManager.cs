@@ -33,40 +33,30 @@ public class GameManager : MonoBehaviour {
 	public static GameDifficulty currDifficulty;
 	public static GameState currGameState;
 	private static GameState prevGameState; //for return buttons
-
-	private bool difficultyChanged;
-
 	public static GameManager currGameManager;
 	public static SurvivalSpawner currSurvivalSpawner;
-
 	private static MenuScript menu;
-
 	private static Toggle soundToggle;
 	private static Slider bgmSlider;
 	private static Slider sfxSlider;
 	private static Dropdown difficultyDropdown;
-
 	private static Transform bgParent;
 	private static Image loadingScreen;
-
 	private static string selectedCharacter;
+	private static int currency;
 
 	private Text displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
-
 	private int selectedSurvivalWave;
 	private int highestSurvivalWave;
 	private int currSurvivalStreak;
-
-	private static int currency;
+	private bool difficultyChanged;
 
 	public static string SelectedCharacter { get { return selectedCharacter; } }
-
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
 	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
-
 	public int Currency { get { return currency; } }
 	public int HighestSurvivalWave { get { return highestSurvivalWave; } }
 	public int CurrentSurvivalStreak { get { return currSurvivalStreak; } }
