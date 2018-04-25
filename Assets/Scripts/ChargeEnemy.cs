@@ -18,9 +18,9 @@ public class ChargeEnemy : SimpleEnemy {
 			Vector3 direction = targetLocation - transform.position;
 
 			if (direction.x > chargeDistance) {//target is to the right
-				Move (1);
+				Run (1);
 			} else if (direction.x < -chargeDistance) {//target is to the left
-				Move (-1);
+				Run (-1);
 			} else {//target is close enough
 				Attack("Attack_Forward");
 				PauseMovement();

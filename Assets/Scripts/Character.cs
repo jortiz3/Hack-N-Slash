@@ -111,12 +111,64 @@ public abstract class Character : MonoBehaviour {
 		attackTimer = 0;
 	}
 
+	protected virtual void DetectBeginOtherCharacter (Character otherCharacter) {
+		// empty void for other classes to fill out if necessary
+	}
+
+	protected virtual void DetectEndOtherCharacter(Character otherCharacter) {
+		//empty void for other classes to fill out if necessary
+	}
+
 	public virtual void Die() {
 		Destroy (hpSlider.gameObject);
 		Destroy (statText.gameObject);
 		if (attackTimerSlider != null)
 			Destroy (attackTimerSlider.gameObject);
 		Destroy (gameObject);
+	}
+
+	protected void Fly (Vector2 direction) {
+		if (rb2D.gravityScale > 0)
+			rb2D.gravityScale = 0;
+
+		if (!isAttacking) {
+			direction.Normalize ();
+
+			if (direction.x < 0) {//if moving left
+				sr.flipX = true;
+
+				if (weapon != null) {
+					weapon.FaceLeft ();
+				}
+			} else if (direction.x > 0) {
+				sr.flipX = false;
+
+				if (weapon != null) {
+					weapon.FaceRight ();
+				}
+			}
+
+			if (!isFlinching) { //if character hasn't been hit recently
+				rb2D.velocity = direction * moveSpeed; //move normally; set velocity
+				if (!direction.Equals(Vector2.zero)) { //if character is moving
+					anim.SetBool ("Run", true);
+					anim.SetBool ("Idle", false);
+
+					if (weapon != null)
+						weapon.Move ();
+				} else { //else character is idle
+					anim.SetBool ("Run", false);
+					anim.SetBool ("Idle", true);
+
+					if (weapon != null)
+						weapon.Idle ();
+				}
+			} else { //character has been hit recently
+				if ((rb2D.velocity.x < moveSpeed / 2f && direction.x > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && direction.x < 0))
+					rb2D.AddForce (new Vector2 (direction.x * moveSpeed, 0)); //only able to make slight adjustments mid-air;
+			}
+		}
+
 	}
 
 	protected void Initialize () {
@@ -178,47 +230,7 @@ public abstract class Character : MonoBehaviour {
 		groundLandingDelay = 0;
 	}
 
-	protected void Move(int xDir) {
-		if (!isAttacking) {
-			xDir = Mathf.Clamp(xDir, -1, 1);
-
-			if (xDir < 0) {//if moving left
-				sr.flipX = true;
-
-				if (weapon != null) {
-					weapon.FaceLeft ();
-				}
-			} else if (xDir > 0) {
-				sr.flipX = false;
-
-				if (weapon != null) {
-					weapon.FaceRight ();
-				}
-			}
-
-			if (!isFlinching) { //if character hasn't been hit recently
-				rb2D.velocity = new Vector2 (xDir * moveSpeed, rb2D.velocity.y); //move normally; set velocity
-				if (xDir != 0) { //if character is moving
-					anim.SetBool ("Run", true);
-					anim.SetBool ("Idle", false);
-
-					if (weapon != null)
-						weapon.Move ();
-				} else { //else character is idle
-					anim.SetBool ("Run", false);
-					anim.SetBool ("Idle", true);
-
-					if (weapon != null)
-						weapon.Idle ();
-				}
-			} else { //character has been hit recently
-				if ((rb2D.velocity.x < moveSpeed / 2f && xDir > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && xDir < 0))
-					rb2D.AddForce (new Vector2 (xDir * moveSpeed, 0)); //only able to make slight adjustments mid-air;
-			}
-		}
-	}
-
-	public void OnCollisionEnter2D(Collision2D otherObj) {
+	void OnCollisionEnter2D(Collision2D otherObj) {
 		if (otherObj.transform.position.y < transform.position.y) { //if other object is below
 			if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
 				LandOnGround();
@@ -229,6 +241,20 @@ public abstract class Character : MonoBehaviour {
 			if (!isFlinching) { //and this isn't flinching
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
 			}
+		}
+	}
+
+	void OnTriggerEnter2D(Collider2D otherObj) {
+		Character c = otherObj.GetComponent<Character> ();
+		if (c != null) {
+			DetectBeginOtherCharacter (c);
+		}
+	}
+
+	void OnTriggerExit2D(Collider2D otherObj) {
+		Character c = otherObj.GetComponent<Character> ();
+		if (c != null) {
+			DetectEndOtherCharacter (c);
 		}
 	}
 
@@ -315,6 +341,46 @@ public abstract class Character : MonoBehaviour {
 		AttackExpire ();
 
 		transform.position = location;
+	}
+
+	protected void Run(int xDir) {
+		if (!isAttacking) {
+			xDir = Mathf.Clamp(xDir, -1, 1);
+
+			if (xDir < 0) {//if moving left
+				sr.flipX = true;
+
+				if (weapon != null) {
+					weapon.FaceLeft ();
+				}
+			} else if (xDir > 0) {
+				sr.flipX = false;
+
+				if (weapon != null) {
+					weapon.FaceRight ();
+				}
+			}
+
+			if (!isFlinching) { //if character hasn't been hit recently
+				rb2D.velocity = new Vector2 (xDir * moveSpeed, rb2D.velocity.y); //move normally; set velocity
+				if (xDir != 0) { //if character is moving
+					anim.SetBool ("Run", true);
+					anim.SetBool ("Idle", false);
+
+					if (weapon != null)
+						weapon.Move ();
+				} else { //else character is idle
+					anim.SetBool ("Run", false);
+					anim.SetBool ("Idle", true);
+
+					if (weapon != null)
+						weapon.Idle ();
+				}
+			} else { //character has been hit recently
+				if ((rb2D.velocity.x < moveSpeed / 2f && xDir > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && xDir < 0))
+					rb2D.AddForce (new Vector2 (xDir * moveSpeed, 0)); //only able to make slight adjustments mid-air;
+			}
+		}
 	}
 
 	protected void StopRotation() {
@@ -415,8 +481,4 @@ public abstract class Character : MonoBehaviour {
 			invulnTimer -= Time.fixedDeltaTime;
 		}
 	}
-
-
-
-
 }

@@ -2,22 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SimpleEnemy : Character { //simple enemy that always moves towards the player in survival, just walks around in story
+public class SimpleEnemy : Character { //simple enemy that walks towards the player
 
 	private float pauseTime;
 	private float currActiveTimer;
 	[SerializeField, Tooltip("How long will this enemy stay active before pausing? (Random.Range)")]
 	private Vector2 attentionSpanRange = Vector2.one;
-
+	protected Character targetCharacter;
 	protected Vector3 targetLocation;
 	[SerializeField, Tooltip("How often does this enemy check for the target's position?")]
 	private Vector2 targetIdentifyRate = Vector2.one;
 	protected float currTargetIdentifyTimer;
-
 	private bool hasFallenOver;
-
 	[SerializeField]
 	private bool isAbleToJump = true;
+
+	protected override void DetectBeginOtherCharacter (Character otherCharacter) {
+		targetCharacter = otherCharacter;
+
+		if ((int)GameManager.currDifficulty < 2) //if the difficulty is below normal, the enemy will pause on detection
+			PauseMovement ();
+	}
+
+	protected override void DetectEndOtherCharacter (Character otherCharacter) {
+		if (otherCharacter == targetCharacter) {
+			targetCharacter = null;
+			PauseMovement ();
+		}
+	}
 
 	void FixedUpdate() {
 		UpdateAnimations ();
@@ -27,9 +39,11 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 		return Random.Range (range.x, range.y);
 	}
 
-	protected virtual Vector3 IdentifyTarget() {
+	protected virtual Vector3 IdentifyTargetLocation() {
 		if (player != null && GameManager.currGameMode == GameMode.Survival)
 			return player.transform.position; //target is player
+		else if (targetCharacter != null)
+			return targetCharacter.transform.position;
 		else
 			return new Vector3 (Random.Range (-10, 10), Random.Range (0, 3), 0);
 	}
@@ -53,12 +67,12 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 	protected virtual void Move() {
 		Vector3 direction = targetLocation - transform.position;
 
-		if (direction.x > 0.4f) {//target is to the right
-			Move (1);
-		} else if (direction.x < -0.4f) {//target is to the left
-			Move (-1);
+		if (direction.x > 0.1f) {//target is to the right
+			Run (1);
+		} else if (direction.x < -0.1f) {//target is to the left
+			Run (-1);
 		} else {//target is close enough
-			Move (0);
+			Run (0);
 			currTargetIdentifyTimer = 0;
 		}
 
@@ -89,7 +103,7 @@ public class SimpleEnemy : Character { //simple enemy that always moves towards 
 		if (currTargetIdentifyTimer > 0) { //update the
 			currTargetIdentifyTimer -= Time.deltaTime;
 		} else { //find target
-			targetLocation = IdentifyTarget();
+			targetLocation = IdentifyTargetLocation();
 			currTargetIdentifyTimer = GenerateFloatFromVector2(targetIdentifyRate); //set the delay
 		}
 

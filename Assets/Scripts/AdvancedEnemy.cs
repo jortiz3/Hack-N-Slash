@@ -2,17 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//keep chasing target a little longer depending on difficulty
+
 public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depending on game difficulty
 
-	[Tooltip("Locations this enemy would go or be attracted to.")]
+	[Tooltip("Locations this enemy would go or be attracted to."), SerializeField]
 	protected Transform[] pointsOfInterest;
+	[SerializeField]
 	protected Spawn[] spawns;
 	protected List<Character> minions;
 	[SerializeField]
 	protected MovementType movementType = MovementType.Run;
+	protected FlightType flightType = FlightType.None;
+	protected Behaviour behaviour = Behaviour.StandGround;
 
-	public enum MovementType { Run, FlyOnly, JumpOnly, Scripted }
-	public enum FlightType { none, sinX, sinY }
+	public enum MovementType { Run, FlyOnly, JumpOnly }
+	public enum FlightType { None, SinX, SinY }
+	public enum Behaviour { StandGround, Evasive }
 
 	public override void Die () {
 		if (minions != null) {
@@ -23,6 +29,24 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 		base.Die ();
 	}
 
+	protected override Vector3 IdentifyTargetLocation () {
+		if (GameManager.currGameMode == GameMode.Survival) {
+			if (player != null) {
+				return player.transform.position;
+			}
+		} else {
+			if (targetCharacter != null) {
+				return targetCharacter.transform.position;
+			}
+
+			if (pointsOfInterest != null && pointsOfInterest.Length > 0) {
+				return pointsOfInterest[Random.Range(0, pointsOfInterest.Length)].position;
+			}
+		}
+
+		return base.IdentifyTargetLocation ();
+	}
+
 	protected override void Move () {
 		base.Move ();
 	}
@@ -30,8 +54,9 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	protected override void UpdateEnemy () {
 		//if target is acquired
 		//	if target is too far away
-		//		if target has been too far away for too long
-		//			no longer target
+		//		if too long
+		//			get new target -- point of interest || player if survival game mode
+		//		end if too long
 		//	end if target too far away
 		//
 		//	move towards target
@@ -40,9 +65,7 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 		//	end if close enough
 		//else if target not acquired
 		//	roam around
-		//
-		//	ray cast in front
-		//	ray collide with character.tag != "Enemy" -> new target
 		//end target not acquired
+		base.UpdateEnemy();
 	}
 }

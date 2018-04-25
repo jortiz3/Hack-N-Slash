@@ -37,9 +37,9 @@ public class Player : Character {
 	void Update () {
 		if (GameManager.currGameState == GameState.Active) {
 			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
-				Move ((int)Input.GetAxisRaw ("Horizontal"));
+				Run ((int)Input.GetAxisRaw ("Horizontal"));
 			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
-				Move (0);
+				Run (0);
 
 			if (Input.GetButtonDown ("Attack") == true) {//first frame button pressed
 				if (Input.GetAxis ("Vertical") > 0)//holding up
@@ -103,7 +103,7 @@ public class Player : Character {
 							Jump ();
 							break;
 						default:
-							Move (0); //transition to idle
+							Run (0); //transition to idle
 							break;
 						}
 
@@ -112,11 +112,11 @@ public class Player : Character {
 						Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
 
 						if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
-							Move (1);
+							Run (1);
 						} else if (temp.x < transform.position.x - 0.1f) { //holding to the left of the character
-							Move (-1);
+							Run (-1);
 						} else { //holding directly above or on character
-							Move (0); //transition to idle
+							Run (0); //transition to idle
 						}
 					}//end touch phase if
 				} //end for loop
