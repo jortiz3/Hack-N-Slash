@@ -13,12 +13,10 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	protected List<Character> minions;
 	[SerializeField]
 	protected MovementType movementType = MovementType.Run;
-	protected FlightType flightType = FlightType.None;
-	protected Behaviour behaviour = Behaviour.StandGround;
+	protected Behaviour behaviour = Behaviour.Aggressive;
 
-	public enum MovementType { Run, FlyOnly, JumpOnly }
-	public enum FlightType { None, SinX, SinY }
-	public enum Behaviour { StandGround, Evasive }
+	public enum MovementType { Run, FlySwoop, FlyBomber, Jumper }
+	public enum Behaviour { Aggressive, StandGround, Evasive }
 
 	public override void Die () {
 		if (minions != null) {

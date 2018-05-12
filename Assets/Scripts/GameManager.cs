@@ -10,6 +10,11 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-continue survival game mode
+//	--AdvancedEnemy
+//		--Flying Capability
+//			--fly straight horizontally, swoop down using sine or cosine formula to attack player
+//			--drop projectiles onto player
+//				--projectiles break on collision with environment
 //	--Code Boss
 //		--wave of enemies prior to boss spawns?
 //		--cutscene played when spawned??

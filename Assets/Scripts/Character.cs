@@ -304,7 +304,17 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	public void ReceiveDamageFrom(Character c) {
-		float forceMagnitude = (c.rb2D.velocity.magnitude + 1) * 50; //+1 to ensure it is never 0
+		ReceiveKnockback (c);
+		ReceiveDamage (c.baseAttackDamage, false); //handle damage
+	}
+
+	public void ReceiveDamageFrom(Weapon w) {
+		ReceiveKnockback (w.wielder);
+		ReceiveDamage (w.Damage, w.wielder.critAvailable); //handle damage + possibility of critical hit
+	}
+
+	private void ReceiveKnockback(Character c) {
+		float forceMagnitude = (rb2D.mass * 150) + c.rb2D.velocity.magnitude; //normal knockback + how fast the enemy was moving
 		Vector2 knockbackDir = rb2D.position - c.rb2D.position;
 
 		if (!c.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
@@ -315,24 +325,6 @@ public abstract class Character : MonoBehaviour {
 
 		rb2D.velocity = Vector2.zero; //stop current movement
 		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
-
-		ReceiveDamage (baseAttackDamage, false); //handle damage
-	}
-
-	public void ReceiveDamageFrom(Weapon w) {
-		float forceMagnitude = (w.attackForce / 10) + w.wielder.rb2D.velocity.x;
-		Vector2 knockbackDir = rb2D.position - w.wielder.rb2D.position;
-
-		if (!w.wielder.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
-			knockbackDir.y = 0f; //don't move vertically
-		} else {
-			knockbackDir.y = knockbackDir.x * 2f;
-		}
-
-		rb2D.velocity = Vector2.zero; //stop current movement
-		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
-
-		ReceiveDamage (w.Damage, w.wielder.critAvailable); //handle damage
 	}
 
 	protected void Respawn(Vector3 location) {
