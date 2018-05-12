@@ -27,6 +27,8 @@ public abstract class Character : MonoBehaviour {
 	private float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
 	[SerializeField]
+	private float baseAttackDamage = 3;
+	[SerializeField, Tooltip("How much will this enemy move/slide on their own when they attack?")]
 	protected float baseAttackForce = 25f;
 	protected Slider attackTimerSlider; //used to visually display the timer to the player
 	[SerializeField]
@@ -111,11 +113,11 @@ public abstract class Character : MonoBehaviour {
 		attackTimer = 0;
 	}
 
-	protected virtual void DetectBeginOtherCharacter (Character otherCharacter) {
+	public virtual void DetectBeginOtherCharacter (Character otherCharacter) {
 		// empty void for other classes to fill out if necessary
 	}
 
-	protected virtual void DetectEndOtherCharacter(Character otherCharacter) {
+	public virtual void DetectEndOtherCharacter(Character otherCharacter) {
 		//empty void for other classes to fill out if necessary
 	}
 
@@ -216,7 +218,7 @@ public abstract class Character : MonoBehaviour {
 			if (weapon != null)
 				weapon.Jump ();
 
-			rb2D.AddForce (Vector2.up * 300);
+			rb2D.AddForce (Vector2.up * rb2D.mass * 300);
 		}
 	}
 
@@ -244,33 +246,7 @@ public abstract class Character : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerEnter2D(Collider2D otherObj) {
-		Character c = otherObj.GetComponent<Character> ();
-		if (c != null) {
-			DetectBeginOtherCharacter (c);
-		}
-	}
-
-	void OnTriggerExit2D(Collider2D otherObj) {
-		Character c = otherObj.GetComponent<Character> ();
-		if (c != null) {
-			DetectEndOtherCharacter (c);
-		}
-	}
-
-	public void ReceiveDamageFrom(Character c) {
-		float forceMagnitude = (c.rb2D.velocity.magnitude + 1) * 50;
-		Vector2 knockbackDir = rb2D.position - c.rb2D.position;
-
-		if (!c.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
-			knockbackDir.y = 0f; //don't move vertically
-		} else {
-			knockbackDir.y = knockbackDir.x * 2f;
-		}
-
-		rb2D.velocity = Vector2.zero; //stop current movement
-		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
-
+	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
 		if (!isInvulnerable) { //enemies typically never invulnerable
 			if (!isFlinching) {
 				if (gameObject.tag.Equals ("Player")) {
@@ -303,16 +279,12 @@ public abstract class Character : MonoBehaviour {
 			}
 
 			if (damage == 0) {
-				if (c.weapon != null) { //if the character has a weapon
-					damage += c.weapon.Damage; //add weapon damage
-				} else {
-					damage += c.rb2D.mass; //damage based on mass
-				}
+				damage += srcDmgVal;
 			}
 
 			damage *= difficultyDamageModifier;
 
-			if (c.critAvailable) {
+			if (criticalHit) {
 				damage *= 1.25f;
 
 				statText.text = "-" + (int)damage + "\nCritical Hit!";
@@ -329,6 +301,38 @@ public abstract class Character : MonoBehaviour {
 			if (!gameObject.tag.Equals ("Player"))
 				AttackExpire ();
 		}
+	}
+
+	public void ReceiveDamageFrom(Character c) {
+		float forceMagnitude = (c.rb2D.velocity.magnitude + 1) * 50; //+1 to ensure it is never 0
+		Vector2 knockbackDir = rb2D.position - c.rb2D.position;
+
+		if (!c.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
+			knockbackDir.y = 0f; //don't move vertically
+		} else {
+			knockbackDir.y = knockbackDir.x * 2f;
+		}
+
+		rb2D.velocity = Vector2.zero; //stop current movement
+		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
+
+		ReceiveDamage (baseAttackDamage, false); //handle damage
+	}
+
+	public void ReceiveDamageFrom(Weapon w) {
+		float forceMagnitude = (w.attackForce / 10) + w.wielder.rb2D.velocity.x;
+		Vector2 knockbackDir = rb2D.position - w.wielder.rb2D.position;
+
+		if (!w.wielder.anim.GetCurrentAnimatorStateInfo (0).IsName ("Attack_Up")) { //not attacking upwards
+			knockbackDir.y = 0f; //don't move vertically
+		} else {
+			knockbackDir.y = knockbackDir.x * 2f;
+		}
+
+		rb2D.velocity = Vector2.zero; //stop current movement
+		rb2D.AddForce (knockbackDir.normalized * forceMagnitude); //knockback
+
+		ReceiveDamage (w.Damage, w.wielder.critAvailable); //handle damage
 	}
 
 	protected void Respawn(Vector3 location) {

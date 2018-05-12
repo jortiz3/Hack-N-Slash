@@ -19,8 +19,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //		--ability to spawn enemies
 //		--hp bar displayed at the bottom?
 //		--Script delegates so behavior can be set in the inspector?
-//--Character Class
-//	--recognize if damage from weapon or touching enemy
 //--Player Mechanics
 //	--multiple control schemes
 //		--Option 1: tilt to move, tap to jump, swipe to attack

@@ -131,7 +131,7 @@ public class Weapon : MonoBehaviour {
 		if (!otherObj.Equals (wielder)) { //if it's not the character wielding the weapon
 			Character otherCharacter = otherObj.GetComponent<Character> ();
 			if (otherCharacter != null) //if it is actually a character
-				otherCharacter.ReceiveDamageFrom (wielder);
+				otherCharacter.ReceiveDamageFrom (this);
 		}
 	}
 

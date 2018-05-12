@@ -17,14 +17,14 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 	[SerializeField]
 	private bool isAbleToJump = true;
 
-	protected override void DetectBeginOtherCharacter (Character otherCharacter) {
+	public override void DetectBeginOtherCharacter (Character otherCharacter) {
 		targetCharacter = otherCharacter;
 
 		if ((int)GameManager.currDifficulty < 2) //if the difficulty is below normal, the enemy will pause on detection
 			PauseMovement ();
 	}
 
-	protected override void DetectEndOtherCharacter (Character otherCharacter) {
+	public override void DetectEndOtherCharacter (Character otherCharacter) {
 		if (otherCharacter == targetCharacter) {
 			targetCharacter = null;
 			PauseMovement ();
