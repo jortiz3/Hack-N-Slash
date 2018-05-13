@@ -20,9 +20,9 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //		--cutscene played when spawned??
 //		--inherit from character class?
 //		--ability to disable knockback
-//		--shorter flinch time
+//		--no flinch time; only delays
 //		--ability to spawn enemies
-//		--hp bar displayed at the bottom?
+//		--hp bar displayed at the bottom/top? GetHPSliderPos(), GetHPSliderSizeDelta()
 //		--Script delegates so behavior can be set in the inspector?
 //--Player Mechanics
 //	--multiple control schemes

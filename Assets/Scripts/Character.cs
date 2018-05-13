@@ -23,6 +23,7 @@ public abstract class Character : MonoBehaviour {
 	[SerializeField]
 	protected int maxhp;
 	private Slider hpSlider;
+	protected bool hpSliderAlwaysActive;
 	private float attackTimer; //used to delay attacks and as the time until the attack expires
 	private float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
@@ -173,6 +174,14 @@ public abstract class Character : MonoBehaviour {
 
 	}
 
+	protected virtual Vector3 GetHPSliderPos() {
+		return transform.position + (Vector3.up * groundDetectDist);
+	}
+
+	protected virtual Vector2 GetHPSliderSizeDelta() {
+		return new Vector2 (Screen.width / 15f, Screen.height / 15f);
+	}
+
 	protected void Initialize () {
 		if (cameraCanvas == null)
 			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
@@ -195,8 +204,10 @@ public abstract class Character : MonoBehaviour {
 		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
 		hpSlider.gameObject.name = gameObject.name + "'s hp slider";
 		hpSlider.maxValue = maxhp;
-		hpSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
-		hpSlider.gameObject.SetActive (false);
+		hpSlider.GetComponent<RectTransform> ().sizeDelta = GetHPSliderSizeDelta ();
+
+		if (!hpSliderAlwaysActive)
+			hpSlider.gameObject.SetActive (false);
 
 		statText = (GameObject.Instantiate(Resources.Load("UI/statusText"), cameraCanvas) as GameObject).GetComponent<Text>();
 		statText.gameObject.name = gameObject.name + "'s status text";
@@ -340,6 +351,9 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected void Run(int xDir) {
+		if (rb2D.gravityScale < 1)
+			rb2D.gravityScale = 1;
+
 		if (!isAttacking) {
 			xDir = Mathf.Clamp(xDir, -1, 1);
 
@@ -448,10 +462,10 @@ public abstract class Character : MonoBehaviour {
 			if (!sr.color.Equals (Color.red))
 				sr.color = Color.red;
 
-			hpSlider.transform.position = transform.position + (Vector3.up * groundDetectDist);
+			hpSlider.transform.position = GetHPSliderPos();
 			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.12f));
 
-			if (!hpSlider.IsActive())
+			if (!hpSlider.gameObject.activeSelf)
 				hpSlider.gameObject.SetActive (true);
 
 			if (!statText.gameObject.activeSelf)
@@ -466,8 +480,10 @@ public abstract class Character : MonoBehaviour {
 		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
 			if (hp > 0) {
 				sr.color = defaultSRColor;
-				hpSlider.gameObject.SetActive (false);
 				statText.gameObject.SetActive (false);
+
+				if (!hpSliderAlwaysActive)
+					hpSlider.gameObject.SetActive (false);
 			} else {
 				Die ();
 			}

@@ -71,10 +71,14 @@ public class Weapon : MonoBehaviour {
 			currCritRange = critRanges [currAnim];
 
 		if (projectile != null) {
-			if (sr.flipX)
-				projectile.Fire(transform.position, new Vector2(-attackForce, 0));
-			else
-				projectile.Fire(transform.position, new Vector2(attackForce, 0));
+			if (currAnim < 2) {
+				if (sr.flipX)
+					projectile.Fire (transform.position, new Vector2 (-attackForce, 0));
+				else
+					projectile.Fire (transform.position, new Vector2 (attackForce, 0));
+			} else {
+				projectile.Fire (transform.position, new Vector2 (0, attackForce));
+			}
 		}
 	}
 

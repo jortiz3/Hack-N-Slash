@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D))]
 public class Projectile : MonoBehaviour {
 
 	private Weapon owner;
@@ -30,6 +31,8 @@ public class Projectile : MonoBehaviour {
 
 	public void SetOwner(Weapon Owner) {
 		owner = Owner;
-		gameObject.layer = owner.gameObject.layer; //conformes projectile to owner's physics layer; allows projectiles to be used by different types of characters
+		gameObject.layer = owner.gameObject.layer; //conforms projectile to owner's physics layer; allows projectiles to be used by different types of characters
+		rb2D = gameObject.GetComponent<Rigidbody2D> ();
+		gameObject.SetActive (false);
 	}
 }
