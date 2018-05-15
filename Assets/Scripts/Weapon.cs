@@ -13,7 +13,8 @@ public class Weapon : MonoBehaviour {
 	[Header("Attack Settings"), SerializeField]
 	private int damage;
 	[SerializeField, Tooltip("Does this weapon fire a projectile? (Can be left null)")]
-	private Projectile projectile;
+	private Projectile[] projectiles;
+	private int currProjectile;
 	[Tooltip("How much force is behind each attack?")]
 	public float attackForce = 80f;
 	[SerializeField, Tooltip("The shortest time between swings (x) and the longest (y).\nOne array element per animation.")]
@@ -70,15 +71,20 @@ public class Weapon : MonoBehaviour {
 		if (currAnim < critRanges.Length)
 			currCritRange = critRanges [currAnim];
 
-		if (projectile != null) {
+		if (projectiles != null && projectiles.Length > 0) {
 			if (currAnim < 2) {
 				if (sr.flipX)
-					projectile.Fire (transform.position, new Vector2 (-attackForce, 0));
+					projectiles[currProjectile].Fire (transform.position, new Vector2 (-attackForce, 0));
 				else
-					projectile.Fire (transform.position, new Vector2 (attackForce, 0));
+					projectiles[currProjectile].Fire (transform.position, new Vector2 (attackForce, 0));
 			} else {
-				projectile.Fire (transform.position, new Vector2 (0, attackForce));
+				projectiles[currProjectile].Fire (transform.position, new Vector2 (0, attackForce));
 			}
+
+			currProjectile++;
+
+			if (currProjectile >= projectiles.Length)
+				currProjectile = 0;
 		}
 	}
 
@@ -181,7 +187,11 @@ public class Weapon : MonoBehaviour {
 		else
 			currhbEnableRange = new Vector2 (0f, 0.3f);
 
-		if (projectile != null)
-			projectile.SetOwner (this);
+
+		currProjectile = 0;
+		for (int i = 0; i < projectiles.Length; i++) {
+			if (projectiles[i] != null)
+				projectiles[i].SetOwner (this);
+		}
 	}
 }

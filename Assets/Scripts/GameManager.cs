@@ -28,6 +28,7 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //	--multiple control schemes
 //		--Option 1: tilt to move, tap to jump, swipe to attack
 //		--Option 2: press and hold to move, tap button on screen to jump, swipe to attack
+//	--ranged weapons: swipe hold to continue to fire??
 //
 
 public class GameManager : MonoBehaviour {
@@ -48,7 +49,7 @@ public class GameManager : MonoBehaviour {
 	private static string selectedCharacter;
 	private static int currency;
 
-	private Text displayedSurvivalWaveNumber;
+	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
 	private int selectedSurvivalWave;
@@ -64,95 +65,11 @@ public class GameManager : MonoBehaviour {
 	public int HighestSurvivalWave { get { return highestSurvivalWave; } }
 	public int CurrentSurvivalStreak { get { return currSurvivalStreak; } }
 
-	void Start () {
-		if (currGameManager == null) {
-			currGameManager = this;
-			DontDestroyOnLoad (gameObject);
-
-			menu = transform.GetChild (0).GetComponent<MenuScript> ();
-			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
-			loadingScreen = bgParent.GetChild (bgParent.childCount - 1).GetComponent<Image> ();
-
-			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
-			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
-			bgmSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
-			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
-			sfxSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
-			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
-
-			Vector2 contentSize = new Vector2 (0, Screen.height * 0.1f);
-			difficultyDropdown.template.sizeDelta = contentSize * difficultyDropdown.options.Count;
-			difficultyDropdown.template.GetComponent<ScrollRect> ().content.sizeDelta = contentSize;
-			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
-
-			PlayerData loadedData = DataPersistence.Load (); //load player save data
-
-			if (loadedData != null) {
-				selectedCharacter = loadedData.selectedCharacter;
-				currency = loadedData.currency;
-				highestSurvivalWave = loadedData.highestSurvivalWave;
-				currSurvivalStreak = loadedData.survivalStreak;
-			} else {
-				selectedCharacter = "Default Player";
-				highestSurvivalWave = 0;
-				currSurvivalStreak = 0;
-				currency = 0;
-
-				SetDifficulty (2);
-				SoundEnabled = true;
-				BGMVolume = 1f;
-				SFXVolume = 1f;
-			}
-
-
-			selectedSurvivalWave = 1;
-
-			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number").GetComponent<Text> ();
-			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
-			displayedSurvivalWaveWarning = GameObject.Find ("Wave Warnings Text").GetComponent<Text> ();
-
-			currGameState = GameState.Menu;
-		} else {
-			Destroy (gameObject);
-		}
-	}
-
 	private void ClearAllCharacters() {
 		Transform temp = GameObject.FindGameObjectWithTag ("Character Parent").transform;
 		foreach (Transform child in temp) {
 			child.GetComponent<Character>().Die();
 		}
-	}
-
-	private void SpawnPlayer() {
-		Instantiate(Resources.Load("Characters/" + selectedCharacter));
-	}
-
-	private void SpawnSurvivalSpawner() {
-		Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
-	}
-
-	public void StartSurvival() {
-		if (SceneManager.GetActiveScene ().name != "Main")
-			SceneManager.LoadScene ("Main");
-		ClearAllCharacters();
-
-		SpawnSurvivalSpawner();
-
-		currGameMode = GameMode.Survival;
-		currGameState = GameState.Menu;
-		UpdateSurvivalDisplayText ();
-		menu.ChangeState ("Survival");
-	}
-
-	public void IncrementSelectedSurvivalWave() {
-		if (selectedSurvivalWave > highestSurvivalWave) { //if the selected wave is higher than possible
-			selectedSurvivalWave = highestSurvivalWave + 1; //set it to the next available wave
-		} else if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) { //prevent from incrementing past the amount of waves in survival spawner
-			selectedSurvivalWave++;
-		}
-
-		UpdateSurvivalDisplayText ();
 	}
 
 	public void DecrementSelectedSurvivalWave() {
@@ -165,15 +82,11 @@ public class GameManager : MonoBehaviour {
 		UpdateSurvivalDisplayText ();
 	}
 
-	public void StartSurvivalWave() {
-		StartCoroutine(LoadLevel());
-	}
-
 	public void EndSurvivalWave(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
 			if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
 				selectedSurvivalWave++; //encourage them to play the next one
-			
+
 			int currencyEarned = 0; //track how much currency we earned
 			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
 				currencyEarned++; //1 currency for completing for the first time
@@ -234,27 +147,18 @@ public class GameManager : MonoBehaviour {
 		DataPersistence.Save (); //save the game no matter what
 	}
 
-	private void UpdateSurvivalDisplayText() {
-		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
-		displayedSurvivalWaveWarning.text = currSurvivalSpawner.GetWaveWarning (selectedSurvivalWave); //update the wave warning text
+	public void ExitToDesktop () {
+		Application.Quit ();
 	}
 
-	public void StartStory() {
-		ClearAllCharacters();
+	public void IncrementSelectedSurvivalWave() {
+		if (selectedSurvivalWave > highestSurvivalWave) { //if the selected wave is higher than possible
+			selectedSurvivalWave = highestSurvivalWave + 1; //set it to the next available wave
+		} else if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) { //prevent from incrementing past the amount of waves in survival spawner
+			selectedSurvivalWave++;
+		}
 
-		currGameMode = GameMode.Story;
-		currGameState = GameState.Menu;
-		menu.ChangeState ("Story");
-	}
-
-	public void SetDifficulty(Dropdown difficulty) {
-		SetDifficulty (difficulty.value);
-	}
-
-	public void SetDifficulty (int value) {
-		currDifficulty = (GameDifficulty)value;
-		difficultyDropdown.value = value;
-		difficultyChanged = true;
+		UpdateSurvivalDisplayText ();
 	}
 
 	private IEnumerator LoadLevel() {
@@ -300,11 +204,6 @@ public class GameManager : MonoBehaviour {
 		Time.timeScale = 0f;
 	}
 
-	public void UnPauseGame() {
-		currGameState = prevGameState;
-		Time.timeScale = 1f;
-	}
-
 	public void ReturnToMainMenu() {
 		currGameState = GameState.Menu;
 		menu.ChangeState ("Main");
@@ -314,12 +213,124 @@ public class GameManager : MonoBehaviour {
 		DataPersistence.SavePlayerPrefs ();
 	}
 
-	public void ExitToDesktop () {
-		Application.Quit ();
+	public void SetDifficulty(Dropdown difficulty) {
+		SetDifficulty (difficulty.value);
+	}
+
+	public void SetDifficulty (int value) {
+		currDifficulty = (GameDifficulty)value;
+		difficultyDropdown.value = value;
+		difficultyChanged = true;
+	}
+
+	public void SetSelectedSurvivalWave(InputField inputField) {
+		selectedSurvivalWave = int.Parse (inputField.text);
+		if (selectedSurvivalWave > highestSurvivalWave + 1)
+			selectedSurvivalWave = highestSurvivalWave + 1;
+		else if (selectedSurvivalWave < 0)
+			selectedSurvivalWave = 1;
+
+		inputField.text = selectedSurvivalWave.ToString ();
+	}
+
+	private void SpawnPlayer() {
+		Instantiate(Resources.Load("Characters/" + selectedCharacter));
+	}
+
+	private void SpawnSurvivalSpawner() {
+		Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
+	}
+
+	void Start () {
+		if (currGameManager == null) {
+			currGameManager = this;
+			DontDestroyOnLoad (gameObject);
+
+			menu = transform.GetChild (0).GetComponent<MenuScript> ();
+			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
+			loadingScreen = bgParent.GetChild (bgParent.childCount - 1).GetComponent<Image> ();
+
+			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
+			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
+			bgmSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
+			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
+			sfxSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.08f, 0);
+			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
+
+			Vector2 contentSize = new Vector2 (0, Screen.height * 0.1f);
+			difficultyDropdown.template.sizeDelta = contentSize * difficultyDropdown.options.Count;
+			difficultyDropdown.template.GetComponent<ScrollRect> ().content.sizeDelta = contentSize;
+			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
+
+			PlayerData loadedData = DataPersistence.Load (); //load player save data
+
+			if (loadedData != null) {
+				selectedCharacter = loadedData.selectedCharacter;
+				currency = loadedData.currency;
+				highestSurvivalWave = loadedData.highestSurvivalWave;
+				currSurvivalStreak = loadedData.survivalStreak;
+			} else {
+				selectedCharacter = "Default Player";
+				highestSurvivalWave = 0;
+				currSurvivalStreak = 0;
+				currency = 0;
+
+				SetDifficulty (2);
+				SoundEnabled = true;
+				BGMVolume = 1f;
+				SFXVolume = 1f;
+			}
+
+
+			selectedSurvivalWave = 1;
+
+			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
+			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
+			displayedSurvivalWaveWarning = GameObject.Find ("Wave Warnings Text").GetComponent<Text> ();
+
+			currGameState = GameState.Menu;
+		} else {
+			Destroy (gameObject);
+		}
+	}
+
+	public void StartStory() {
+		ClearAllCharacters();
+
+		currGameMode = GameMode.Story;
+		currGameState = GameState.Menu;
+		menu.ChangeState ("Story");
+	}
+
+	public void StartSurvival() {
+		if (SceneManager.GetActiveScene ().name != "Main")
+			SceneManager.LoadScene ("Main");
+		ClearAllCharacters();
+
+		SpawnSurvivalSpawner();
+
+		currGameMode = GameMode.Survival;
+		currGameState = GameState.Menu;
+		UpdateSurvivalDisplayText ();
+		menu.ChangeState ("Survival");
+	}
+
+	public void StartSurvivalWave() {
+		StartCoroutine(LoadLevel());
 	}
 
 	public void ToggleSoundEnabled(Toggle UIToggle) {
 		//get the toggle value
 		//enable/disable the sound
+	}
+
+	public void UnPauseGame() {
+		currGameState = prevGameState;
+		Time.timeScale = 1f;
+	}
+
+	private void UpdateSurvivalDisplayText() {
+		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
+		displayedSurvivalWaveWarning.text = currSurvivalSpawner.GetWaveWarning (selectedSurvivalWave); //update the wave warning text
 	}
 }
