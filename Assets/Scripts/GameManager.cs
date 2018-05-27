@@ -9,7 +9,11 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
+//	--Survival Spawner
+//		--bool for boss wave?
+//		--attribute to store boss?
 //	--AdvancedEnemy
 //		--Flying Capability
 //			--fly straight horizontally, swoop down using sine or cosine formula to attack player
@@ -26,8 +30,9 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //		--Script delegates so behavior can be set in the inspector?
 //--Player Mechanics
 //	--multiple control schemes
-//		--Option 1: tilt to move, tap to jump, swipe to attack
-//		--Option 2: press and hold to move, tap button on screen to jump, swipe to attack
+//		--Option 1: Analog stick on screen to move, 1 button on screen for attack, 1 button for jump -- able to scale/reposition each in settings
+//		--Option 2: tilt to move, tap to jump, swipe to attack
+//		--Option 3: press and hold to move, tap button on screen to jump, swipe to attack
 //	--ranged weapons: swipe hold to continue to fire??
 //
 

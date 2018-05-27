@@ -28,4 +28,22 @@ public class Spawn {
 		GameObject.Instantiate (character.gameObject, spawnLocations[tempLoc].position, Quaternion.Euler(Vector3.zero)); //instantiate the character
 		currqty--; //update quantity
 	}
+
+	public IEnumerator Instantiate (AdvancedEnemy summoner) { //revisit for cleaner solutions
+		if (spawnLocations.Length < 1 || currqty < 1) { //if we don't have any spawn locations or enough spawns
+			yield break; //exit
+		}
+
+		int tempLoc = Random.Range (0, spawnLocations.Length);//get current spawn location
+
+		if (animator != null) {
+			GameObject tempObj = GameObject.Instantiate (animator.gameObject, spawnLocations [tempLoc].position, Quaternion.Euler (Vector3.zero)); //instantiate the spawn animation
+			yield return new WaitForSeconds (animator.runtimeAnimatorController.animationClips[0].length); //wait for the animation to play
+			GameObject.Destroy(tempObj); //destroy spawn animation
+		}
+
+		GameObject temp = GameObject.Instantiate (character.gameObject, spawnLocations[tempLoc].position, Quaternion.Euler(Vector3.zero)) as GameObject; //instantiate the character
+		summoner.RegisterMinion(temp.GetComponent<Character>());
+		currqty--; //update quantity
+	}
 }

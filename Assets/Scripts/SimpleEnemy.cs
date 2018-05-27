@@ -16,6 +16,7 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 	private bool hasFallenOver;
 	[SerializeField]
 	private bool isAbleToJump = true;
+	protected Vector3 moveDirection;
 
 	public override void DetectBeginOtherCharacter (Character otherCharacter) {
 		targetCharacter = otherCharacter;
@@ -65,11 +66,15 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 	}
 
 	protected virtual void Move() {
-		Vector3 direction = targetLocation - transform.position;
+		if (targetLocation == Vector3.zero)
+			return;
 
-		if (direction.x > 0.1f) {//target is to the right
+		if (moveDirection == Vector3.zero)
+			moveDirection = targetLocation - transform.position;
+
+		if (moveDirection.x > 0.1f) {//target is to the right
 			Run (1);
-		} else if (direction.x < -0.1f) {//target is to the left
+		} else if (moveDirection.x < -0.1f) {//target is to the left
 			Run (-1);
 		} else {//target is close enough
 			Run (0);
@@ -77,12 +82,14 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 		}
 
 		if (isAbleToJump) {
-			if (Mathf.Abs (direction.x) < 2f) {//jump only when horizontally near target
-				if (direction.y > 2f) {//jump only when below target
+			if (Mathf.Abs (moveDirection.x) < 2f) {//jump only when horizontally near target
+				if (moveDirection.y > 2f) {//jump only when below target
 					Jump ();
 				}
 			}
 		}
+
+		moveDirection = Vector3.zero;
 	}
 
 	protected void PauseMovement() {
