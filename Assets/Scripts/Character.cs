@@ -40,6 +40,8 @@ public abstract class Character : MonoBehaviour {
 	private Text statText;
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
+	public int MaxHP { get { return maxhp; } }
+	public float MovementSpeed { get { return moveSpeed; } }
 	public Vector2 Velocity { get { return rb2D.velocity; } }
 	public bool isFacingRight { get { return !sr.flipX; } }
 	public bool isFacingLeft { get { return !isFacingRight; } }

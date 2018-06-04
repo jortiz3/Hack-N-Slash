@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Player : Character {
+
+	public string weaponType;
 	[SerializeField]
 	private bool infiniteRespawn;
 	[SerializeField]

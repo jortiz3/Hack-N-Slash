@@ -9,6 +9,19 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-Outfit Selection:
+//	--Add a way to determine if unlocked
+//
+//-Weapon Selection:
+//	--show attack animation on selection
+//		--only show if available for currently selected outfit
+//	--show image for selected weapon
+//		--show shadow for not unlocked weapons
+//		--show cost or required challenge to unlock
+//	--filters:
+//		--default: unlocked and usable for the currently selected outfit
+//		--available for current oufit
+//		--all weapons
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -51,7 +64,7 @@ public class GameManager : MonoBehaviour {
 	private static Dropdown difficultyDropdown;
 	private static Transform bgParent;
 	private static Image loadingScreen;
-	private static string selectedCharacter;
+	private static string selectedOutfit;
 	private static int currency;
 
 	private InputField displayedSurvivalWaveNumber;
@@ -61,8 +74,10 @@ public class GameManager : MonoBehaviour {
 	private int highestSurvivalWave;
 	private int currSurvivalStreak;
 	private bool difficultyChanged;
+	private Text displayedSelectedOutfitInfo;
+	//private Text displayedSelectedWeaponInfo;
 
-	public static string SelectedCharacter { get { return selectedCharacter; } }
+	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
 	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
@@ -218,6 +233,19 @@ public class GameManager : MonoBehaviour {
 		DataPersistence.SavePlayerPrefs ();
 	}
 
+	public void SelectOutfit (string OutfitName) {
+		string textToDisplay;
+
+		//if unlocked
+		Player p = (Instantiate(Resources.Load("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> ();
+		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + "\nWeapon Type: " + p.weaponType;
+
+		//if not unlocked
+		//textToDisplay = "You must use x amount of currency to unlock this oufit. -- OR -- You must complete x challenge to unlock this outfit.";
+
+		displayedSelectedOutfitInfo.text = textToDisplay;
+	}
+
 	public void SetDifficulty(Dropdown difficulty) {
 		SetDifficulty (difficulty.value);
 	}
@@ -239,7 +267,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private void SpawnPlayer() {
-		Instantiate(Resources.Load("Characters/" + selectedCharacter));
+		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit));
 	}
 
 	private void SpawnSurvivalSpawner() {
@@ -270,28 +298,26 @@ public class GameManager : MonoBehaviour {
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 
 			if (loadedData != null) {
-				selectedCharacter = loadedData.selectedCharacter;
 				currency = loadedData.currency;
 				highestSurvivalWave = loadedData.highestSurvivalWave;
 				currSurvivalStreak = loadedData.survivalStreak;
 			} else {
-				selectedCharacter = "Default Player";
 				highestSurvivalWave = 0;
 				currSurvivalStreak = 0;
 				currency = 0;
-
-				SetDifficulty (2);
-				SoundEnabled = true;
-				BGMVolume = 1f;
-				SFXVolume = 1f;
 			}
 
+			SetDifficulty ((int)currDifficulty);
+			sfxSlider.value = SFXVolume; //adjust sfx bar to loaded/preset value
+			bgmSlider.value = BGMVolume; //adjust bgm bar to loaded/preset value
+			soundToggle.isOn = SoundEnabled; //set soundtoggle
 
 			selectedSurvivalWave = 1;
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
 			displayedSurvivalWaveWarning = GameObject.Find ("Wave Warnings Text").GetComponent<Text> ();
+			displayedSelectedOutfitInfo = GameObject.Find ("Selected Outfit Text").GetComponent<Text> ();
 
 			currGameState = GameState.Menu;
 		} else {
@@ -325,7 +351,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void ToggleSoundEnabled(Toggle UIToggle) {
-		//get the toggle value
+		SoundEnabled = UIToggle.isOn;
 		//enable/disable the sound
 	}
 
