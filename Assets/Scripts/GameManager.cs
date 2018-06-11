@@ -9,6 +9,10 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-Challenges/Unlocks
+//	--list of challenges in gamemanager
+//	--list of unlocks in gamemanager
+//	--both saved in player data via binary
 //-Outfit Selection:
 //	--Add a way to determine if unlocked
 //
@@ -238,7 +242,8 @@ public class GameManager : MonoBehaviour {
 
 		//if unlocked
 		Player p = (Instantiate(Resources.Load("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> ();
-		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + "\nWeapon Type: " + p.weaponType;
+		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType;
+		p.Die ();
 
 		//if not unlocked
 		//textToDisplay = "You must use x amount of currency to unlock this oufit. -- OR -- You must complete x challenge to unlock this outfit.";
