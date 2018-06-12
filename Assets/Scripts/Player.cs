@@ -11,11 +11,12 @@ public class Player : Character {
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
 	[SerializeField]
-	private int costToUnlock;
+	private int unlockCost;
 
 	private List<TouchInfo> touchInfo;
 
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
+	public int UnlockCost { get { return unlockCost; } }
 
 	void Awake() {
 		if (player != null) //if there is a player already

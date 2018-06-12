@@ -1,9 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
-public class Challenge : MonoBehaviour {
-
+public class Challenge {
 	private string name;
 	private string description;
 	private bool complete;

@@ -67,7 +67,6 @@ public class GameManager : MonoBehaviour {
 	private static Transform bgParent;
 	private static Image loadingScreen;
 	private static string selectedOutfit;
-	private static Transform unlocks_outfitsParent;
 	private static int currency;
 	private static List<string> unlocks;
 
@@ -78,8 +77,13 @@ public class GameManager : MonoBehaviour {
 	private int highestSurvivalWave;
 	private int currSurvivalStreak;
 	private bool difficultyChanged;
+	private Transform unlocks_outfitsParent;
 	private Text displayedSelectedOutfitInfo;
 	//private Text displayedSelectedWeaponInfo;
+	private string selectedItemToPurchase;
+	private int selectedItemCostToPurchase;
+	private Text purchaseConfirmationText;
+	private GameObject displayPurchaseConfirmationButton_Outfit;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
@@ -229,6 +233,16 @@ public class GameManager : MonoBehaviour {
 		Time.timeScale = 0f;
 	}
 
+	public void PurchaseSelectedItem() {
+		if (currency >= selectedItemCostToPurchase) { //if the player has enough money
+			UnlockItem (selectedItemToPurchase); //unlock the item
+			currency -= selectedItemCostToPurchase; //update money
+			DataPersistence.Save (); //save the changes
+		} else {
+			//unable to purchase; inform the player
+		}
+	}
+
 	public void ReturnToMainMenu() {
 		currGameState = GameState.Menu;
 		menu.ChangeState ("Main");
@@ -241,17 +255,27 @@ public class GameManager : MonoBehaviour {
 	public void SelectOutfit (string OutfitName) {
 		string textToDisplay;
 
-		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> ();
-		if (unlocks.Contains (OutfitName)) {
-			selectedOutfit = OutfitName;
-			textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType;
-		} else {
-			//if not unlocked
-			textToDisplay = "You must use x amount of currency to unlock this oufit. -- OR -- You must complete x challenge to unlock this outfit.";
-		}
-		p.Die ();
+		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> (); //spawn prefab to get the info from script
+		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "     Movement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType; //set outfit info text
 
-		displayedSelectedOutfitInfo.text = textToDisplay;
+		if (unlocks.Contains (OutfitName)) { //outfit unlocked
+			selectedOutfit = OutfitName; //set this as current outfit to spawn as
+
+			displayPurchaseConfirmationButton_Outfit.SetActive (false); //hide unlock button
+		} else { //outfit not unlocked
+			selectedItemToPurchase = OutfitName; //remember which outfit we just clicked on
+			selectedItemCostToPurchase = p.UnlockCost; //remember the cost
+
+			if (p.UnlockCost > 0) { //if the outfit is for sale
+				textToDisplay += "\nCost: " + selectedItemCostToPurchase; //display the cost
+				displayPurchaseConfirmationButton_Outfit.SetActive (true); //display the unlock button
+			} else { //outfit is only available after completing a challenge
+				textToDisplay += "\nChallenge to unlock: " + "[null]"; //display which challenge must be completed
+			}
+		}
+		p.Die (); //destry the player we created temporarily
+
+		displayedSelectedOutfitInfo.text = textToDisplay; //update the displayed text
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
@@ -321,6 +345,7 @@ public class GameManager : MonoBehaviour {
 
 			//disable lock image for each item that is already unlocked
 			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
+			unlocks_outfitsParent.GetComponent<RectTransform>().sizeDelta = new Vector2 (unlocks_outfitsParent.childCount * (unlocks_outfitsParent.GetChild(0).GetComponent<RectTransform>().sizeDelta.x + 5), 0);
 			foreach (Transform child in unlocks_outfitsParent) { //check each child
 				if (unlocks.Contains (child.name)) { //see if it has been unlocked
 					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
@@ -338,6 +363,12 @@ public class GameManager : MonoBehaviour {
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
 			displayedSurvivalWaveWarning = GameObject.Find ("Wave Warnings Text").GetComponent<Text> ();
 			displayedSelectedOutfitInfo = GameObject.Find ("Selected Outfit Text").GetComponent<Text> ();
+
+			purchaseConfirmationText = GameObject.Find ("Purchase Confirmation Text").GetComponent<Text>();
+			purchaseConfirmationText.transform.parent.gameObject.SetActive (false);
+
+			displayPurchaseConfirmationButton_Outfit = GameObject.Find ("Purchase Outfit Button");
+			displayPurchaseConfirmationButton_Outfit.SetActive (false);
 
 			currGameState = GameState.Menu;
 		} else {
@@ -377,8 +408,10 @@ public class GameManager : MonoBehaviour {
 
 	public void UnlockItem(string itemName) {
 		Transform temp = unlocks_outfitsParent.Find (itemName);
-		if (temp == null) {
-			//check under weapons
+		if (temp != null) { //it was an outfit
+			displayPurchaseConfirmationButton_Outfit.SetActive (false);
+		} else { //check under weapons
+			
 		}
 		temp.Find ("Lock").gameObject.SetActive (false);
 		unlocks.Add (itemName);
@@ -387,6 +420,10 @@ public class GameManager : MonoBehaviour {
 	public void UnPauseGame() {
 		currGameState = prevGameState;
 		Time.timeScale = 1f;
+	}
+
+	public void UpdatePurchaseConfirmationText() {
+		purchaseConfirmationText.text = "Are you sure you would like to unlock " + selectedItemToPurchase + " for " + selectedItemCostToPurchase + "?";
 	}
 
 	private void UpdateSurvivalDisplayText() {
