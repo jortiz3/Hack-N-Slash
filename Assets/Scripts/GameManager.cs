@@ -84,6 +84,7 @@ public class GameManager : MonoBehaviour {
 	private int selectedItemCostToPurchase;
 	private Text purchaseConfirmationText;
 	private GameObject displayPurchaseConfirmationButton_Outfit;
+	private GameObject purchaseUnsuccessfulPanel;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
@@ -239,7 +240,7 @@ public class GameManager : MonoBehaviour {
 			currency -= selectedItemCostToPurchase; //update money
 			DataPersistence.Save (); //save the changes
 		} else {
-			//unable to purchase; inform the player
+			purchaseUnsuccessfulPanel.SetActive (true); //unable to purchase; inform the player
 		}
 	}
 
@@ -370,6 +371,9 @@ public class GameManager : MonoBehaviour {
 			displayPurchaseConfirmationButton_Outfit = GameObject.Find ("Purchase Outfit Button");
 			displayPurchaseConfirmationButton_Outfit.SetActive (false);
 
+			purchaseUnsuccessfulPanel = GameObject.Find ("Purchase Unsuccessful");
+			purchaseUnsuccessfulPanel.SetActive (false);
+
 			currGameState = GameState.Menu;
 		} else {
 			Destroy (gameObject);
@@ -423,7 +427,8 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void UpdatePurchaseConfirmationText() {
-		purchaseConfirmationText.text = "Are you sure you would like to unlock " + selectedItemToPurchase + " for " + selectedItemCostToPurchase + "?";
+		purchaseConfirmationText.text = "Are you sure you would like to unlock " + selectedItemToPurchase + " for " + selectedItemCostToPurchase + "?"
+			+ "\n\nYour Currency: " + currency;
 	}
 
 	private void UpdateSurvivalDisplayText() {
