@@ -10,6 +10,8 @@ public class Player : Character {
 	private bool infiniteRespawn;
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
+	[SerializeField]
+	private int costToUnlock;
 
 	private List<TouchInfo> touchInfo;
 

@@ -9,13 +9,11 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-Challenges/Unlocks
-//	--list of challenges in gamemanager
-//	--list of unlocks in gamemanager
-//	--both saved in player data via binary
+//-Challenges
+//	--list of challenges in gamemanager?
 //-Outfit Selection:
-//	--Add a way to determine if unlocked
-//
+//	--add purchase button -- display if outfit not unlocked
+//	--update purchase confirmation to display purchase amount
 //-Weapon Selection:
 //	--show attack animation on selection
 //		--only show if available for currently selected outfit
@@ -69,7 +67,9 @@ public class GameManager : MonoBehaviour {
 	private static Transform bgParent;
 	private static Image loadingScreen;
 	private static string selectedOutfit;
+	private static Transform unlocks_outfitsParent;
 	private static int currency;
+	private static List<string> unlocks;
 
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
@@ -81,6 +81,7 @@ public class GameManager : MonoBehaviour {
 	private Text displayedSelectedOutfitInfo;
 	//private Text displayedSelectedWeaponInfo;
 
+	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
@@ -240,13 +241,15 @@ public class GameManager : MonoBehaviour {
 	public void SelectOutfit (string OutfitName) {
 		string textToDisplay;
 
-		//if unlocked
-		Player p = (Instantiate(Resources.Load("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> ();
-		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType;
+		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> ();
+		if (unlocks.Contains (OutfitName)) {
+			selectedOutfit = OutfitName;
+			textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "\nMovement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType;
+		} else {
+			//if not unlocked
+			textToDisplay = "You must use x amount of currency to unlock this oufit. -- OR -- You must complete x challenge to unlock this outfit.";
+		}
 		p.Die ();
-
-		//if not unlocked
-		//textToDisplay = "You must use x amount of currency to unlock this oufit. -- OR -- You must complete x challenge to unlock this outfit.";
 
 		displayedSelectedOutfitInfo.text = textToDisplay;
 	}
@@ -301,15 +304,27 @@ public class GameManager : MonoBehaviour {
 			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
 
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
+			unlocks = new List<string>();
 
 			if (loadedData != null) {
 				currency = loadedData.currency;
 				highestSurvivalWave = loadedData.highestSurvivalWave;
 				currSurvivalStreak = loadedData.survivalStreak;
+				unlocks.AddRange (loadedData.unlocks);
 			} else {
 				highestSurvivalWave = 0;
 				currSurvivalStreak = 0;
 				currency = 0;
+				unlocks.Add ("Stick it to 'em"); //default player
+				unlocks.Add ("Iron Longsword");
+			}
+
+			//disable lock image for each item that is already unlocked
+			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
+			foreach (Transform child in unlocks_outfitsParent) { //check each child
+				if (unlocks.Contains (child.name)) { //see if it has been unlocked
+					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+				}
 			}
 
 			SetDifficulty ((int)currDifficulty);
@@ -358,6 +373,15 @@ public class GameManager : MonoBehaviour {
 	public void ToggleSoundEnabled(Toggle UIToggle) {
 		SoundEnabled = UIToggle.isOn;
 		//enable/disable the sound
+	}
+
+	public void UnlockItem(string itemName) {
+		Transform temp = unlocks_outfitsParent.Find (itemName);
+		if (temp == null) {
+			//check under weapons
+		}
+		temp.Find ("Lock").gameObject.SetActive (false);
+		unlocks.Add (itemName);
 	}
 
 	public void UnPauseGame() {
