@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Player : Character {
 
-	public string weaponType;
+	public List<string> weaponSpecialization;
 	[SerializeField]
 	private bool infiniteRespawn;
 	[SerializeField]

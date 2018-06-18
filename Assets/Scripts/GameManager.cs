@@ -11,15 +11,10 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //To do:
 //-Challenges
 //	--list of challenges in gamemanager?
-//-Outfit Selection:
-//	--add purchase button -- display if outfit not unlocked
-//	--update purchase confirmation to display purchase amount
 //-Weapon Selection:
-//	--show attack animation on selection
-//		--only show if available for currently selected outfit
+//	--show attack animation on selection? later on
 //	--show image for selected weapon
 //		--show shadow for not unlocked weapons
-//		--show cost or required challenge to unlock
 //	--filters:
 //		--default: unlocked and usable for the currently selected outfit
 //		--available for current oufit
@@ -67,6 +62,7 @@ public class GameManager : MonoBehaviour {
 	private static Transform bgParent;
 	private static Image loadingScreen;
 	private static string selectedOutfit;
+	private static string selectedWeapon;
 	private static int currency;
 	private static List<string> unlocks;
 
@@ -78,16 +74,20 @@ public class GameManager : MonoBehaviour {
 	private int currSurvivalStreak;
 	private bool difficultyChanged;
 	private Transform unlocks_outfitsParent;
+	private Transform unlocks_weaponsParent;
 	private Text displayedSelectedOutfitInfo;
-	//private Text displayedSelectedWeaponInfo;
-	private string selectedItemToPurchase;
-	private int selectedItemCostToPurchase;
+	private Transform displayedSelectedWeaponInfo;
+	private string purchase_selectedItemName;
+	private string purchase_selectedItemType;
+	private int purchase_selectedItemCost;
 	private Text purchaseConfirmationText;
 	private GameObject displayPurchaseConfirmationButton_Outfit;
+	private GameObject displayPurchaseConfirmationButton_Weapon;
 	private GameObject purchaseUnsuccessfulPanel;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
+	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
 	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
@@ -235,10 +235,16 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void PurchaseSelectedItem() {
-		if (currency >= selectedItemCostToPurchase) { //if the player has enough money
-			UnlockItem (selectedItemToPurchase); //unlock the item
-			currency -= selectedItemCostToPurchase; //update money
+		if (currency >= purchase_selectedItemCost) { //if the player has enough money
+			UnlockItem (purchase_selectedItemName); //unlock the item
+			currency -= purchase_selectedItemCost; //update money
 			DataPersistence.Save (); //save the changes
+
+			if (purchase_selectedItemType.Equals ("Outfit")) {
+				SelectOutfit (purchase_selectedItemName);
+			} else if (purchase_selectedItemType.Equals ("Weapon")) {
+				SelectWeapon (purchase_selectedItemName);
+			}
 		} else {
 			purchaseUnsuccessfulPanel.SetActive (true); //unable to purchase; inform the player
 		}
@@ -257,18 +263,19 @@ public class GameManager : MonoBehaviour {
 		string textToDisplay;
 
 		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> (); //spawn prefab to get the info from script
-		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "     Movement Speed: " + p.MovementSpeed + " m/s\nWeapon Type: " + p.weaponType; //set outfit info text
+		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "     Movement Speed: " + p.MovementSpeed + " m/s"; //set outfit info text
 
 		if (unlocks.Contains (OutfitName)) { //outfit unlocked
 			selectedOutfit = OutfitName; //set this as current outfit to spawn as
 
 			displayPurchaseConfirmationButton_Outfit.SetActive (false); //hide unlock button
 		} else { //outfit not unlocked
-			selectedItemToPurchase = OutfitName; //remember which outfit we just clicked on
-			selectedItemCostToPurchase = p.UnlockCost; //remember the cost
+			purchase_selectedItemName = OutfitName; //remember which outfit we just clicked on
+			purchase_selectedItemType = "Outfit";
+			purchase_selectedItemCost = p.UnlockCost; //remember the cost
 
 			if (p.UnlockCost > 0) { //if the outfit is for sale
-				textToDisplay += "\nCost: " + selectedItemCostToPurchase; //display the cost
+				textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
 				displayPurchaseConfirmationButton_Outfit.SetActive (true); //display the unlock button
 			} else { //outfit is only available after completing a challenge
 				textToDisplay += "\nChallenge to unlock: " + "[null]"; //display which challenge must be completed
@@ -277,6 +284,37 @@ public class GameManager : MonoBehaviour {
 		p.Die (); //destry the player we created temporarily
 
 		displayedSelectedOutfitInfo.text = textToDisplay; //update the displayed text
+	}
+
+	public void SelectWeapon(string WeaponName) {
+		Text weaponText = displayedSelectedWeaponInfo.GetChild (0).GetComponent<Text> (); //to display the info for the weapon
+		Image weaponImage = displayedSelectedWeaponInfo.GetChild (1).GetComponent<Image> (); //to display an image of the weapon
+
+		Weapon w = (Instantiate (Resources.Load ("Weapons/" + WeaponName)) as GameObject).GetComponent<Weapon> (); //spawn prefab to get the info from script
+		weaponText.text = "Damage: " + w.Damage + "\nType: " + w.Specialization; //update info
+
+		if (unlocks.Contains (WeaponName)) { // if the weapon is unlocked
+			weaponText.color = Color.black; //ensure the text is black
+			weaponImage.transform.GetChild(0).gameObject.SetActive(false); //hide the lock image
+			displayPurchaseConfirmationButton_Weapon.SetActive (false); //display unlock button
+
+			selectedWeapon = WeaponName; //update the selected weapon
+		} else { //weapon not unlocked
+			purchase_selectedItemName = WeaponName;
+			purchase_selectedItemType = "Weapon";
+			purchase_selectedItemCost = w.UnlockCost;
+
+			if (w.UnlockCost > 0) {
+				weaponText.color = Color.red; //inform the player visually the item is locked
+				weaponText.text += "\nCost: " + w.UnlockCost;
+				weaponImage.transform.GetChild (0).gameObject.SetActive (true);
+				displayPurchaseConfirmationButton_Weapon.SetActive (true); //display unlock button
+			} else {
+				weaponText.text += "\nChallenge to unlock:" + "[null]";
+			}
+		}
+
+		Destroy (w.gameObject);
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
@@ -301,6 +339,8 @@ public class GameManager : MonoBehaviour {
 
 	private void SpawnPlayer() {
 		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit));
+		Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
+		Character.player.Wield(w);
 	}
 
 	private void SpawnSurvivalSpawner() {
@@ -341,7 +381,7 @@ public class GameManager : MonoBehaviour {
 				currSurvivalStreak = 0;
 				currency = 0;
 				unlocks.Add ("Stick it to 'em"); //default player
-				unlocks.Add ("Iron Longsword");
+				unlocks.Add ("Iron Longsword"); //default weapon
 			}
 
 			//disable lock image for each item that is already unlocked
@@ -352,6 +392,16 @@ public class GameManager : MonoBehaviour {
 					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
 				}
 			}
+
+			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
+			unlocks_weaponsParent.GetComponent<RectTransform>().sizeDelta = new Vector2 (0, unlocks_weaponsParent.childCount * (unlocks_weaponsParent.GetChild(0).GetComponent<RectTransform>().sizeDelta.y + 5));
+
+			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Info").transform;
+
+			displayPurchaseConfirmationButton_Weapon = GameObject.Find ("Purchase Weapon Button");
+			displayPurchaseConfirmationButton_Weapon.SetActive (false);
+
+			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive (false);
 
 			SetDifficulty ((int)currDifficulty);
 			sfxSlider.value = SFXVolume; //adjust sfx bar to loaded/preset value
@@ -414,10 +464,8 @@ public class GameManager : MonoBehaviour {
 		Transform temp = unlocks_outfitsParent.Find (itemName);
 		if (temp != null) { //it was an outfit
 			displayPurchaseConfirmationButton_Outfit.SetActive (false);
-		} else { //check under weapons
-			
+			temp.Find ("Lock").gameObject.SetActive (false);
 		}
-		temp.Find ("Lock").gameObject.SetActive (false);
 		unlocks.Add (itemName);
 	}
 
@@ -427,7 +475,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void UpdatePurchaseConfirmationText() {
-		purchaseConfirmationText.text = "Are you sure you would like to unlock " + selectedItemToPurchase + " for " + selectedItemCostToPurchase + "?"
+		purchaseConfirmationText.text = "Are you sure you would like to unlock " + purchase_selectedItemName + " for " + purchase_selectedItemCost + "?"
 			+ "\n\nYour Currency: " + currency;
 	}
 

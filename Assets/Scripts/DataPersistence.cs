@@ -15,6 +15,7 @@ public class DataPersistence {
 		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume", 0.5f); //set the sound effects volume using the stored playerpref
 
 		GameManager.SelectedOutfit = PlayerPrefs.GetString ("SelectedCharacter", "Stick it to 'em");
+		GameManager.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Iron Longsword");
 
 		FileStream file;
 		if (File.Exists (saveLocation)) {
@@ -57,6 +58,7 @@ public class DataPersistence {
 		PlayerPrefs.SetFloat ("SFX Volume", GameManager.SFXVolume); //set sound effects volume to playerprefs
 
 		PlayerPrefs.SetString ("SelectedCharacter", GameManager.SelectedOutfit); //set the currently selected character
+		PlayerPrefs.SetString ("SelectedWeapon", GameManager.SelectedWeapon); //set the currently selected
 
 		PlayerPrefs.Save (); //save the playerpref changes
 	}

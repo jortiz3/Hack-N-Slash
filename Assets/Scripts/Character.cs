@@ -173,7 +173,6 @@ public abstract class Character : MonoBehaviour {
 					rb2D.AddForce (new Vector2 (direction.x * moveSpeed, 0)); //only able to make slight adjustments mid-air;
 			}
 		}
-
 	}
 
 	protected virtual Vector3 GetHPSliderPos() {
@@ -322,8 +321,8 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	public void ReceiveDamageFrom(Weapon w) {
-		ReceiveKnockback (w.wielder);
-		ReceiveDamage (w.Damage, w.wielder.critAvailable); //handle damage + possibility of critical hit
+		ReceiveKnockback (w.Wielder);
+		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
 	}
 
 	private void ReceiveKnockback(Character c) {
@@ -494,5 +493,13 @@ public abstract class Character : MonoBehaviour {
 		if (isInvulnerable) {
 			invulnTimer -= Time.fixedDeltaTime;
 		}
+	}
+
+	public void Wield (Weapon w) {
+		if (weapon != null) {
+			Destroy(weapon.gameObject);
+		}
+		weapon = w;
+		w.AssignTo (this);
 	}
 }
