@@ -177,6 +177,17 @@ public class GameManager : MonoBehaviour {
 		Application.Quit ();
 	}
 
+	public void FilterVisibleWeaponUnlocks() {
+		foreach (Transform WeaponSpecialization in unlocks_weaponsParent) {
+			if (selectedOutfit_weaponSpecializations.Contains (WeaponSpecialization.name)) {
+				WeaponSpecialization.gameObject.SetActive (true);
+			} else {
+				WeaponSpecialization.gameObject.SetActive (false);
+			}
+		}
+		ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
+	}
+
 	public void IncrementSelectedSurvivalWave() {
 		if (selectedSurvivalWave > highestSurvivalWave) { //if the selected wave is higher than possible
 			selectedSurvivalWave = highestSurvivalWave + 1; //set it to the next available wave
@@ -246,6 +257,11 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	public void ReselectBothOutfitAndWeapon() {
+		SelectOutfit (selectedOutfit);
+		SelectWeapon (selectedWeapon);
+	}
+
 	private void ResizeHorizontalLayoutGroup (RectTransform parent) {
 		Vector2 newSizeDelta = Vector2.zero;
 		foreach (Transform child in parent) {
@@ -280,6 +296,8 @@ public class GameManager : MonoBehaviour {
 			unlocks_outfitsParent.Find(selectedOutfit).Find("Checkmark").gameObject.SetActive(false); //hide checkmark from previously selected outfit
 			unlocks_outfitsParent.Find(OutfitName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected outfit
 			selectedOutfit = OutfitName; //set this as current outfit to spawn as
+
+			SelectWeapon (p.DefaultWeapon); //ensures the player always has the correct type of weapon equipped
 		} else { //outfit not unlocked
 			purchase_selectedItemName = OutfitName; //remember which outfit we just clicked on
 			purchase_selectedItemType = "Outfit";
@@ -352,6 +370,15 @@ public class GameManager : MonoBehaviour {
 		inputField.text = selectedSurvivalWave.ToString ();
 	}
 
+	public void ShowAllWeaponUnlocks() {
+		foreach (Transform WeaponSpecialization in unlocks_weaponsParent) {
+			if (!WeaponSpecialization.gameObject.activeSelf) {
+				WeaponSpecialization.gameObject.SetActive (true);
+			}
+		}
+		ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
+	}
+
 	private void SpawnPlayer() {
 		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit));
 		Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
@@ -402,6 +429,7 @@ public class GameManager : MonoBehaviour {
 				currency = 0;
 				unlocks.Add ("Stick it to 'em"); //default player
 				unlocks.Add ("Iron Longsword"); //default weapon
+				unlocks.Add ("Test Dagger");
 				//challenges
 				//missions
 				//extra00
@@ -447,7 +475,7 @@ public class GameManager : MonoBehaviour {
 					}
 				}
 			}
-			ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform>()); //ensure the entire weapon area has enough space to scroll
+			ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ()); //ensure the weapon area has enough space;
 
 			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
@@ -472,8 +500,7 @@ public class GameManager : MonoBehaviour {
 
 			currGameState = GameState.Menu;
 
-			SelectOutfit (selectedOutfit);
-			SelectWeapon (SelectedWeapon);
+			ReselectBothOutfitAndWeapon ();
 		} else {
 			Destroy (gameObject);
 		}
