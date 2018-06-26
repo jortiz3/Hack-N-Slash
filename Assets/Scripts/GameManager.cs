@@ -11,13 +11,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //To do:
 //-Challenges
 //	--list of challenges in gamemanager?
-//-Weapon Selection:
-//	--show attack animation on selection? later on
-//		--show shadow for not unlocked weapons
-//	--filters:
-//		--default: unlocked and usable for the currently selected outfit
-//		--available for current oufit
-//		--all weapons
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -62,6 +55,7 @@ public class GameManager : MonoBehaviour {
 	private static Image loadingScreen;
 	private static string selectedOutfit;
 	private static string selectedWeapon;
+	private static string selectedWeaponSpecialization;
 	private static int currency;
 	private static List<string> unlocks;
 
@@ -84,10 +78,12 @@ public class GameManager : MonoBehaviour {
 	private GameObject displayPurchaseConfirmationButton_Outfit;
 	private GameObject displayPurchaseConfirmationButton_Weapon;
 	private GameObject purchaseUnsuccessfulPanel;
+	private List<string> selectedOutfit_weaponSpecializations;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
+	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
 	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
@@ -242,12 +238,23 @@ public class GameManager : MonoBehaviour {
 
 			if (purchase_selectedItemType.Equals ("Outfit")) {
 				SelectOutfit (purchase_selectedItemName);
-			} else if (purchase_selectedItemType.Equals ("Weapon")) {
+			} else { //item type will equal the weapon specialization
 				SelectWeapon (purchase_selectedItemName);
 			}
 		} else {
 			purchaseUnsuccessfulPanel.SetActive (true); //unable to purchase; inform the player
 		}
+	}
+
+	private void ResizeHorizontalLayoutGroup (RectTransform parent) {
+		Vector2 newSizeDelta = Vector2.zero;
+		foreach (Transform child in parent) {
+			if (child.gameObject.activeSelf) {
+				newSizeDelta.x += child.GetComponent<RectTransform>().sizeDelta.x + 5;
+			}
+		}
+
+		parent.sizeDelta = newSizeDelta;
 	}
 
 	public void ReturnToMainMenu() {
@@ -263,10 +270,12 @@ public class GameManager : MonoBehaviour {
 		string textToDisplay;
 
 		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> (); //spawn prefab to get the info from script
-		textToDisplay = "Name: " + OutfitName + "\nMax hp: " + p.MaxHP + "     Movement Speed: " + p.MovementSpeed + " m/s"; //set outfit info text
+		textToDisplay = OutfitName + "\nMax hp: " + p.MaxHP + "     Movement Speed: " + p.MovementSpeed + " m/s"; //set outfit info text
 
 		if (unlocks.Contains (OutfitName)) { //outfit is unlocked
 			displayPurchaseConfirmationButton_Outfit.SetActive (false); //hide unlock button
+
+			selectedOutfit_weaponSpecializations = p.weaponSpecialization;
 
 			unlocks_outfitsParent.Find(selectedOutfit).Find("Checkmark").gameObject.SetActive(false); //hide checkmark from previously selected outfit
 			unlocks_outfitsParent.Find(OutfitName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected outfit
@@ -284,30 +293,35 @@ public class GameManager : MonoBehaviour {
 				textToDisplay += "\nChallenge to unlock: " + "[null]"; //display which challenge must be completed
 			}
 		}
-		p.Die (); //destry the player we created temporarily
+		p.Die (); //destroy the player we created temporarily
 
 		displayedSelectedOutfitInfo.text = textToDisplay; //update the displayed text
 	}
 
 	public void SelectWeapon(string WeaponName) {
 		Weapon w = (Instantiate (Resources.Load ("Weapons/" + WeaponName)) as GameObject).GetComponent<Weapon> (); //spawn prefab to get the info from script
-		displayedSelectedWeaponInfo.text = "Damage: " + w.Damage + "\nType: " + w.Specialization; //update info
+		displayedSelectedWeaponInfo.text = WeaponName + "\nDamage: " + w.Damage + "\nType: " + w.Specialization; //update info
 
 		if (unlocks.Contains (WeaponName)) { // if the weapon is unlocked
-			displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
-			displayPurchaseConfirmationButton_Weapon.SetActive (false); //hide purchase/unlock button
+			if (selectedOutfit_weaponSpecializations.Contains (w.Specialization)) { //if the weapon can be used with the current outfit
+				displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
+				displayPurchaseConfirmationButton_Weapon.SetActive (false); //hide purchase/unlock button
 
-			unlocks_weaponsParent.Find(selectedWeapon).Find("Checkmark").gameObject.SetActive(false); //hide checkmark from previously selected weapon
-			unlocks_weaponsParent.Find(WeaponName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected weapon
-			selectedWeapon = WeaponName; //update the selected weapon
+				unlocks_weaponsParent.Find (selectedWeaponSpecialization).Find (selectedWeapon).Find ("Checkmark").gameObject.SetActive (false); //hide checkmark from previously selected weapon
+				unlocks_weaponsParent.Find (w.Specialization).Find (WeaponName).Find ("Checkmark").gameObject.SetActive (true); //show the checkmark for currently selected weapon
+				selectedWeapon = WeaponName; //update the selected weapon
+				selectedWeaponSpecialization = w.Specialization;
+			} else {
+				displayedSelectedWeaponInfo.text += "\nWeapon cannot be used with the current outfit.";
+			}
 		} else { //weapon not unlocked
 			purchase_selectedItemName = WeaponName;
-			purchase_selectedItemType = "Weapon";
+			purchase_selectedItemType = w.Specialization;
 			purchase_selectedItemCost = w.UnlockCost;
 			purchase_selectedItemColor = w.SpriteColor;
 
 			if (w.UnlockCost > 0) {
-				displayedSelectedWeaponInfo.color = Color.red; //inform the player visually the item is locked
+				//displayedSelectedWeaponInfo.color = Color.red; //inform the player visually the item is locked
 				displayedSelectedWeaponInfo.text += "\nCost: " + w.UnlockCost;
 				displayPurchaseConfirmationButton_Weapon.SetActive (true); //display purchase/unlock button
 			} else {
@@ -403,32 +417,37 @@ public class GameManager : MonoBehaviour {
 			selectedSurvivalWave = 1;
 
 			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
-			unlocks_outfitsParent.GetComponent<RectTransform>().sizeDelta = new Vector2 (unlocks_outfitsParent.childCount * (unlocks_outfitsParent.GetChild(0).GetComponent<RectTransform>().sizeDelta.x + 5), 0); //ensure the size of the view area is the right size
+			ResizeHorizontalLayoutGroup (unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
 			foreach (Transform child in unlocks_outfitsParent) { //check each child
 				if (unlocks.Contains (child.name)) { //see if it has been unlocked
 					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
 
 					if (child.name.Equals (selectedOutfit)) { //if the child is the selected outfit (and unlocked)
 						child.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+
+						//get weapon specialization
 					}
 				} else { //outfit not unlocked
 					child.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show outfit in black
 				}
 			}
 
-			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
-			unlocks_weaponsParent.GetComponent<RectTransform>().sizeDelta = new Vector2 (unlocks_weaponsParent.childCount * (unlocks_weaponsParent.GetChild(0).GetComponent<RectTransform>().sizeDelta.x + 5), 0); //ensure the size of the view area is the right size
-			foreach (Transform child in unlocks_weaponsParent) { //check each child
-				if (unlocks.Contains (child.name)) { //see if it has been unlocked
-					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent 
+			foreach (Transform weaponSpecialization in unlocks_weaponsParent) {
+				ResizeHorizontalLayoutGroup (weaponSpecialization.GetComponent<RectTransform> ()); //ensure each weaponspec has enough space
+				foreach (Transform weapon in weaponSpecialization) {
+					if (unlocks.Contains (weapon.name)) { //see if it has been unlocked
+						weapon.Find ("Lock").gameObject.SetActive (false); //hide the lock image
 
-					if (child.name.Equals (selectedWeapon)) { //if the child is the selected weapon (and unlocked)
-						child.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+						if (weapon.name.Equals (selectedWeapon)) { //if the child is the selected weapon (and unlocked)
+							weapon.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+						}
+					} else { //weapon not unlocked
+						weapon.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
 					}
-				} else { //weapon not unlocked
-					child.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
 				}
 			}
+			ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform>()); //ensure the entire weapon area has enough space to scroll
 
 			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
@@ -452,6 +471,9 @@ public class GameManager : MonoBehaviour {
 			purchaseUnsuccessfulPanel.SetActive (false);
 
 			currGameState = GameState.Menu;
+
+			SelectOutfit (selectedOutfit);
+			SelectWeapon (SelectedWeapon);
 		} else {
 			Destroy (gameObject);
 		}
@@ -490,9 +512,14 @@ public class GameManager : MonoBehaviour {
 	public void UnlockItem(string itemName) {
 		Transform temp = unlocks_outfitsParent.Find (itemName);
 		if (temp != null) { //it was an outfit
-			displayPurchaseConfirmationButton_Outfit.SetActive (false);
 			temp.Find ("Sprite").GetComponent<Image> ().color = purchase_selectedItemColor;
 			temp.Find ("Lock").gameObject.SetActive (false);
+			displayPurchaseConfirmationButton_Outfit.SetActive (false);
+		} else { //it was a weapon
+			temp = unlocks_weaponsParent.Find(purchase_selectedItemType).Find(purchase_selectedItemName);
+			temp.Find ("Sprite").GetComponent<Image> ().color = purchase_selectedItemColor;
+			temp.Find ("Lock").gameObject.SetActive (false);
+			displayPurchaseConfirmationButton_Weapon.SetActive(false);
 		}
 		unlocks.Add (itemName);
 	}

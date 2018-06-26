@@ -168,7 +168,7 @@ public class Weapon : MonoBehaviour {
 		}
 	}
 
-	void Start() {
+	void Awake() {
 		if (transform.parent != null) {
 			wielder = transform.parent.GetComponent<Character>();
 		}

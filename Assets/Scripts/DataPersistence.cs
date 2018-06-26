@@ -16,6 +16,7 @@ public class DataPersistence {
 
 		GameManager.SelectedOutfit = PlayerPrefs.GetString ("SelectedCharacter", "Stick it to 'em");
 		GameManager.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Iron Longsword");
+		GameManager.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Two-handed");
 
 		FileStream file;
 		if (File.Exists (saveLocation)) {
@@ -64,6 +65,7 @@ public class DataPersistence {
 
 		PlayerPrefs.SetString ("SelectedCharacter", GameManager.SelectedOutfit); //set the currently selected character
 		PlayerPrefs.SetString ("SelectedWeapon", GameManager.SelectedWeapon); //set the currently selected
+		PlayerPrefs.SetString ("SelectedWeaponSpecialization", GameManager.SelectedWeaponSpecialization);
 
 		PlayerPrefs.Save (); //save the playerpref changes
 	}
