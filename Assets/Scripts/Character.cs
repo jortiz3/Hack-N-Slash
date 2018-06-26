@@ -51,6 +51,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+	public Color SpriteColor { get { return sr.color; } }
 
 	protected void AddTorque (float torque) {
 		rb2D.AddTorque (torque);

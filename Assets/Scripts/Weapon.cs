@@ -43,6 +43,7 @@ public class Weapon : MonoBehaviour {
 	public Vector2 currentHitboxEnableRange { get { return currhbEnableRange; } }
 	public Vector2 currentCritRange { get { return currCritRange; } }
 	public Character Wielder { get { return wielder;} }
+	public Color SpriteColor { get { return sr.color; } }
 
 	public void AssignTo(Character c) {
 		transform.SetParent (c.transform);

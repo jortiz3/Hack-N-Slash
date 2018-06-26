@@ -39,11 +39,16 @@ public class DataPersistence {
 		}
 
 		PlayerData playerData = new PlayerData ();
-		playerData.fileVersion = "v0.1";
+		playerData.fileVersion = "v1.0";
 		playerData.currency = GameManager.currGameManager.Currency;
 		playerData.highestSurvivalWave = GameManager.currGameManager.HighestSurvivalWave;
 		playerData.survivalStreak = GameManager.currGameManager.CurrentSurvivalStreak;
 		playerData.unlocks = GameManager.Unlocks;
+		//challenges
+		//missions
+		//extra00
+		//extra01
+		//extra02
 
 		BinaryFormatter formatter = new BinaryFormatter ();
 		formatter.Serialize (file, playerData);
