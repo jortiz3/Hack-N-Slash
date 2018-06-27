@@ -29,55 +29,29 @@ public class Player : Character {
 		Initialize ();
 	}
 
-	void Start() {
-		if (cameraCanvas == null)
-			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
-
-		attackTimerSlider = (GameObject.Instantiate (Resources.Load ("UI/attackTimerSlider"), cameraCanvas) as GameObject).GetComponent<Slider>();
-		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
-		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
-		attackTimerSlider.gameObject.SetActive (false);
-
-		touchInfo = new List<TouchInfo> ();
-	}
-
-	#if UNITY_EDITOR
-	void Update () {
-		if (GameManager.currGameState == GameState.Active) {
-			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
-				Run ((int)Input.GetAxisRaw ("Horizontal"));
-			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
-				Run (0);
-
-			if (Input.GetButtonDown ("Attack") == true) {//first frame button pressed
-				if (Input.GetAxis ("Vertical") > 0)//holding up
-					Attack ("Attack_Up");
-				//else if (Input.GetAxis ("Vertical") < 0)//holding down
-					//Attack ("Attack_Down");
-				else if (Input.GetAxis ("Horizontal") > 0) {//holding right
-					if (isFacingRight)
-						Attack ("Attack_Forward");
-					else
-						Attack ("Attack_Backward");
-				} else if (Input.GetAxis ("Horizontal") < 0) {//holding left
-					if (isFacingLeft)
-						Attack ("Attack_Forward");
-					else
-						Attack ("Attack_Backward");
-				} else {
-					Attack ("Attack");
+	public override void Die () {
+		if (infiniteRespawn) {
+			Respawn (Vector3.zero);
+		} else if (numOfRespawnsRemaining > 0) {
+			Respawn (Vector3.zero);
+			numOfRespawnsRemaining--;
+		} else {
+			if (GameManager.currGameState == GameState.Active) {
+				switch (GameManager.currGameMode) {
+				case GameMode.Story:
+					break;
+				case GameMode.Survival:
+					GameManager.currGameManager.EndSurvivalWave ("died");
+					break;
 				}
 			}
-
-			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
-				Jump ();	
+			base.Die ();
 		}
 	}
-	#endif
 
 	void FixedUpdate() {
 		if (GameManager.currGameState == GameState.Active) {
-			if (Input.touchCount > 0) { //if the player is touching the screen
+			/*if (Input.touchCount > 0) { //if the player is touching the screen
 				Touch currTouch;
 				for (int i = 0; i < Input.touchCount; i++) {
 					currTouch = Input.GetTouch (i);
@@ -128,31 +102,69 @@ public class Player : Character {
 						}
 					}//end touch phase if
 				} //end for loop
-			}//end touch count if
+			}//end touch count if*/
 		}//end gamestate if
-
 		UpdateAnimations ();
 	}
 
-	public override void Die () {
-		if (infiniteRespawn) {
-			Respawn (Vector3.zero);
-		} else if (numOfRespawnsRemaining > 0) {
-			Respawn (Vector3.zero);
-			numOfRespawnsRemaining--;
+	public void ReceivePlayerInput (string input) {
+		if (input.Contains ("Run")) {
+			input = input.Replace ("Run", "");
+			Run (float.Parse (input));
+		} else if (input.Equals ("Jump")) {
+			Jump ();
 		} else {
-			if (GameManager.currGameState == GameState.Active) {
-				switch (GameManager.currGameMode) {
-				case GameMode.Story:
-					break;
-				case GameMode.Survival:
-					GameManager.currGameManager.EndSurvivalWave ("died");
-					break;
-				}
-			}
-			base.Die ();
+			Attack (input);
 		}
 	}
+
+	void Start() {
+		if (cameraCanvas == null)
+			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
+
+		attackTimerSlider = (GameObject.Instantiate (Resources.Load ("UI/attackTimerSlider"), cameraCanvas) as GameObject).GetComponent<Slider>();
+		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
+		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
+		attackTimerSlider.gameObject.SetActive (false);
+
+		touchInfo = new List<TouchInfo> ();
+	}
+
+	#if UNITY_EDITOR
+	void Update () {
+		/*
+		if (GameManager.currGameState == GameState.Active) {
+			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
+				Run ((int)Input.GetAxisRaw ("Horizontal"));
+			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
+				Run (0);
+
+			if (Input.GetButtonDown ("Attack") == true) {//first frame button pressed
+				if (Input.GetAxis ("Vertical") > 0)//holding up
+					Attack ("Attack_Up");
+				//else if (Input.GetAxis ("Vertical") < 0)//holding down
+					//Attack ("Attack_Down");
+				else if (Input.GetAxis ("Horizontal") > 0) {//holding right
+					if (isFacingRight)
+						Attack ("Attack_Forward");
+					else
+						Attack ("Attack_Backward");
+				} else if (Input.GetAxis ("Horizontal") < 0) {//holding left
+					if (isFacingLeft)
+						Attack ("Attack_Forward");
+					else
+						Attack ("Attack_Backward");
+				} else {
+					Attack ("Attack");
+				}
+			}
+
+			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
+				Jump ();	
+		}
+		*/
+	}
+	#endif
 
 
 	struct TouchInfo {

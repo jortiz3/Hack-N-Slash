@@ -49,6 +49,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isFalling { get { return anim.GetBool ("Falling"); } }
 	public bool isOnGround { get { return !isJumping && !isFalling ? true : false; } }
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
+	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
 	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
 	public Color SpriteColor { get { return sr.color; } }
@@ -352,20 +353,20 @@ public abstract class Character : MonoBehaviour {
 		transform.position = location;
 	}
 
-	protected void Run(int xDir) {
+	protected void Run(float xVel) {
 		if (rb2D.gravityScale < 1)
 			rb2D.gravityScale = 1;
 
 		if (!isAttacking) {
-			xDir = Mathf.Clamp(xDir, -1, 1);
+			xVel = Mathf.Clamp(xVel, -1, 1);
 
-			if (xDir < 0) {//if moving left
+			if (xVel < 0) {//if moving left
 				sr.flipX = true;
 
 				if (weapon != null) {
 					weapon.FaceLeft ();
 				}
-			} else if (xDir > 0) {
+			} else if (xVel > 0) {
 				sr.flipX = false;
 
 				if (weapon != null) {
@@ -374,8 +375,8 @@ public abstract class Character : MonoBehaviour {
 			}
 
 			if (!isFlinching) { //if character hasn't been hit recently
-				rb2D.velocity = new Vector2 (xDir * moveSpeed, rb2D.velocity.y); //move normally; set velocity
-				if (xDir != 0) { //if character is moving
+				rb2D.velocity = new Vector2 (xVel * moveSpeed, rb2D.velocity.y); //move normally; set velocity
+				if (xVel != 0) { //if character is moving
 					anim.SetBool ("Run", true);
 					anim.SetBool ("Idle", false);
 
@@ -389,8 +390,8 @@ public abstract class Character : MonoBehaviour {
 						weapon.Idle ();
 				}
 			} else { //character has been hit recently
-				if ((rb2D.velocity.x < moveSpeed / 2f && xDir > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && xDir < 0))
-					rb2D.AddForce (new Vector2 (xDir * moveSpeed, 0)); //only able to make slight adjustments mid-air;
+				if ((rb2D.velocity.x < moveSpeed / 2f && xVel > 0) || (rb2D.velocity.x > -(moveSpeed / 2f) && xVel < 0))
+					rb2D.AddForce (new Vector2 (xVel * moveSpeed, 0)); //only able to make slight adjustments mid-air;
 			}
 		}
 	}
