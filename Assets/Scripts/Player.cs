@@ -15,8 +15,6 @@ public class Player : Character {
 	[SerializeField]
 	private int unlockCost;
 
-	private List<TouchInfo> touchInfo;
-
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
 	public int UnlockCost { get { return unlockCost; } }
 	public string DefaultWeapon { get { return defaultWeapon; } }
@@ -50,60 +48,6 @@ public class Player : Character {
 	}
 
 	void FixedUpdate() {
-		if (GameManager.currGameState == GameState.Active) {
-			/*if (Input.touchCount > 0) { //if the player is touching the screen
-				Touch currTouch;
-				for (int i = 0; i < Input.touchCount; i++) {
-					currTouch = Input.GetTouch (i);
-
-					if (currTouch.phase == TouchPhase.Began) {
-						touchInfo.Insert (i, new TouchInfo (Time.time, currTouch.position));
-					} else if (currTouch.phase == TouchPhase.Ended) {
-						string endPhase = touchInfo [i].GetEndPhase (Time.time, currTouch.position);
-
-						switch (endPhase) {
-						case "swipe_left":
-							if (isFacingLeft)
-								Attack ("Attack_Forward");
-							else
-								Attack ("Attack_Backward");
-							break;
-						case "swipe_right":
-							if (isFacingRight)
-								Attack ("Attack_Forward");
-							else
-								Attack ("Attack_Backward");
-							break;
-						case "swipe_up":
-							Attack ("Attack_Up");
-							break;
-						case "swipe_down":
-							Attack ("Attack");
-							//Attack ("Attack_Down");
-							break;
-						case "jump":
-							Jump ();
-							break;
-						default:
-							Run (0); //transition to idle
-							break;
-						}
-
-						touchInfo.RemoveAt (i);
-					} else if (touchInfo[i].deltaTime > 0.06f) {
-						Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
-
-						if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
-							Run (1);
-						} else if (temp.x < transform.position.x - 0.1f) { //holding to the left of the character
-							Run (-1);
-						} else { //holding directly above or on character
-							Run (0); //transition to idle
-						}
-					}//end touch phase if
-				} //end for loop
-			}//end touch count if*/
-		}//end gamestate if
 		UpdateAnimations ();
 	}
 
@@ -126,8 +70,6 @@ public class Player : Character {
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
 		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
 		attackTimerSlider.gameObject.SetActive (false);
-
-		touchInfo = new List<TouchInfo> ();
 	}
 
 	#if UNITY_EDITOR
@@ -165,41 +107,4 @@ public class Player : Character {
 		*/
 	}
 	#endif
-
-
-	struct TouchInfo {
-		float startTime;
-		Vector2 startPosition;
-
-		public float deltaTime { get { return Time.time - startTime; } }
-
-		public TouchInfo(float StartTime, Vector2 StartPosition) {
-			startTime = StartTime;
-			startPosition = StartPosition;
-		}
-
-		public string GetEndPhase (float EndTime, Vector2 EndPosition) {
-			float deltaTime = EndTime - startTime;
-			Vector2 deltaPosition = EndPosition - startPosition;
-
-			if (deltaPosition.magnitude > 50) { //if the swipe is long enough
-				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
-				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
-
-				if (angle < 0.78 || angle >= 5.49) {
-					return "swipe_right";
-				} else if (angle < 2.35) {
-					return "swipe_up";
-				} else if (angle < 3.92) {
-					return "swipe_left";
-				} else if (angle < 5.49) {
-					return "swipe_down";
-				}
-			} else if (deltaTime < 0.15f) { //briefly tapped the screen
-				return "jump";
-			}
-
-			return "";
-		}
-	}
 }
