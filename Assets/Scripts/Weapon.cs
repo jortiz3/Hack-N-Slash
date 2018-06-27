@@ -4,8 +4,7 @@ using System.Collections;
 [RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Animator))]
 public class Weapon : MonoBehaviour {
 
-	[HideInInspector]
-	public Character wielder;
+	private Character wielder;
 	private SpriteRenderer sr;
 	private Animator anim;
 	private BoxCollider2D bc2D;
@@ -32,10 +31,25 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("Hitbox offset when the player is facing right.")]
 	private Vector2 hitboxOffsetRight;
 
+	[Space(),SerializeField]
+	private int unlockCost;
+	[SerializeField]
+	private string specialization;
+
 	public int Damage { get { return damage; } }
+	public int UnlockCost { get { return unlockCost; } }
+	public string Specialization { get { return specialization; } } // One-handed, Two-handed, Bow, Gun, Mixed
 	public Vector2 currentAttackDelay { get { return currAttackDelay; } }
 	public Vector2 currentHitboxEnableRange { get { return currhbEnableRange; } }
 	public Vector2 currentCritRange { get { return currCritRange; } }
+	public Character Wielder { get { return wielder;} }
+	public Color SpriteColor { get { return sr.color; } }
+
+	public void AssignTo(Character c) {
+		transform.SetParent (c.transform);
+		transform.localPosition = Vector3.zero;
+		wielder = c;
+	}
 
 	/// <summary>
 	/// Returns the name of the trigger to call for the character animation.
@@ -154,11 +168,9 @@ public class Weapon : MonoBehaviour {
 		}
 	}
 
-	void Start() {
+	void Awake() {
 		if (transform.parent != null) {
 			wielder = transform.parent.GetComponent<Character>();
-		} else {
-			Debug.Log ("Weapon '" + gameObject.name + "' does not have a character wielding it (parent).");
 		}
 
 		sr = gameObject.GetComponent<SpriteRenderer> ();

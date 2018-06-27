@@ -8,18 +8,22 @@ public class DataPersistence {
 	private static string saveLocation = Application.persistentDataPath + "/meta.dat";
 
 	public static PlayerData Load() {
+		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
+		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
+
+		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
+		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume", 0.5f); //set the sound effects volume using the stored playerpref
+
+		GameManager.SelectedOutfit = PlayerPrefs.GetString ("SelectedCharacter", "Stick it to 'em");
+		GameManager.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Iron Longsword");
+		GameManager.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Two-handed");
+
 		FileStream file;
 		if (File.Exists (saveLocation)) {
 			file = File.OpenRead (saveLocation);
 		} else {
-			return null; //nothing to load if there is no file; skip loading playerprefs
+			return null; //no player data to load if there is no file
 		}
-
-		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty")); //set the game difficulty using the stored playerpref
-		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
-
-		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume"); //set the background music volume using the stored playerpref
-		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume"); //set the sound effects volume using the stored playerpref
 
 		BinaryFormatter formatter = new BinaryFormatter ();
 		return (PlayerData)formatter.Deserialize (file); //get the playerdata from the file, send the data to the gameManager who called the method
@@ -36,11 +40,16 @@ public class DataPersistence {
 		}
 
 		PlayerData playerData = new PlayerData ();
-		playerData.fileVersion = "v0.1";
-		playerData.selectedCharacter = GameManager.SelectedCharacter;
+		playerData.fileVersion = "v1.0";
 		playerData.currency = GameManager.currGameManager.Currency;
 		playerData.highestSurvivalWave = GameManager.currGameManager.HighestSurvivalWave;
 		playerData.survivalStreak = GameManager.currGameManager.CurrentSurvivalStreak;
+		playerData.unlocks = GameManager.Unlocks;
+		//challenges
+		//missions
+		//extra00
+		//extra01
+		//extra02
 
 		BinaryFormatter formatter = new BinaryFormatter ();
 		formatter.Serialize (file, playerData);
@@ -53,6 +62,10 @@ public class DataPersistence {
 
 		PlayerPrefs.SetFloat("BGM Volume", GameManager.BGMVolume); //set background music volume to playerprefs
 		PlayerPrefs.SetFloat ("SFX Volume", GameManager.SFXVolume); //set sound effects volume to playerprefs
+
+		PlayerPrefs.SetString ("SelectedCharacter", GameManager.SelectedOutfit); //set the currently selected character
+		PlayerPrefs.SetString ("SelectedWeapon", GameManager.SelectedWeapon); //set the currently selected
+		PlayerPrefs.SetString ("SelectedWeaponSpecialization", GameManager.SelectedWeaponSpecialization);
 
 		PlayerPrefs.Save (); //save the playerpref changes
 	}

@@ -40,6 +40,8 @@ public abstract class Character : MonoBehaviour {
 	private Text statText;
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
+	public int MaxHP { get { return maxhp; } }
+	public float MovementSpeed { get { return moveSpeed; } }
 	public Vector2 Velocity { get { return rb2D.velocity; } }
 	public bool isFacingRight { get { return !sr.flipX; } }
 	public bool isFacingLeft { get { return !isFacingRight; } }
@@ -49,6 +51,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+	public Color SpriteColor { get { return sr.color; } }
 
 	protected void AddTorque (float torque) {
 		rb2D.AddTorque (torque);
@@ -171,7 +174,6 @@ public abstract class Character : MonoBehaviour {
 					rb2D.AddForce (new Vector2 (direction.x * moveSpeed, 0)); //only able to make slight adjustments mid-air;
 			}
 		}
-
 	}
 
 	protected virtual Vector3 GetHPSliderPos() {
@@ -320,8 +322,8 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	public void ReceiveDamageFrom(Weapon w) {
-		ReceiveKnockback (w.wielder);
-		ReceiveDamage (w.Damage, w.wielder.critAvailable); //handle damage + possibility of critical hit
+		ReceiveKnockback (w.Wielder);
+		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
 	}
 
 	private void ReceiveKnockback(Character c) {
@@ -492,5 +494,13 @@ public abstract class Character : MonoBehaviour {
 		if (isInvulnerable) {
 			invulnTimer -= Time.fixedDeltaTime;
 		}
+	}
+
+	public void Wield (Weapon w) {
+		if (weapon != null) {
+			Destroy(weapon.gameObject);
+		}
+		weapon = w;
+		w.AssignTo (this);
 	}
 }

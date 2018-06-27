@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 705c4efe92e05044f863e973ba0c492c
-timeCreated: 1483930837
+timeCreated: 1529346619
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -10,14 +10,16 @@ TextureImporter:
     21300006: Longsword_3
     21300008: Longsword_4
     21300010: Longsword_5
-  serializedVersion: 2
+  serializedVersion: 4
   mipmaps:
     mipMapMode: 0
     enableMipMap: 1
+    sRGBTexture: 1
     linearTexture: 0
-    correctGamma: 0
     fadeOut: 0
     borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
     mipMapFadeDistanceStart: 1
     mipMapFadeDistanceEnd: 3
   bumpmap:
@@ -27,23 +29,22 @@ TextureImporter:
     normalMapFilter: 0
   isReadable: 0
   grayScaleToAlpha: 0
-  generateCubemap: 0
+  generateCubemap: 6
   cubemapConvolution: 0
-  cubemapConvolutionSteps: 7
-  cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
   textureFormat: -1
   maxTextureSize: 2048
   textureSettings:
+    serializedVersion: 2
     filterMode: -1
     aniso: 16
     mipBias: -1
-    wrapMode: 1
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
   nPOTScale: 0
   lightmap: 0
-  rGBM: 0
   compressionQuality: 50
-  allowsAlphaSplitting: 0
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
@@ -51,12 +52,28 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 30
+  alphaUsage: 1
   alphaIsTransparency: 1
+  spriteTessellationDetail: -1
   textureType: 8
-  buildTargetSettings: []
+  textureShape: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  platformSettings:
+  - buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
   spriteSheet:
+    serializedVersion: 2
     sprites:
-    - name: Longsword_0
+    - serializedVersion: 2
+      name: Longsword_0
       rect:
         serializedVersion: 2
         x: 0
@@ -66,17 +83,11 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: 0, y: 3.5}
-        - {x: -4, y: -1.5}
-        - {x: -10, y: -13.5}
-        - {x: -11, y: -17.5}
-        - {x: -11, y: -20.5}
-        - {x: -5, y: -20.5}
-        - {x: 7, y: -10.5}
-        - {x: 7, y: 2.5}
-        - {x: 4, y: 3.5}
-    - name: Longsword_1
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Longsword_1
       rect:
         serializedVersion: 2
         x: 60
@@ -86,37 +97,25 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: 0, y: 1.5}
-        - {x: -4, y: -3.5}
-        - {x: -10, y: -15.5}
-        - {x: -11, y: -19.5}
-        - {x: -11, y: -22.5}
-        - {x: -5, y: -22.5}
-        - {x: 7, y: -12.5}
-        - {x: 7, y: 0.5}
-        - {x: 4, y: 1.5}
-    - name: Longsword_2
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Longsword_2
       rect:
         serializedVersion: 2
         x: 120
-        y: 45
+        y: 52
         width: 60
-        height: 45
+        height: 38
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: 0, y: 5.5}
-        - {x: -4, y: 0.5}
-        - {x: -10, y: -11.5}
-        - {x: -11, y: -15.5}
-        - {x: -11, y: -18.5}
-        - {x: -5, y: -18.5}
-        - {x: 7, y: -8.5}
-        - {x: 7, y: 4.5}
-        - {x: 4, y: 5.5}
-    - name: Longsword_3
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Longsword_3
       rect:
         serializedVersion: 2
         x: 0
@@ -126,24 +125,11 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: -8, y: 10.5}
-        - {x: -11, y: 7.5}
-        - {x: -11, y: -14.5}
-        - {x: -1, y: -22.5}
-        - {x: 25, y: -22.5}
-        - {x: 28, y: -19.5}
-        - {x: 28, y: 5.5}
-        - {x: 22, y: 10.5}
-      - - {x: -23, y: -8.5}
-        - {x: -30, y: -9.5}
-        - {x: -30, y: -17.5}
-        - {x: -20, y: -19.5}
-        - {x: -6, y: -19.5}
-        - {x: -1, y: -16.5}
-        - {x: -1, y: -10.5}
-        - {x: -6, y: -8.5}
-    - name: Longsword_4
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Longsword_4
       rect:
         serializedVersion: 2
         x: 60
@@ -153,50 +139,25 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: 16, y: 13.5}
-        - {x: -2, y: 13.5}
-        - {x: -2, y: -22.5}
-        - {x: 21, y: -22.5}
-        - {x: 30, y: -13.5}
-        - {x: 30, y: 1.5}
-        - {x: 29, y: 5.5}
-      - - {x: -30, y: -14.5}
-        - {x: -28, y: -16.5}
-        - {x: -5, y: -16.5}
-        - {x: -5, y: -10.5}
-        - {x: -6, y: -8.5}
-        - {x: -9, y: -7.5}
-        - {x: -30, y: -7.5}
-    - name: Longsword_5
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Longsword_5
       rect:
         serializedVersion: 2
         x: 120
-        y: 0
+        y: 1
         width: 60
-        height: 45
+        height: 51
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      outline:
-      - - {x: 16, y: 22.5}
-        - {x: 13, y: 21.5}
-        - {x: -1, y: -15.5}
-        - {x: -1, y: -22.5}
-        - {x: 28, y: -22.5}
-        - {x: 30, y: -17.5}
-        - {x: 30, y: 22.5}
-      - - {x: -21, y: 16.5}
-        - {x: -25, y: 16.5}
-        - {x: -26, y: 14.5}
-        - {x: -26, y: 8.5}
-        - {x: -9, y: -5.5}
-        - {x: -7, y: -5.5}
-        - {x: -2, y: -4.5}
-        - {x: 1, y: -3.5}
-        - {x: 1, y: 0.5}
-        - {x: -3, y: 8.5}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
     outline: []
+    physicsShape: []
   spritePackingTag: 
   userData: 
   assetBundleName: 

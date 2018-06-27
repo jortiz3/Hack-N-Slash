@@ -4,14 +4,22 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Player : Character {
+
+	[SerializeField]
+	private string defaultWeapon;
+	public List<string> weaponSpecialization;
 	[SerializeField]
 	private bool infiniteRespawn;
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
+	[SerializeField]
+	private int unlockCost;
 
 	private List<TouchInfo> touchInfo;
 
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
+	public int UnlockCost { get { return unlockCost; } }
+	public string DefaultWeapon { get { return defaultWeapon; } }
 
 	void Awake() {
 		if (player != null) //if there is a player already
