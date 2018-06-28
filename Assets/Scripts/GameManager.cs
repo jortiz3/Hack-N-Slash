@@ -9,6 +9,10 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-recode buttonless controls to be neater/simpler
+//		--touch.x far enough to side to move
+//		--swipe from character x to attack
+//		--tap near character to jump
 //-Challenges
 //	--list of challenges in gamemanager?
 //-revisit Spawn class for cleaner register advanced enemy minion solution

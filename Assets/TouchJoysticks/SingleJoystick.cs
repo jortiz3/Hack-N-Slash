@@ -49,26 +49,41 @@ public class SingleJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IP
 
 
             bgImage.rectTransform.SetAsLastSibling(); // ensures that this joystick will always render on top of other UI elements
-            bgImage.rectTransform.GetWorldCorners(fourCornersArray); // fills the fourCornersArray with the world space positions of the four corners of the background image of this joystick
-
-            bgImageStartPosition = fourCornersArray[3]; // saves the world space position of the bottom right hand corner of the background image of this joystick as the image was placed on the canvas before play was pressed 
-            bgImage.rectTransform.pivot = new Vector2(1, 0); // places the bottom right corner of background image of this joystick onto the pivot (wherever it may be in the canvas) 
-
-            //bgImage.rectTransform.anchorMin = new Vector2(0, 0); // sets the min anchors to the lower left corner of the canvas
-            //bgImage.rectTransform.anchorMax = new Vector2(0, 0); // sets the max anchors to the lower left corner of the canvas
-            bgImage.rectTransform.position = bgImageStartPosition; // sets the background image of this joystick back to the same position it was on the canvas before play was pressed
+			SetCornerPivot(); //sets the pivot so the joystick can be used;
         }
      }
+
+	public void SetCenterPivot() { //minor modifications to default code by Justin Ortiz
+		bgImage.rectTransform.GetWorldCorners(fourCornersArray); // fills the fourCornersArray with the world space positions of the four corners of the background image of this joystick
+
+		bgImageStartPosition = fourCornersArray[2] - new Vector3((bgImage.rectTransform.sizeDelta.x * bgImage.transform.localScale.x) / 2, (bgImage.rectTransform.sizeDelta.y * bgImage.transform.localScale.y) / 2, 0); // saves the world space position of the bottom right hand corner of the background image of this joystick as the image was placed on the canvas before play was pressed 
+		bgImage.rectTransform.pivot = new Vector2(0.5f, 0.5f); // places the bottom right corner of background image of this joystick onto the pivot (wherever it may be in the canvas) 
+
+		//bgImage.rectTransform.anchorMin = new Vector2(0, 0); // sets the min anchors to the lower left corner of the canvas
+		//bgImage.rectTransform.anchorMax = new Vector2(0, 0); // sets the max anchors to the lower left corner of the canvas
+		bgImage.rectTransform.position = bgImageStartPosition; // sets the background image of this joystick back to the same position it was on the canvas before play was pressed
+	}
+
+	public void SetCornerPivot() { //default code placed into method by Justin Ortiz
+		bgImage.rectTransform.GetWorldCorners(fourCornersArray); // fills the fourCornersArray with the world space positions of the four corners of the background image of this joystick
+
+		bgImageStartPosition = fourCornersArray[3]; // saves the world space position of the bottom right hand corner of the background image of this joystick as the image was placed on the canvas before play was pressed 
+		bgImage.rectTransform.pivot = new Vector2(1f, 0f); // places the bottom right corner of background image of this joystick onto the pivot (wherever it may be in the canvas) 
+
+		//bgImage.rectTransform.anchorMin = new Vector2(0, 0); // sets the min anchors to the lower left corner of the canvas
+		//bgImage.rectTransform.anchorMax = new Vector2(0, 0); // sets the max anchors to the lower left corner of the canvas
+		bgImage.rectTransform.position = bgImageStartPosition; // sets the background image of this joystick back to the same position it was on the canvas before play was pressed
+	}
 
     // this event happens when there is a drag on screen
     public virtual void OnDrag(PointerEventData ped)
     {
-        Vector2 localPoint = Vector2.zero; // resets the localPoint out parameter of the RectTransformUtility.ScreenPointToLocalPointInRectangle function on each drag event
+		if (GameManager.currGameState == GameState.Active) { //added by Justin Ortiz
+			Vector2 localPoint = Vector2.zero; // resets the localPoint out parameter of the RectTransformUtility.ScreenPointToLocalPointInRectangle function on each drag event
 
-        // if the point touched on the screen is within the background image of this joystick
-        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(bgImage.rectTransform, ped.position, ped.pressEventCamera, out localPoint))
-        {
-            /*
+			// if the point touched on the screen is within the background image of this joystick
+			if (RectTransformUtility.ScreenPointToLocalPointInRectangle (bgImage.rectTransform, ped.position, ped.pressEventCamera, out localPoint)) {
+				/*
                 bgImage.rectTransform.sizeDelta is the size of the background image of this joystick
                 Example: if the image size is 150 by 150 pixels on the screen
                          the length of x will measure from the Right side of the image to the Left side as -150 to 0  
@@ -80,10 +95,10 @@ public class SingleJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IP
                 localPoint.x becomes (from Left to Right -1 to 0) (-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0)
                 localPoint.y becomes (from Bottom to Top 0 to 1) (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
             */
-            localPoint.x = (localPoint.x / bgImage.rectTransform.sizeDelta.x);
-            localPoint.y = (localPoint.y / bgImage.rectTransform.sizeDelta.y);
+				localPoint.x = (localPoint.x / bgImage.rectTransform.sizeDelta.x);
+				localPoint.y = (localPoint.y / bgImage.rectTransform.sizeDelta.y);
 
-            /*
+				/*
                 the correct x and y point values are created here
                 localPoint.x becomes (from Left to Right -1 to 1) (-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
                 localPoint.y becomes (from Bottom to Top -1 to 1) (-1, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
@@ -96,37 +111,36 @@ public class SingleJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IP
 
                 the solution to this (further down this script) will be to normalize the vector (remove it's magnitude) so that its value of x or y never increases past 1
             */
-            inputVector = new Vector3(localPoint.x * 2 + 1, localPoint.y * 2 - 1, 0);
+				inputVector = new Vector3 (localPoint.x * 2 + 1, localPoint.y * 2 - 1, 0);
 
-            // before we normalize, we will save this unnormalized vector in order to move the joystick along with our drag 
-            unNormalizedInput = inputVector;
+				// before we normalize, we will save this unnormalized vector in order to move the joystick along with our drag 
+				unNormalizedInput = inputVector;
 
-            inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector; // normalizes the vector, this will be used to ouput to a game object controller to control movement (for example, of a player character or any desired game object)
+				inputVector = (inputVector.magnitude > 1.0f) ? inputVector.normalized : inputVector; // normalizes the vector, this will be used to ouput to a game object controller to control movement (for example, of a player character or any desired game object)
 
-            // moves the joystick handle "knob" image
-            joystickKnobImage.rectTransform.anchoredPosition =
-             new Vector3(inputVector.x * (bgImage.rectTransform.sizeDelta.x / joystickHandleDistance),
-                         inputVector.y * (bgImage.rectTransform.sizeDelta.y / joystickHandleDistance));
+				// moves the joystick handle "knob" image
+				joystickKnobImage.rectTransform.anchoredPosition =
+             new Vector3 (inputVector.x * (bgImage.rectTransform.sizeDelta.x / joystickHandleDistance),
+					inputVector.y * (bgImage.rectTransform.sizeDelta.y / joystickHandleDistance));
 
-            // if the joystick is not set to stay in a fixed position
-            if (joystickStaysInFixedPosition == false)
-            {
-                // if dragging outside the circle of the background image
-                if (unNormalizedInput.magnitude > inputVector.magnitude)
-                {
-                    var currentPosition = bgImage.rectTransform.position;
-                    currentPosition.x += ped.delta.x;
-                    currentPosition.y += ped.delta.y;
+				// if the joystick is not set to stay in a fixed position
+				if (joystickStaysInFixedPosition == false) {
+					// if dragging outside the circle of the background image
+					if (unNormalizedInput.magnitude > inputVector.magnitude) {
+						var currentPosition = bgImage.rectTransform.position;
+						currentPosition.x += ped.delta.x;
+						currentPosition.y += ped.delta.y;
 
-                    // keeps the joystick within the screen
-                    currentPosition.x = Mathf.Clamp(currentPosition.x, 0 + bgImage.rectTransform.sizeDelta.x, Screen.width);
-                    currentPosition.y = Mathf.Clamp(currentPosition.y, 0, Screen.height - bgImage.rectTransform.sizeDelta.y);
+						// keeps the joystick within the screen
+						currentPosition.x = Mathf.Clamp (currentPosition.x, 0 + bgImage.rectTransform.sizeDelta.x, Screen.width);
+						currentPosition.y = Mathf.Clamp (currentPosition.y, 0, Screen.height - bgImage.rectTransform.sizeDelta.y);
 
-                    // moves the entire joystick along with the drag  
-                    bgImage.rectTransform.position = currentPosition;
-                }
-            }
-        }
+						// moves the entire joystick along with the drag  
+						bgImage.rectTransform.position = currentPosition;
+					}
+				}
+			}
+		}
     }
 
     // this event happens when there is a touch down (or mouse pointer down) on the screen
