@@ -89,7 +89,6 @@ public class PlayerInput : MonoBehaviour {
 					Touch currTouch;
 					for (int i = 0; i < Input.touchCount; i++) {
 						currTouch = Input.GetTouch (i);
-
 						if (currTouch.phase == TouchPhase.Began) {
 							touchInfo.Insert (i, new TouchInfo (Time.time, currTouch.position));
 						} else if (currTouch.phase == TouchPhase.Ended) {
@@ -124,7 +123,7 @@ public class PlayerInput : MonoBehaviour {
 							}
 
 							touchInfo.RemoveAt (i);
-						} else if (touchInfo [i].deltaTime > 0.06f) {
+						} else if (touchInfo [i].deltaTime > 0.02f) {
 							Vector3 temp = Camera.main.ScreenToWorldPoint (currTouch.position);
 
 							if (temp.x > transform.position.x + 0.1f) { //holding to the right of the character
@@ -329,16 +328,16 @@ public class PlayerInput : MonoBehaviour {
 				//dot product gives us the cosine of the angle between 2 vectors; so, we need to get the arccosine
 				float angle = Mathf.Acos (Vector2.Dot (Vector2.right, deltaPosition.normalized)); //angle between the swipe and directly to the right
 
-				if (angle < 0.78 || angle >= 5.49) {
+				if (angle < 1.04 || angle >= 5.23) {
 					return "swipe_right";
-				} else if (angle < 2.35) {
+				} else if (angle < 2.09) {
 					return "swipe_up";
-				} else if (angle < 3.92) {
+				} else if (angle < 4.18) {
 					return "swipe_left";
 				} else if (angle < 5.49) {
 					return "swipe_down";
 				}
-			} else if (deltaTime < 0.15f) { //briefly tapped the screen
+			} else if (deltaTime < 0.2f) { //briefly tapped the screen
 				return "jump";
 			}
 
