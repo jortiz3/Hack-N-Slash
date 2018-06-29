@@ -278,7 +278,7 @@ public class PlayerInput : MonoBehaviour {
 		if (editModeEnabled) {
 			if (Input.touchCount == 1) { //reposition
 				Vector2 currTouchPos = Input.GetTouch(0).position; //get the current touch
-				if ((currTouchPos - (Vector2)editObject.position).magnitude < editObject.sizeDelta.magnitude) { //if the touch is close enough to the current object
+				if ((currTouchPos - (Vector2)editObject.position).magnitude < editObject.sizeDelta.magnitude / 2) { //if the touch is close enough to the current object
 					float marginWidth = Screen.width * 0.05f; //get the current margin the left and right sides of the screen
 					if (currTouchPos.x > marginWidth && currTouchPos.x < Screen.width - marginWidth) { //ensure the player is dragging between the margins
 						float marginHeight = Screen.height * 0.08f; //get the current margin between the top and bottom sides of the screen
