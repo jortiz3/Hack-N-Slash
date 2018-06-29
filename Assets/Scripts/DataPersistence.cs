@@ -18,6 +18,8 @@ public class DataPersistence {
 		GameManager.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Iron Longsword");
 		GameManager.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Two-handed");
 
+		PlayerInput.currControlScheme = (ControlScheme)PlayerPrefs.GetInt ("Control Scheme", (int)ControlScheme.Default);
+
 		FileStream file;
 		if (File.Exists (saveLocation)) {
 			file = File.OpenRead (saveLocation);
@@ -66,6 +68,8 @@ public class DataPersistence {
 		PlayerPrefs.SetString ("SelectedCharacter", GameManager.SelectedOutfit); //set the currently selected character
 		PlayerPrefs.SetString ("SelectedWeapon", GameManager.SelectedWeapon); //set the currently selected
 		PlayerPrefs.SetString ("SelectedWeaponSpecialization", GameManager.SelectedWeaponSpecialization);
+
+		PlayerPrefs.SetInt ("Control Scheme", (int)PlayerInput.currControlScheme);
 
 		PlayerPrefs.Save (); //save the playerpref changes
 	}
