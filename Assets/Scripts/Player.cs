@@ -36,7 +36,7 @@ public class Player : Character {
 		} else {
 			if (GameManager.currGameState == GameState.Active) {
 				switch (GameManager.currGameMode) {
-				case GameMode.Story:
+				case GameMode.Campaign:
 					break;
 				case GameMode.Survival:
 					GameManager.currGameManager.EndSurvivalWave ("died");

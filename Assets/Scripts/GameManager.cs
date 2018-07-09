@@ -4,11 +4,19 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public enum GameMode { Survival, Story };
+public enum GameMode { Survival, Campaign };
 public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-finish adding locks to chapter tabs
+//-unlock when last mission from previous chapter complete
+//-show complete text when mission complete
+//-add 10 mission buttons to each chapter + prologue with locks
+//-hide locks for completed missions and the next mission
+//-resize layout group for missions
+//-load missions properly (only sometimes loads)
+
 //-recode buttonless controls to be neater/simpler
 //		--touch.x far enough to side to move
 //		--swipe from character x to attack
@@ -63,6 +71,7 @@ public class GameManager : MonoBehaviour {
 	private static int currency;
 	private static List<string> unlocks;
 
+	private string selectedCampaignMission;
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
@@ -202,7 +211,7 @@ public class GameManager : MonoBehaviour {
 		UpdateSurvivalDisplayText ();
 	}
 
-	private IEnumerator LoadLevel() {
+	private IEnumerator LoadLevel () {
 		loadingScreen.color = Color.white; //display load screen
 
 		difficultyChanged = false;
@@ -211,24 +220,32 @@ public class GameManager : MonoBehaviour {
 		SpawnPlayer();
 
 		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Background");
+		bool bgNeedsToBeInstantiated = false;
+		string bgFilePath;
 
 		if (currGameMode == GameMode.Survival) {
-			if ((selectedSurvivalWave - 1 != currSurvivalSpawner.PreviousWave && selectedSurvivalWave % 25 == 1)//player just started a new wave, and background needs to change
-				|| backgroundIsMissing) { //or if background is missing at the moment
+			bgFilePath = "Backgrounds/Survival_" + (selectedSurvivalWave - 1);
 
-				if (!backgroundIsMissing) { //if we have a background
-					Destroy (bgParent.GetChild (0).gameObject); //destroy current background
-				}
-
-				GameObject.Instantiate (Resources.Load ("Backgrounds/Survival_" + (selectedSurvivalWave - 1)), bgParent);//instantiate background
-				bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
-
-				yield return new WaitForSeconds(1);
+			if (selectedSurvivalWave - 1 != currSurvivalSpawner.PreviousWave && selectedSurvivalWave % 25 == 1) {//player just started a new wave, and background needs to be updated 
+				bgNeedsToBeInstantiated = true;
 			}
 
 			currSurvivalSpawner.StartWave (selectedSurvivalWave);
 		} else {
-			//load story level
+			bgFilePath = "Backgrounds/" + selectedCampaignMission;
+
+			bgNeedsToBeInstantiated = true;
+		}
+
+		if (bgNeedsToBeInstantiated) {
+			if (!backgroundIsMissing) {
+				Destroy (bgParent.GetChild (0).gameObject); //destroy current background
+			}
+
+			GameObject.Instantiate (Resources.Load (bgFilePath), bgParent);//instantiate background
+			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
+
+			yield return new WaitForSeconds(1);
 		}
 
 		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
@@ -284,6 +301,11 @@ public class GameManager : MonoBehaviour {
 
 	public void SaveSettings() {
 		DataPersistence.SavePlayerPrefs ();
+	}
+
+	public void SelectCampaignMission(string missionName) {
+		selectedCampaignMission = missionName;
+		StartCoroutine (LoadLevel ());
 	}
 
 	public void SelectOutfit (string OutfitName) {
@@ -510,12 +532,12 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	public void StartStory() {
+	public void StartCampaign() {
 		ClearAllCharacters();
 
-		currGameMode = GameMode.Story;
+		currGameMode = GameMode.Campaign;
 		currGameState = GameState.Menu;
-		menu.ChangeState ("Story");
+		menu.ChangeState ("Campaign");
 	}
 
 	public void StartSurvival() {
