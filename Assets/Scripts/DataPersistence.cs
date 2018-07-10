@@ -48,7 +48,7 @@ public class DataPersistence {
 		playerData.survivalStreak = GameManager.currGameManager.CurrentSurvivalStreak;
 		playerData.unlocks = GameManager.Unlocks;
 		//challenges
-		//missions
+		playerData.missions = GameManager.Missions; 
 		//extra00
 		//extra01
 		//extra02

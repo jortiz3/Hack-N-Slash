@@ -9,12 +9,12 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-finish adding locks to chapter tabs
+//-finish adding locks to chapter tabs -- complete
 //-unlock when last mission from previous chapter complete
-//-show complete text when mission complete
-//-add 10 mission buttons to each chapter + prologue with locks
-//-hide locks for completed missions and the next mission
-//-resize layout group for missions
+//-add 10 mission buttons to each chapter + prologue with locks -- prologue & ch1 complete
+//-hide locks for completed missions and the next mission -- complete
+//-show complete text when mission complete -- complete
+//-resize layout group for missions -- complete
 
 //-recode buttonless controls to be neater/simpler
 //		--touch.x far enough to side to move
@@ -69,6 +69,7 @@ public class GameManager : MonoBehaviour {
 	private static string selectedWeaponSpecialization;
 	private static int currency;
 	private static List<string> unlocks;
+	private static List<string> missions;
 
 	private string selectedCampaignMission;
 	private InputField displayedSurvivalWaveNumber;
@@ -93,6 +94,7 @@ public class GameManager : MonoBehaviour {
 	private List<string> selectedOutfit_weaponSpecializations;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
+	public static string[] Missions { get { return missions.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
@@ -286,7 +288,7 @@ public class GameManager : MonoBehaviour {
 		SelectWeapon (selectedWeapon);
 	}
 
-	private void ResizeHorizontalLayoutGroup (RectTransform parent) {
+	public void ResizeHorizontalLayoutGroup (RectTransform parent) {
 		Vector2 newSizeDelta = Vector2.zero;
 		foreach (Transform child in parent) {
 			if (child.gameObject.activeSelf) {
@@ -306,8 +308,14 @@ public class GameManager : MonoBehaviour {
 		DataPersistence.SavePlayerPrefs ();
 	}
 
-	public void SelectCampaignMission(string missionName) {
-		selectedCampaignMission = missionName;
+	public void SelectCampaignMission(Transform buttonWithLockAsChild) {
+		Transform lockChild = buttonWithLockAsChild.Find("Lock"); //get the lock
+
+		if (lockChild.gameObject.activeSelf) { //if the lock is active
+			//player is unable to play the level -- inform them they cannot play?
+			return;
+		}
+		selectedCampaignMission = lockChild.name;
 		StartCoroutine (LoadLevel ());
 	}
 
@@ -441,6 +449,7 @@ public class GameManager : MonoBehaviour {
 
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 			unlocks = new List<string>();
+			missions = new List<string> ();
 
 			if (loadedData != null) {
 				currency = loadedData.currency;
@@ -448,7 +457,7 @@ public class GameManager : MonoBehaviour {
 				currSurvivalStreak = loadedData.survivalStreak;
 				unlocks.AddRange (loadedData.unlocks);
 				//challenges
-				//missions
+				missions.AddRange (loadedData.missions);
 				//extra00
 				//extra01
 				//extra02
@@ -512,6 +521,36 @@ public class GameManager : MonoBehaviour {
 			displayPurchaseConfirmationButton_Weapon.SetActive (false);
 
 			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive (false);
+
+			Transform campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
+			Transform campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
+			Transform currChapter;
+			Transform currMission;
+			for (int i = 0; i < campaignMissionsParent.childCount; i++) { //for each chapter
+				currChapter = campaignMissionsParent.GetChild (i); //get current chapter
+				ResizeHorizontalLayoutGroup (currChapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
+				for (int j = 0; j < currChapter.childCount; j++) { //for each mission
+					currMission = currChapter.GetChild (j); //get current mission
+					if (missions.Contains (currMission.name)) { //if this mission was complete
+						currMission.Find ("Lock").gameObject.SetActive (false); //remove the lock
+						currMission.Find ("Complete").gameObject.SetActive (true);//show it was complete
+
+						if ((j + 1) < currChapter.childCount) { // unlock the next mission
+							currChapter.GetChild (j + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next child
+						} else if ((i + 1) < campaignTabsParent.childCount){ //unlock the next chapter
+							Toggle tab = campaignTabsParent.GetChild (i + 1).GetComponent<Toggle>(); //get the tab
+							tab.interactable = true; //allow the tab to be clicked
+							tab.transform.Find ("Lock").gameObject.SetActive (false); //remove the lock
+							campaignMissionsParent.GetChild(i + 1).GetChild(0).Find("Lock").gameObject.SetActive(false);//unlock the first mission in the next chapter
+						}
+					}
+				}
+
+				if (i > 0) {
+					currChapter.gameObject.SetActive (false); //set all chapters except for chapter 1 inactive
+				}
+			}
+			ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>());
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
