@@ -103,7 +103,9 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 	}
 
 	void Update() {
-		UpdateEnemy ();
+		if (GameManager.currGameState == GameState.Active) { 
+			UpdateEnemy ();
+		}
 	}
 
 	protected virtual void UpdateEnemy () {

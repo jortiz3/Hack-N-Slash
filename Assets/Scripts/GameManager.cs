@@ -15,7 +15,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //-add 10 mission buttons to each chapter + prologue with locks
 //-hide locks for completed missions and the next mission
 //-resize layout group for missions
-//-load missions properly (only sometimes loads)
 
 //-recode buttonless controls to be neater/simpler
 //		--touch.x far enough to side to move
@@ -212,6 +211,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private IEnumerator LoadLevel () {
+		menu.ChangeState ("");
 		loadingScreen.color = Color.white; //display load screen
 
 		difficultyChanged = false;
@@ -224,11 +224,14 @@ public class GameManager : MonoBehaviour {
 		string bgFilePath;
 
 		if (currGameMode == GameMode.Survival) {
-			bgFilePath = "Backgrounds/Survival_" + (selectedSurvivalWave - 1);
-
-			if (selectedSurvivalWave - 1 != currSurvivalSpawner.PreviousWave && selectedSurvivalWave % 25 == 1) {//player just started a new wave, and background needs to be updated 
+			bgFilePath = "Survival_" + ((selectedSurvivalWave - 1) / 25);
+				
+			if (!bgParent.GetChild (0).name.Contains (bgFilePath) || //background is not what it needs to be
+				(selectedSurvivalWave - 1) / 25 !=  currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
 				bgNeedsToBeInstantiated = true;
 			}
+
+			bgFilePath = "Backgrounds/" + bgFilePath;
 
 			currSurvivalSpawner.StartWave (selectedSurvivalWave);
 		} else {
@@ -244,16 +247,16 @@ public class GameManager : MonoBehaviour {
 
 			GameObject.Instantiate (Resources.Load (bgFilePath), bgParent);//instantiate background
 			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
-
-			yield return new WaitForSeconds(1);
 		}
+
+		Time.timeScale = 1f;
+
+		yield return new WaitForSeconds (1);
 
 		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
 		loadingScreen.color = Color.clear; //hide load screen
 
 		currGameState = GameState.Active;
-		menu.ChangeState ("");
-		Time.timeScale = 1f;
 	}
 
 	public void PauseGame() {
@@ -422,7 +425,7 @@ public class GameManager : MonoBehaviour {
 
 			menu = transform.GetChild (0).GetComponent<MenuScript> ();
 			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
-			loadingScreen = bgParent.GetChild (bgParent.childCount - 1).GetComponent<Image> ();
+			loadingScreen = menu.transform.GetChild (menu.transform.childCount - 1).GetComponent<Image> ();
 
 			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
 			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
