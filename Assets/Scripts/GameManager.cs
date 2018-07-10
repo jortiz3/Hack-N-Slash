@@ -9,12 +9,7 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-finish adding locks to chapter tabs -- complete
-//-unlock when last mission from previous chapter complete
-//-add 10 mission buttons to each chapter + prologue with locks -- prologue & ch1 complete
-//-hide locks for completed missions and the next mission -- complete
-//-show complete text when mission complete -- complete
-//-resize layout group for missions -- complete
+//show complete and remove locks upon level completion -- possibly move this to a method?
 
 //-recode buttonless controls to be neater/simpler
 //		--touch.x far enough to side to move
@@ -72,6 +67,8 @@ public class GameManager : MonoBehaviour {
 	private static List<string> missions;
 
 	private string selectedCampaignMission;
+	private Transform campaignMissionsParent;
+	private Transform campaignTabsParent;
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
@@ -110,6 +107,28 @@ public class GameManager : MonoBehaviour {
 		foreach (Transform child in temp) {
 			child.GetComponent<Character>().Die();
 		}
+	}
+
+	public void CompleteCurrentCampaignMission() {
+		CompleteCampaignMission (selectedCampaignMission);
+	}
+
+	private void CompleteCampaignMission (string missionName) {
+		string[] missionInfo = selectedCampaignMission.Split (new char [] {' ', '_'}); //split the name of the mission
+		int chapter = int.Parse (missionInfo[1]); //get the chapter number
+		int mission = int.Parse (missionInfo[3]); //get the mission number
+
+		Transform currChapterTransform = campaignMissionsParent.GetChild (chapter);
+		//Transform currMissionTransform = currChapterTransform.GetChild (mission);
+
+		if ((mission + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
+			currChapterTransform.GetChild (mission + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next mission
+		} else if ((chapter + 1) < campaignTabsParent.childCount) { //if there is a next chapter
+
+		}
+
+		currChapterTransform.GetChild(mission).Find("Complete").gameObject.SetActive(true); //show current mission as complete
+		missions.Add (selectedCampaignMission); //record current mission as complete
 	}
 
 	public void DecrementSelectedSurvivalWave() {
@@ -522,8 +541,8 @@ public class GameManager : MonoBehaviour {
 
 			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive (false);
 
-			Transform campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
-			Transform campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
+			campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
+			campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
 			Transform currChapter;
 			Transform currMission;
 			for (int i = 0; i < campaignMissionsParent.childCount; i++) { //for each chapter
@@ -535,9 +554,9 @@ public class GameManager : MonoBehaviour {
 						currMission.Find ("Lock").gameObject.SetActive (false); //remove the lock
 						currMission.Find ("Complete").gameObject.SetActive (true);//show it was complete
 
-						if ((j + 1) < currChapter.childCount) { // unlock the next mission
+						if ((j + 1) < currChapter.childCount) { //if another mission available within chapter
 							currChapter.GetChild (j + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next child
-						} else if ((i + 1) < campaignTabsParent.childCount){ //unlock the next chapter
+						} else if ((i + 1) < campaignTabsParent.childCount){ //else, unlock the next chapter
 							Toggle tab = campaignTabsParent.GetChild (i + 1).GetComponent<Toggle>(); //get the tab
 							tab.interactable = true; //allow the tab to be clicked
 							tab.transform.Find ("Lock").gameObject.SetActive (false); //remove the lock
@@ -546,7 +565,7 @@ public class GameManager : MonoBehaviour {
 					}
 				}
 
-				if (i > 0) {
+				if (i > 0) { //after first iteration
 					currChapter.gameObject.SetActive (false); //set all chapters except for chapter 1 inactive
 				}
 			}
