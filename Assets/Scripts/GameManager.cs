@@ -9,8 +9,6 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//show complete and remove locks upon level completion -- possibly move this to a method?
-
 //-recode buttonless controls to be neater/simpler
 //		--touch.x far enough to side to move
 //		--swipe from character x to attack
@@ -110,25 +108,34 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void CompleteCurrentCampaignMission() {
-		CompleteCampaignMission (selectedCampaignMission);
+		CompleteCampaignMission (selectedCampaignMission, true);
 	}
 
-	private void CompleteCampaignMission (string missionName) {
-		string[] missionInfo = selectedCampaignMission.Split (new char [] {' ', '_'}); //split the name of the mission
-		int chapter = int.Parse (missionInfo[1]); //get the chapter number
-		int mission = int.Parse (missionInfo[3]); //get the mission number
+	private void CompleteCampaignMission (string missionName, bool saveCompletionToArray) {
+		string[] missionInfo = missionName.Split ('_'); //split the name of the mission -- example: "Chapter 1_Mission 1" -> {"Chapter 1", "Mission 1"}
 
-		Transform currChapterTransform = campaignMissionsParent.GetChild (chapter);
-		//Transform currMissionTransform = currChapterTransform.GetChild (mission);
+		Transform currChapterTransform = campaignMissionsParent.Find(missionInfo[0]); //find chapter transform using first piece of mission info -- "Chapter 1"
+		Transform currMissionTransform = currChapterTransform.Find(missionName);
 
-		if ((mission + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
-			currChapterTransform.GetChild (mission + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next mission
-		} else if ((chapter + 1) < campaignTabsParent.childCount) { //if there is a next chapter
+		currMissionTransform.Find ("Lock").gameObject.SetActive (false); //hide the lock
+		currMissionTransform.Find ("Complete").gameObject.SetActive (true); //show mission as complete
+		if (saveCompletionToArray)
+			missions.Add (selectedCampaignMission); //record current mission as complete
 
+		int currMissionIndex = currMissionTransform.GetSiblingIndex (); //get sibling index -- 0
+
+		if ((currMissionIndex + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
+			currChapterTransform.GetChild (currMissionIndex + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next mission
+		} else { //there is no other mission in the current chapter, check for next chapter
+			int chapter = int.Parse ((missionInfo [0].Split (' ')) [1]); //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
+			
+			if (chapter < campaignTabsParent.childCount) { //if there is a next chapter {
+				Toggle tab = campaignTabsParent.GetChild(chapter).GetComponent<Toggle>(); //get tab for next chapter (desired chapter - 1)
+				tab.interactable = true; //make tab usable
+				tab.transform.Find ("Lock").gameObject.SetActive (false); //hide the lock
+				campaignMissionsParent.GetChild (chapter).GetChild (0).Find ("Lock").gameObject.SetActive (false); //unlock the first mission in the chapter
+			}
 		}
-
-		currChapterTransform.GetChild(mission).Find("Complete").gameObject.SetActive(true); //show current mission as complete
-		missions.Add (selectedCampaignMission); //record current mission as complete
 	}
 
 	public void DecrementSelectedSurvivalWave() {
@@ -543,33 +550,15 @@ public class GameManager : MonoBehaviour {
 
 			campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
 			campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
-			Transform currChapter;
-			Transform currMission;
-			for (int i = 0; i < campaignMissionsParent.childCount; i++) { //for each chapter
-				currChapter = campaignMissionsParent.GetChild (i); //get current chapter
-				ResizeHorizontalLayoutGroup (currChapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
-				for (int j = 0; j < currChapter.childCount; j++) { //for each mission
-					currMission = currChapter.GetChild (j); //get current mission
-					if (missions.Contains (currMission.name)) { //if this mission was complete
-						currMission.Find ("Lock").gameObject.SetActive (false); //remove the lock
-						currMission.Find ("Complete").gameObject.SetActive (true);//show it was complete
 
-						if ((j + 1) < currChapter.childCount) { //if another mission available within chapter
-							currChapter.GetChild (j + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next child
-						} else if ((i + 1) < campaignTabsParent.childCount){ //else, unlock the next chapter
-							Toggle tab = campaignTabsParent.GetChild (i + 1).GetComponent<Toggle>(); //get the tab
-							tab.interactable = true; //allow the tab to be clicked
-							tab.transform.Find ("Lock").gameObject.SetActive (false); //remove the lock
-							campaignMissionsParent.GetChild(i + 1).GetChild(0).Find("Lock").gameObject.SetActive(false);//unlock the first mission in the next chapter
-						}
-					}
-				}
-
-				if (i > 0) { //after first iteration
-					currChapter.gameObject.SetActive (false); //set all chapters except for chapter 1 inactive
-				}
+			foreach (Transform chapter in campaignMissionsParent) {
+				ResizeHorizontalLayoutGroup (chapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
 			}
-			ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>());
+			ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>()); //make sure the viewport has enough scroll space
+
+			foreach (string mission in missions) {
+				CompleteCampaignMission (mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
+			}
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
