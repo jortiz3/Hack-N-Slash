@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿//Written by Justin Ortiz
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,12 +11,8 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-recode buttonless controls to be neater/simpler
-//		--touch.x far enough to side to move
-//		--swipe from character x to attack
-//		--tap near character to jump
+//-dynamically resize weapons, outfits, & missions in start method
 //-Challenges
-//	--list of challenges in gamemanager?
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -36,11 +34,14 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //		--Script delegates so behavior can be set in the inspector?
 //--Player Mechanics
 //	--multiple control schemes
-//		--Option 1: Analog stick on screen to move, 1 button on screen for attack, 1 button for jump -- able to scale/reposition each in settings
+//		--Option 1: joystick + buttons -- complete
 //		--Option 2: tilt to move, tap to jump, swipe to attack
-//		--Option 3: press and hold to move, tap button on screen to jump, swipe to attack
+//		--Option 3: buttonless -- complete
+//			-recode buttonless controls to be neater/simpler
+//				--touch.x far enough to side to move
+//				--swipe from character x to attack
+//				--tap near character to jump
 //	--ranged weapons: swipe hold to continue to fire??
-//
 
 public class GameManager : MonoBehaviour {
 
@@ -241,15 +242,18 @@ public class GameManager : MonoBehaviour {
 	private IEnumerator LoadLevel () {
 		menu.ChangeState ("");
 		loadingScreen.color = Color.white; //display load screen
+		loadingScreen.raycastTarget = true;
+		currGameState = GameState.Loading;
 
 		difficultyChanged = false;
 
 		ClearAllCharacters (); //clear all remaining enemies
 		SpawnPlayer();
 
-		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Background");
+		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Level");
 		bool bgNeedsToBeInstantiated = false;
 		string bgFilePath;
+		GameState nextGameState;
 
 		if (currGameMode == GameMode.Survival) {
 			bgFilePath = "Survival_" + ((selectedSurvivalWave - 1) / 25);
@@ -259,13 +263,15 @@ public class GameManager : MonoBehaviour {
 				bgNeedsToBeInstantiated = true;
 			}
 
-			bgFilePath = "Backgrounds/" + bgFilePath;
+			bgFilePath = "Levels/" + bgFilePath;
 
 			currSurvivalSpawner.StartWave (selectedSurvivalWave);
+			nextGameState = GameState.Active;
 		} else {
-			bgFilePath = "Backgrounds/" + selectedCampaignMission;
+			bgFilePath = "Levels/" + selectedCampaignMission;
 
 			bgNeedsToBeInstantiated = true;
+			nextGameState = GameState.Cutscene;
 		}
 
 		if (bgNeedsToBeInstantiated) {
@@ -283,8 +289,9 @@ public class GameManager : MonoBehaviour {
 
 		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
 		loadingScreen.color = Color.clear; //hide load screen
+		loadingScreen.raycastTarget = false;
 
-		currGameState = GameState.Active;
+		currGameState = nextGameState;
 	}
 
 	public void PauseGame() {
@@ -341,7 +348,7 @@ public class GameManager : MonoBehaviour {
 			//player is unable to play the level -- inform them they cannot play?
 			return;
 		}
-		selectedCampaignMission = lockChild.name;
+		selectedCampaignMission = buttonWithLockAsChild.name;
 		StartCoroutine (LoadLevel ());
 	}
 
