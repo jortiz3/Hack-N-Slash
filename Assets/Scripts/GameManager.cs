@@ -149,6 +149,10 @@ public class GameManager : MonoBehaviour {
 		UpdateSurvivalDisplayText ();
 	}
 
+	public void EndCutscene() {
+		currGameState = GameState.Active;
+	}
+
 	public void EndSurvivalWave(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
 			if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
@@ -464,7 +468,7 @@ public class GameManager : MonoBehaviour {
 			currGameManager = this;
 			DontDestroyOnLoad (gameObject);
 
-			menu = transform.GetChild (0).GetComponent<MenuScript> ();
+			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
 			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
 			loadingScreen = menu.transform.GetChild (menu.transform.childCount - 1).GetComponent<Image> ();
 

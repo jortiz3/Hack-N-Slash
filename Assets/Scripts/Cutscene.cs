@@ -7,10 +7,12 @@ using UnityEngine.UI;
 
 public class Cutscene : MonoBehaviour {
 
+	private static GameObject cutsceneObject; //pointer to object within the main scene that will display the image and text
+	private static Image image; //pointer to the image on the cutscene object we will change -- attached to this gameobject
+	private static Text narrationText; //pointer to the text on the cutscene we will change -- attached to child of this gameobject
+
 	[SerializeField]
-	private Scene[] scenes; // all of the data for the cutscene -- edited in the unity inspector
-	private Image image; //pointer to the image we will change -- attached to this gameobject
-	private Text narrationText; //pointer to the text we will change -- attached to child of this gameobject
+	private Scene[] scenes; // all of the data for the cutscene stored in this script -- edited in the unity inspector
 
 	private int currScene; //current scene to display
 	private int currNarration; //current narration
@@ -30,7 +32,7 @@ public class Cutscene : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if (GameManager.currGameState == GameState.Cutscene && !cutsceneComplete) { //cutscene to show, not complete
+		if (GameManager.currGameState == GameState.Cutscene) { //cutscene to show, not complete
 			if (currDelayTime > 0) { //we are in a delay
 				currDelayTime -= Time.fixedDeltaTime;
 			} else if (!delayComplete) { //we finished a delay, narration text was cleared
@@ -55,8 +57,8 @@ public class Cutscene : MonoBehaviour {
 			currDelayTime = 2f; //set delay so player can process
 			delayComplete = false;
 		} else { //no more scenes
-			gameObject.SetActive(false);
-			cutsceneComplete = true; //mark as complete
+			cutsceneObject.SetActive(false);
+			GameManager.currGameManager.EndCutscene ();
 		}
 	}
 
@@ -82,13 +84,18 @@ public class Cutscene : MonoBehaviour {
 	void Start() {
 		cutsceneComplete = false;
 
-		image = GetComponent<Image> (); //get the image component so we can change the sprite later on
-		narrationText = transform.Find ("Narration").GetComponent<Text>(); //get the text child so we can change narration text later on
+		if (cutsceneObject == null) {
+			cutsceneObject = GameManager.currGameManager.transform.Find("Canvas (Overlay)").Find ("Cutscene").gameObject; //get the cutscene object so we can show/hide it later on
+			image = cutsceneObject.transform.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
+			narrationText = cutsceneObject.transform.Find ("Narration").GetComponent<Text>(); //get the text child so we can change narration text later on
+		}
 
 		currScene = 0; //set to the first scene
 		currNarration = 0; //set to the first narration text
 
 		SetSprite (); //show the first sprite
 		SetNarrationText (); //show the first narration text
+
+		cutsceneObject.SetActive (true);
 	}
 }
