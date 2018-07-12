@@ -8,8 +8,10 @@ using UnityEngine.UI;
 public class Cutscene : MonoBehaviour {
 
 	private static GameObject cutsceneObject; //pointer to object within the main scene that will display the image and text
-	private static Image image; //pointer to the image on the cutscene object we will change -- attached to this gameobject
-	private static Text narrationText; //pointer to the text on the cutscene we will change -- attached to child of this gameobject
+	private static Image image; //pointer to the image on the cutscene object we will change -- attached to the cutscene object
+	private static AudioSource narrationAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
+	private static AudioSource soundEffectAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
+	private static Text subtitleText; //pointer to the text on the cutscene we will change -- attached to child of the cutscene object
 
 	[SerializeField]
 	private Scene[] scenes; // all of the data for the cutscene stored in this script -- edited in the unity inspector
@@ -19,12 +21,9 @@ public class Cutscene : MonoBehaviour {
 	private float currDisplayTime; //how much time is left for current narration
 	private float currDelayTime; //delay between scenes to give player time to process what they have seen
 	private bool delayComplete;
-	private bool cutsceneComplete; //to let us know when the cutscene is done
-
-	public bool isComplete { get { return cutsceneComplete; } }
 
 	private void ClearNarrationText() {
-		narrationText.text = "";
+		subtitleText.text = "";
 	}
 
 	private void ClearSprite() {
@@ -37,7 +36,7 @@ public class Cutscene : MonoBehaviour {
 				currDelayTime -= Time.fixedDeltaTime;
 			} else if (!delayComplete) { //we finished a delay, narration text was cleared
 				SetSprite (); //show current picture
-				SetNarrationText (); //show current narration
+				NextNarration(); //go to first narration -- 0
 				delayComplete = true;
 			} else if (currDisplayTime > 0) { //narration is being displayed
 				currDisplayTime -= Time.fixedDeltaTime;
@@ -51,14 +50,15 @@ public class Cutscene : MonoBehaviour {
 		currScene++; //increment current scene
 
 		if (currScene < scenes.Length) { //another scene to show
-			currNarration = 0; //reset narration
+			currNarration = -1; //reset narration to -1
 			ClearNarrationText (); //clear narration text
 
 			currDelayTime = 2f; //set delay so player can process
 			delayComplete = false;
 		} else { //no more scenes
-			cutsceneObject.SetActive(false);
-			GameManager.currGameManager.EndCutscene ();
+			StopAllAudio(); //may not be necessary
+			cutsceneObject.SetActive(false); //hide cutscene object
+			GameManager.currGameManager.EndCutscene (); //inform game manager cutscene is complete
 		}
 	}
 
@@ -67,13 +67,27 @@ public class Cutscene : MonoBehaviour {
 
 		if (currNarration < scenes [currScene].SceneNarration.Length) { //if there is another narration for the current scene
 			SetNarrationText();
+			PlayAudio (narrationAudioSource, scenes [currScene].SceneNarration [currNarration].NarrationAudioClip, GameManager.BGMVolume);
+			PlayAudio (soundEffectAudioSource, scenes [currScene].SceneNarration [currNarration].SoundEffect, GameManager.SFXVolume);
 		} else {
 			NextScene (); //go to the next scene
 		}
 	}
 
+	private void PlayAudio (AudioSource aSource, AudioClip aClip, float volume) {
+		if (GameManager.SoundEnabled) {
+			if (aClip != null) { //ensure there is a clip
+				if (aSource.isPlaying) //is the narrator currently speaking?
+					aSource.Stop (); //stop the narrator
+				aSource.volume = volume; //ensure the volume is correct
+				aSource.clip = aClip; //change it to the correct clip
+				aSource.Play (); //play the clip
+			}
+		}
+	}
+
 	private void SetNarrationText() {
-		narrationText.text = scenes [currScene].SceneNarration [currNarration].Text; //set the text
+		subtitleText.text = scenes [currScene].SceneNarration [currNarration].Text; //set the text
 		currDisplayTime = scenes [currScene].SceneNarration [currNarration].DisplayTime; //set displaytime
 	}
 
@@ -82,20 +96,26 @@ public class Cutscene : MonoBehaviour {
 	}
 
 	void Start() {
-		cutsceneComplete = false;
-
 		if (cutsceneObject == null) {
 			cutsceneObject = GameManager.currGameManager.transform.Find("Canvas (Overlay)").Find ("Cutscene").gameObject; //get the cutscene object so we can show/hide it later on
+			narrationAudioSource = cutsceneObject.transform.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
+			soundEffectAudioSource = cutsceneObject.transform.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
 			image = cutsceneObject.transform.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
-			narrationText = cutsceneObject.transform.Find ("Narration").GetComponent<Text>(); //get the text child so we can change narration text later on
+			subtitleText = cutsceneObject.transform.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
 
 		currScene = 0; //set to the first scene
-		currNarration = 0; //set to the first narration text
+		currNarration = -1; //set position just behind first narration text
 
 		SetSprite (); //show the first sprite
-		SetNarrationText (); //show the first narration text
 
-		cutsceneObject.SetActive (true);
+		cutsceneObject.SetActive (true); //show the cutscene object
+
+		NextNarration (); //increment to first narration
+	}
+
+	private void StopAllAudio() {
+		narrationAudioSource.Stop ();
+		soundEffectAudioSource.Stop ();
 	}
 }

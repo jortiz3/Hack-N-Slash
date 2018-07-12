@@ -12,6 +12,13 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-dynamically resize weapons, outfits, & missions in start method
+//-different ways to complete mission
+//	--reach location
+//	--defeat enemy
+//	--end cutscene
+//	--collect items?
+//-checkpoints?
+//	--placed in campaign missions, if player dies they can retry from checkpoint; but if they leave mission, they must restart from beginning
 //-Challenges
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
