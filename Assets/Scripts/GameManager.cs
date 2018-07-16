@@ -11,7 +11,6 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-dynamically resize weapons, outfits, & missions in start method
 //-different ways to complete mission
 //	--reach location
 //	--defeat enemy
@@ -332,11 +331,55 @@ public class GameManager : MonoBehaviour {
 		SelectWeapon (selectedWeapon);
 	}
 
+	public IEnumerator ResizeAllUIElements() {
+		yield return new WaitForEndOfFrame ();
+
+		//outfits
+		foreach (RectTransform outfit in unlocks_outfitsParent) { //check each child
+			if (unlocks.Contains (outfit.name)) { //see if it has been unlocked
+				outfit.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+
+				if (outfit.name.Equals (selectedOutfit)) { //if the child is the selected outfit (and unlocked)
+					outfit.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+
+					//get weapon specialization
+				}
+			} else { //outfit not unlocked
+				outfit.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show outfit in black
+			}
+			outfit.sizeDelta = new Vector2 (outfit.rect.height, outfit.rect.height);
+		}
+		ResizeHorizontalLayoutGroup (unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
+
+		//weapons
+		foreach (RectTransform weaponSpecialization in unlocks_weaponsParent) {
+			foreach (RectTransform weapon in weaponSpecialization) {
+				if (unlocks.Contains (weapon.name)) { //see if it has been unlocked
+					weapon.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+
+					if (weapon.name.Equals (selectedWeapon)) { //if the child is the selected weapon (and unlocked)
+						weapon.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+					}
+				} else { //weapon not unlocked
+					weapon.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
+				}
+				//weapon.sizeDelta = new Vector2 (weapon.rect.height, weapon.rect.height);
+			}
+			ResizeHorizontalLayoutGroup (weaponSpecialization); //ensure each weaponspec has enough space
+		}
+
+		//campaign missions
+		foreach (Transform chapter in campaignMissionsParent) {
+			ResizeHorizontalLayoutGroup (chapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
+		}
+		ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>()); //make sure the viewport has enough scroll space
+	}
+
 	public void ResizeHorizontalLayoutGroup (RectTransform parent) {
-		Vector2 newSizeDelta = Vector2.zero;
-		foreach (Transform child in parent) {
-			if (child.gameObject.activeSelf) {
-				newSizeDelta.x += child.GetComponent<RectTransform>().sizeDelta.x + 5;
+		Vector2 newSizeDelta = Vector2.zero; //start with value of 0
+		foreach (RectTransform child in parent) { //go through all children of rect transform
+			if (child.gameObject.activeSelf) { //if the child is active/shown
+				newSizeDelta.x += child.sizeDelta.x + 5; //add to the width
 			}
 		}
 
@@ -527,37 +570,7 @@ public class GameManager : MonoBehaviour {
 			selectedSurvivalWave = 1;
 
 			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
-			ResizeHorizontalLayoutGroup (unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
-			foreach (Transform child in unlocks_outfitsParent) { //check each child
-				if (unlocks.Contains (child.name)) { //see if it has been unlocked
-					child.Find ("Lock").gameObject.SetActive (false); //hide the lock image
-
-					if (child.name.Equals (selectedOutfit)) { //if the child is the selected outfit (and unlocked)
-						child.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
-
-						//get weapon specialization
-					}
-				} else { //outfit not unlocked
-					child.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show outfit in black
-				}
-			}
-
-			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent 
-			foreach (Transform weaponSpecialization in unlocks_weaponsParent) {
-				ResizeHorizontalLayoutGroup (weaponSpecialization.GetComponent<RectTransform> ()); //ensure each weaponspec has enough space
-				foreach (Transform weapon in weaponSpecialization) {
-					if (unlocks.Contains (weapon.name)) { //see if it has been unlocked
-						weapon.Find ("Lock").gameObject.SetActive (false); //hide the lock image
-
-						if (weapon.name.Equals (selectedWeapon)) { //if the child is the selected weapon (and unlocked)
-							weapon.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
-						}
-					} else { //weapon not unlocked
-						weapon.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
-					}
-				}
-			}
-			ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ()); //ensure the weapon area has enough space;
+			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
 
 			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
@@ -568,15 +581,6 @@ public class GameManager : MonoBehaviour {
 
 			campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
 			campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
-
-			foreach (Transform chapter in campaignMissionsParent) {
-				ResizeHorizontalLayoutGroup (chapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
-			}
-			ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>()); //make sure the viewport has enough scroll space
-
-			foreach (string mission in missions) {
-				CompleteCampaignMission (mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
-			}
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
@@ -595,6 +599,11 @@ public class GameManager : MonoBehaviour {
 			currGameState = GameState.Menu;
 
 			ReselectBothOutfitAndWeapon ();
+			StartCoroutine (ResizeAllUIElements ());
+
+			foreach (string mission in missions) { //for each loaded mission
+				CompleteCampaignMission (mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
+			}
 		} else {
 			Destroy (gameObject);
 		}

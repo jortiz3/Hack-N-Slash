@@ -22,6 +22,8 @@ public class DataPersistence {
 
 		PlayerInput.currControlScheme = (ControlScheme)PlayerPrefs.GetInt ("Control Scheme", (int)ControlScheme.Default);
 
+		Door.TutorialDisplayed = PlayerPrefs.GetInt ("Door Tutorial", 0) == 1 ? true : false;
+
 		FileStream file;
 		if (File.Exists (saveLocation)) {
 			file = File.OpenRead (saveLocation);
