@@ -16,6 +16,8 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //	--defeat enemy
 //	--end cutscene
 //	--collect items?
+//if mission complete, skip cutscene;
+//cutscene at end of mission
 //-checkpoints?
 //	--placed in campaign missions, if player dies they can retry from checkpoint; but if they leave mission, they must restart from beginning
 //-Challenges
@@ -57,6 +59,8 @@ public class GameManager : MonoBehaviour {
 	private static GameState prevGameState; //for return buttons
 	public static GameManager currGameManager;
 	public static SurvivalSpawner currSurvivalSpawner;
+	public static Vector3 currPlayerSpawnLocation;
+
 	private static MenuScript menu;
 	private static Toggle soundToggle;
 	private static Slider bgmSlider;
@@ -94,6 +98,7 @@ public class GameManager : MonoBehaviour {
 	private GameObject displayPurchaseConfirmationButton_Weapon;
 	private GameObject purchaseUnsuccessfulPanel;
 	private List<string> selectedOutfit_weaponSpecializations;
+	private bool getDefaultPlayerSpawnLocation;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string[] Missions { get { return missions.ToArray (); } }
@@ -258,7 +263,6 @@ public class GameManager : MonoBehaviour {
 		difficultyChanged = false;
 
 		ClearAllCharacters (); //clear all remaining enemies
-		SpawnPlayer();
 
 		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Level");
 		bool bgNeedsToBeInstantiated = false;
@@ -292,6 +296,13 @@ public class GameManager : MonoBehaviour {
 			GameObject.Instantiate (Resources.Load (bgFilePath), bgParent);//instantiate background
 			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
 		}
+
+		if (getDefaultPlayerSpawnLocation) {
+			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position;
+			getDefaultPlayerSpawnLocation = false;
+		}
+
+		SpawnPlayer();
 
 		Time.timeScale = 1f;
 
@@ -402,8 +413,9 @@ public class GameManager : MonoBehaviour {
 			//player is unable to play the level -- inform them they cannot play?
 			return;
 		}
-		selectedCampaignMission = buttonWithLockAsChild.name;
-		StartCoroutine (LoadLevel ());
+		getDefaultPlayerSpawnLocation = true; //ensure we get the default spawn location for the level
+		selectedCampaignMission = buttonWithLockAsChild.name; //set this as the selected mission
+		StartCoroutine (LoadLevel ()); //load the level
 	}
 
 	public void SelectOutfit (string OutfitName) {
@@ -504,7 +516,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private void SpawnPlayer() {
-		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit));
+		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit), currPlayerSpawnLocation, Quaternion.Euler(Vector3.zero));
 		Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
 		Character.player.Wield(w);
 	}
@@ -569,6 +581,8 @@ public class GameManager : MonoBehaviour {
 
 			selectedSurvivalWave = 1;
 
+			currPlayerSpawnLocation = Vector3.zero;
+
 			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
 			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
 
@@ -631,6 +645,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartSurvivalWave() {
+		getDefaultPlayerSpawnLocation = true;
 		StartCoroutine(LoadLevel());
 	}
 
