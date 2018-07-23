@@ -29,9 +29,9 @@ public class Player : Character {
 
 	public override void Die () {
 		if (infiniteRespawn) {
-			Respawn (Vector3.zero);
+			Respawn (GameManager.currPlayerSpawnLocation);
 		} else if (numOfRespawnsRemaining > 0) {
-			Respawn (Vector3.zero);
+			Respawn (GameManager.currPlayerSpawnLocation);
 			numOfRespawnsRemaining--;
 		} else {
 			if (GameManager.currGameState == GameState.Active) {

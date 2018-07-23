@@ -12,6 +12,15 @@ public class Cutscene : MonoBehaviour {
 	private static AudioSource soundEffectAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
 	private static Text subtitleText; //pointer to the text on the cutscene we will change -- attached to child of the cutscene object
 
+	[SerializeField, Tooltip("If true, will complete the mission once the cutscene is complete.")]
+	private bool endMissionOnFinish = false;
+	[SerializeField, Tooltip("If left null, will not spawn anything.")]
+	private Boss bossToSpawn;
+	[SerializeField, Tooltip("Location to spawn the boss. If left null, will spawn on cutscene object location.")]
+	private Transform bossSpawnLocation;
+	[SerializeField, Tooltip ("Can be used to lock the player into a specific location/area (Set parent gameobject active once they are inside).")]
+	private GameObject gameObjectToEnableOnCutsceneEnd;
+
 	[SerializeField]
 	private Scene[] scenes; // all of the data for the cutscene stored in this script -- edited in the unity inspector
 
@@ -20,6 +29,7 @@ public class Cutscene : MonoBehaviour {
 	private float currDisplayTime; //how much time is left for current narration
 	private float currDelayTime; //delay between scenes to give player time to process what they have seen
 	private bool delayComplete;
+	private bool ended;
 
 	private void ClearNarrationText() {
 		subtitleText.text = "";
@@ -27,6 +37,27 @@ public class Cutscene : MonoBehaviour {
 
 	private void ClearSprite() {
 		image.sprite = null;
+	}
+
+	public void EndCutscene() {
+		if (ended)
+			return;
+
+		if (gameObjectToEnableOnCutsceneEnd != null) { //if there is a gameobject we need to show
+			gameObjectToEnableOnCutsceneEnd.SetActive (true); //show the gameobject
+		}
+
+		if (bossToSpawn != null) { //if there is a boss to spawn
+			Vector3 SpawnLoc = transform.position; //set initial spawn location to this object position
+			if (bossSpawnLocation != null) { //if there is a different position to spawn the boss
+				SpawnLoc = bossSpawnLocation.position; //change location
+			}
+			Instantiate (bossToSpawn, SpawnLoc, Quaternion.Euler (Vector3.zero)); //spawn the boss
+		}
+
+		StopAllAudio(); //may not be necessary
+		GameManager.currGameManager.StopCutscene (this, endMissionOnFinish); //inform game manager cutscene is complete
+		ended = true; //ensure we don't spawn multiple bosses
 	}
 
 	void FixedUpdate () {
@@ -55,8 +86,7 @@ public class Cutscene : MonoBehaviour {
 			currDelayTime = 2f; //set delay so player can process
 			delayComplete = false;
 		} else { //no more scenes
-			StopAllAudio(); //may not be necessary
-			GameManager.currGameManager.StopCutscene (this); //inform game manager cutscene is complete
+			EndCutscene();
 		}
 	}
 
@@ -102,6 +132,7 @@ public class Cutscene : MonoBehaviour {
 		}
 
 		delayComplete = true;
+		ended = false;
 
 		currScene = 0; //set to the first scene
 		currNarration = -1; //set position just behind first narration text

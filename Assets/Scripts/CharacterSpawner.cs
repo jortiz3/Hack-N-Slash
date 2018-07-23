@@ -46,16 +46,18 @@ public class CharacterSpawner : MonoBehaviour {
 	}
 
 	void Update () {
-		if (!Depleted) {
-			if (spawnTimer > 0) {
-				spawnTimer -= Time.deltaTime;
-			} else {
-				InstantiateSpawn ();
+		if (GameManager.currGameState == GameState.Active) {
+			if (!Depleted) {
+				if (spawnTimer > 0) {
+					spawnTimer -= Time.deltaTime;
+				} else {
+					InstantiateSpawn ();
 
-				if (!randomizeAll)
-					spawnTimer = Random.Range (spawnTimeRange.x, spawnTimeRange.y);
-				else
-					spawnTimer = Random.Range (1f, 8f);
+					if (!randomizeAll)
+						spawnTimer = Random.Range (spawnTimeRange.x, spawnTimeRange.y);
+					else
+						spawnTimer = Random.Range (1f, 8f);
+				}
 			}
 		}
 	}

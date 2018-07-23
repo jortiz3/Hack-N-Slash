@@ -11,15 +11,14 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-different ways to complete mission
+//-End mission screen
+//	--mission complete
+//	--mission fail
+//-different ways to complete mission -- cutscenes begin & end every mission
 //	--reach location
 //	--defeat enemy
-//	--end cutscene
 //	--collect items?
-//if mission complete, skip cutscene;
-//cutscene at end of mission
-//-checkpoints?
-//	--placed in campaign missions, if player dies they can retry from checkpoint; but if they leave mission, they must restart from beginning
+//	--puzzle?
 //-Challenges
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
@@ -75,6 +74,7 @@ public class GameManager : MonoBehaviour {
 	private static int currency;
 	private static List<string> unlocks;
 	private static List<string> missions;
+	private static Cutscene currCutscene;
 
 	private string selectedCampaignMission;
 	private Transform campaignMissionsParent;
@@ -121,7 +121,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void CompleteCurrentCampaignMission() {
-		CompleteCampaignMission (selectedCampaignMission, true);
+		//give currency
+		CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
+		StartCampaign(); //display mission complete screen
 	}
 
 	private void CompleteCampaignMission (string missionName, bool saveCompletionToArray) {
@@ -324,7 +326,8 @@ public class GameManager : MonoBehaviour {
 
 	public void PlayCutscene(Cutscene c) {
 		cutsceneParent.gameObject.SetActive(true); //show cutscene parent -- image, subtitles, etc.
-		c.gameObject.SetActive (true); //ensure the cutscene object can update
+		currCutscene = c;
+		currCutscene.gameObject.SetActive (true); //ensure the cutscene object can update
 		currGameState = GameState.Cutscene; //change gamestate
 	}
 
@@ -522,6 +525,12 @@ public class GameManager : MonoBehaviour {
 		ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
 	}
 
+	public void SkipCurrentCutscene() {
+		if (missions.Contains(selectedCampaignMission)) { //if the player has already beaten the current mission
+			currCutscene.EndCutscene (); //allow them to skip the cutscene
+		}
+	}
+
 	private void SpawnPlayer() {
 		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit), currPlayerSpawnLocation, Quaternion.Euler(Vector3.zero));
 		Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
@@ -661,6 +670,14 @@ public class GameManager : MonoBehaviour {
 		cutsceneParent.gameObject.SetActive (false); //hide pictures, subtitles, etc.
 		c.gameObject.SetActive (false); //prevent cutscene from updating further
 		currGameState = GameState.Active; //change gamestate
+	}
+
+	public void StopCutscene (Cutscene c, bool completeMission) {
+		StopCutscene (c);
+
+		if (completeMission) {
+			CompleteCurrentCampaignMission (); //mark mission as complete
+		}
 	}
 
 	public void ToggleSoundEnabled(Toggle UIToggle) {
