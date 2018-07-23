@@ -60,6 +60,7 @@ public class GameManager : MonoBehaviour {
 	public static GameManager currGameManager;
 	public static SurvivalSpawner currSurvivalSpawner;
 	public static Vector3 currPlayerSpawnLocation;
+	public static Transform cutsceneParent;
 
 	private static MenuScript menu;
 	private static Toggle soundToggle;
@@ -158,10 +159,6 @@ public class GameManager : MonoBehaviour {
 		}
 
 		UpdateSurvivalDisplayText ();
-	}
-
-	public void EndCutscene() {
-		currGameState = GameState.Active;
 	}
 
 	public void EndSurvivalWave(string waveInfo) {
@@ -297,12 +294,16 @@ public class GameManager : MonoBehaviour {
 			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
 		}
 
-		if (getDefaultPlayerSpawnLocation) {
-			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position;
-			getDefaultPlayerSpawnLocation = false;
+		if (getDefaultPlayerSpawnLocation) { //if we need to get the location
+			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position; //get the location from the level
+			getDefaultPlayerSpawnLocation = false; //reset the bool in case we need to use checkpoint location next time level is loaded
 		}
 
-		SpawnPlayer();
+		if (nextGameState == GameState.Cutscene) { //if a mission if being loaded
+			PlayCutscene (bgParent.GetChild(0).Find("Start_Cutscene").GetComponent<Cutscene>()); //play opening cutscene
+		}
+
+		SpawnPlayer(); //spawn player after we get the location
 
 		Time.timeScale = 1f;
 
@@ -319,6 +320,12 @@ public class GameManager : MonoBehaviour {
 		prevGameState = currGameState;
 		currGameState = GameState.Paused;
 		Time.timeScale = 0f;
+	}
+
+	public void PlayCutscene(Cutscene c) {
+		cutsceneParent.gameObject.SetActive(true); //show cutscene parent -- image, subtitles, etc.
+		c.gameObject.SetActive (true); //ensure the cutscene object can update
+		currGameState = GameState.Cutscene; //change gamestate
 	}
 
 	public void PurchaseSelectedItem() {
@@ -533,6 +540,7 @@ public class GameManager : MonoBehaviour {
 			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
 			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
 			loadingScreen = menu.transform.GetChild (menu.transform.childCount - 1).GetComponent<Image> ();
+			cutsceneParent = menu.transform.Find ("Cutscene");
 
 			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
 			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
@@ -647,6 +655,12 @@ public class GameManager : MonoBehaviour {
 	public void StartSurvivalWave() {
 		getDefaultPlayerSpawnLocation = true;
 		StartCoroutine(LoadLevel());
+	}
+
+	public void StopCutscene(Cutscene c) {
+		cutsceneParent.gameObject.SetActive (false); //hide pictures, subtitles, etc.
+		c.gameObject.SetActive (false); //prevent cutscene from updating further
+		currGameState = GameState.Active; //change gamestate
 	}
 
 	public void ToggleSoundEnabled(Toggle UIToggle) {

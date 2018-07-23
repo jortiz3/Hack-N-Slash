@@ -122,7 +122,6 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	}
 
 	protected override void UpdateEnemy () {
-
 		if (remainingSpawns > 0) { //spawn minions
 			if (!isFlinching && !isAttacking && isOnGround) {
 				if (spawnTimer <= 0) {

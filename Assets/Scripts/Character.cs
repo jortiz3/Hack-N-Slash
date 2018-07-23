@@ -396,6 +396,10 @@ public abstract class Character : MonoBehaviour {
 		}
 	}
 
+	protected void StopMovement() {
+		rb2D.velocity = Vector2.zero;
+	}
+
 	protected void StopRotation() {
 		rb2D.angularVelocity = 0;
 	}

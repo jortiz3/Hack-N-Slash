@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class Cutscene : MonoBehaviour {
 
-	private static GameObject cutsceneObject; //pointer to object within the main scene that will display the image and text
 	private static Image image; //pointer to the image on the cutscene object we will change -- attached to the cutscene object
 	private static AudioSource narrationAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
 	private static AudioSource soundEffectAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
@@ -57,8 +56,7 @@ public class Cutscene : MonoBehaviour {
 			delayComplete = false;
 		} else { //no more scenes
 			StopAllAudio(); //may not be necessary
-			cutsceneObject.SetActive(false); //hide cutscene object
-			GameManager.currGameManager.EndCutscene (); //inform game manager cutscene is complete
+			GameManager.currGameManager.StopCutscene (this); //inform game manager cutscene is complete
 		}
 	}
 
@@ -96,21 +94,19 @@ public class Cutscene : MonoBehaviour {
 	}
 
 	void Start() {
-		if (cutsceneObject == null) {
-			cutsceneObject = GameManager.currGameManager.transform.Find("Canvas (Overlay)").Find ("Cutscene").gameObject; //get the cutscene object so we can show/hide it later on
-			narrationAudioSource = cutsceneObject.transform.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
-			soundEffectAudioSource = cutsceneObject.transform.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
-			image = cutsceneObject.transform.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
-			subtitleText = cutsceneObject.transform.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
+		if (narrationAudioSource == null) {
+			narrationAudioSource = GameManager.cutsceneParent.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
+			soundEffectAudioSource = GameManager.cutsceneParent.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
+			image = GameManager.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
+			subtitleText = GameManager.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
+
+		delayComplete = true;
 
 		currScene = 0; //set to the first scene
 		currNarration = -1; //set position just behind first narration text
 
 		SetSprite (); //show the first sprite
-
-		cutsceneObject.SetActive (true); //show the cutscene object
-
 		NextNarration (); //increment to first narration
 	}
 
