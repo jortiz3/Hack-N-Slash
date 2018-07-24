@@ -37,9 +37,10 @@ public class Player : Character {
 			if (GameManager.currGameState == GameState.Active) {
 				switch (GameManager.currGameMode) {
 				case GameMode.Campaign:
+					GameManager.currGameManager.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager.currGameManager.EndSurvivalWave ("died");
+					GameManager.currGameManager.EndSurvivalWave ("died"); //fail survival
 					break;
 				}
 			}

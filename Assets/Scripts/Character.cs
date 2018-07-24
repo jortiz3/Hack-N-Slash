@@ -261,6 +261,9 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
+		if (GameManager.currGameState != GameState.Active)
+			return;
+
 		if (!isInvulnerable) { //enemies typically never invulnerable
 			if (!isFlinching) {
 				if (gameObject.tag.Equals ("Player")) {

@@ -8,6 +8,8 @@ public class Door : MonoBehaviour {
 
 	//private Key keyToUnlockDoor;
 	[SerializeField]
+	private Cutscene cutsceneToPlay;
+	[SerializeField]
 	private Transform locationToMoveTo;
 	[SerializeField]
 	private float timeDelay;
@@ -40,8 +42,8 @@ public class Door : MonoBehaviour {
 		if (locationToMoveTo != null) {
 			charactersToMove.Add (new GameObjectToMove(other.gameObject, timeDelay));
 			other.gameObject.SetActive (false);
-		} else {
-			//end campaign mission?
+		} else if (cutsceneToPlay != null){
+			GameManager.currGameManager.PlayCutscene (cutsceneToPlay);
 		}
 		//}
 

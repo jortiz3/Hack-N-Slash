@@ -11,12 +11,9 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-End mission screen
-//	--mission complete
-//	--mission fail
 //-different ways to complete mission -- cutscenes begin & end every mission
-//	--reach location
-//	--defeat enemy
+//	--reach location -- complete (via checkpoint)
+//	--defeat enemy -- add cutscene to play upon enemy death
 //	--collect items?
 //	--puzzle?
 //-Challenges
@@ -72,6 +69,7 @@ public class GameManager : MonoBehaviour {
 	private static string selectedWeapon;
 	private static string selectedWeaponSpecialization;
 	private static int currency;
+	private static int currencyEarned;
 	private static List<string> unlocks;
 	private static List<string> missions;
 	private static Cutscene currCutscene;
@@ -79,6 +77,7 @@ public class GameManager : MonoBehaviour {
 	private string selectedCampaignMission;
 	private Transform campaignMissionsParent;
 	private Transform campaignTabsParent;
+	private Transform missionReportParent;
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
@@ -121,12 +120,21 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void CompleteCurrentCampaignMission() {
-		//give currency
-		CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
-		StartCampaign(); //display mission complete screen
+		int missionCompleteBonus = 200; //add completion bonus for currency
+		if (missions.Contains (selectedCampaignMission)) { //mission previously completed
+			missionCompleteBonus = (int)(missionCompleteBonus * 0.05f); //reduce completion bonus
+		} else { //not previously completed
+			CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
+		}
+		currencyEarned += missionCompleteBonus;
+		currency += currencyEarned; //add the currency the player earned
+		StartCampaign(); //display campaign screen
+		DisplayMissionReportScreen (true); //show the mission report
+		DataPersistence.Save();
+		Time.timeScale = 0f;
 	}
 
-	private void CompleteCampaignMission (string missionName, bool saveCompletionToArray) {
+	private void CompleteCampaignMission (string missionName, bool saveCompletionToArray) { //used in start method and at end of missions
 		string[] missionInfo = missionName.Split ('_'); //split the name of the mission -- example: "Chapter 1_Mission 1" -> {"Chapter 1", "Mission 1"}
 
 		Transform currChapterTransform = campaignMissionsParent.Find(missionInfo[0]); //find chapter transform using first piece of mission info -- "Chapter 1"
@@ -134,8 +142,9 @@ public class GameManager : MonoBehaviour {
 
 		currMissionTransform.Find ("Lock").gameObject.SetActive (false); //hide the lock
 		currMissionTransform.Find ("Complete").gameObject.SetActive (true); //show mission as complete
-		if (saveCompletionToArray)
+		if (saveCompletionToArray) {
 			missions.Add (selectedCampaignMission); //record current mission as complete
+		}
 
 		int currMissionIndex = currMissionTransform.GetSiblingIndex (); //get sibling index -- 0
 
@@ -153,6 +162,10 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+	public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
+		currencyEarned += amount; //add the amount the object is worth
+	}
+
 	public void DecrementSelectedSurvivalWave() {
 		if (selectedSurvivalWave > 1) {
 			selectedSurvivalWave--;
@@ -163,12 +176,32 @@ public class GameManager : MonoBehaviour {
 		UpdateSurvivalDisplayText ();
 	}
 
+	private void DisplayMissionReportScreen(bool missionSuccessful) {
+		Text result = missionReportParent.Find ("Result").GetComponent<Text> ();
+		Text info = missionReportParent.Find ("Info").GetComponent<Text> ();
+		missionReportParent.Find ("Mission Report Retry Button").gameObject.SetActive (!missionSuccessful);
+
+		if (missionSuccessful) {
+			result.text = "Mission Complete!";
+			result.color = Color.green;
+
+			info.text = "Mission Rating: A+\nCurrency Earned: " + currencyEarned + "\nTotal currency: " + currency;
+		} else {
+			result.text = "Mission Failure";
+			result.color = Color.black;
+
+			info.text = "Mission Rating: F\nCurrency Earned: " + currencyEarned + "\nTotal currency: " + currency;
+		}
+
+		missionReportParent.gameObject.SetActive (true);
+	}
+
 	public void EndSurvivalWave(string waveInfo) {
 		if (waveInfo.Equals ("survived")) {
 			if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
 				selectedSurvivalWave++; //encourage them to play the next one
 
-			int currencyEarned = 0; //track how much currency we earned
+			currencyEarned = 0; //track how much currency we earned
 			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
 				currencyEarned++; //1 currency for completing for the first time
 
@@ -232,6 +265,13 @@ public class GameManager : MonoBehaviour {
 		Application.Quit ();
 	}
 
+	public void FailCurrentCampaignMission() {
+		currencyEarned = 0;
+		StartCampaign(); //display campaign screen
+		DisplayMissionReportScreen (false); //show the mission report
+		Time.timeScale = 0f;
+	}
+
 	public void FilterVisibleWeaponUnlocks() {
 		foreach (Transform WeaponSpecialization in unlocks_weaponsParent) {
 			if (selectedOutfit_weaponSpecializations.Contains (WeaponSpecialization.name)) {
@@ -259,7 +299,8 @@ public class GameManager : MonoBehaviour {
 		loadingScreen.raycastTarget = true;
 		currGameState = GameState.Loading;
 
-		difficultyChanged = false;
+		difficultyChanged = false; //show the player has not changed the difficulty yet during this mission
+		currencyEarned = 0; //show the player has not earned any currency yet for this mission
 
 		ClearAllCharacters (); //clear all remaining enemies
 
@@ -398,13 +439,19 @@ public class GameManager : MonoBehaviour {
 
 	public void ResizeHorizontalLayoutGroup (RectTransform parent) {
 		Vector2 newSizeDelta = Vector2.zero; //start with value of 0
+		float spacing = parent.GetComponent<HorizontalLayoutGroup>().spacing;
 		foreach (RectTransform child in parent) { //go through all children of rect transform
 			if (child.gameObject.activeSelf) { //if the child is active/shown
-				newSizeDelta.x += child.sizeDelta.x + 5; //add to the width
+				newSizeDelta.x += child.sizeDelta.x + spacing; //add to the width
 			}
 		}
 
 		parent.sizeDelta = newSizeDelta;
+	}
+
+	public void RetryCampaignMission() { //player just failed a mission
+		getDefaultPlayerSpawnLocation = false; //if a checkpoint was triggered, then we will start from there
+		StartCoroutine (LoadLevel ());
 	}
 
 	public void ReturnToMainMenu() {
@@ -538,7 +585,11 @@ public class GameManager : MonoBehaviour {
 	}
 
 	private void SpawnSurvivalSpawner() {
-		Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
+		if (currSurvivalSpawner != null) {
+			currSurvivalSpawner.gameObject.SetActive (true);
+		} else {
+			Instantiate (Resources.Load ("Spawners/SurvivalSpawner"));
+		}
 	}
 
 	void Start () {
@@ -612,6 +663,8 @@ public class GameManager : MonoBehaviour {
 
 			campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
 			campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
+			missionReportParent = GameObject.Find ("Mission Report").transform;
+			missionReportParent.gameObject.SetActive (false);
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
@@ -641,7 +694,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void StartCampaign() {
-		ClearAllCharacters();
+		if (currSurvivalSpawner != null) {
+			currSurvivalSpawner.gameObject.SetActive(false);
+		}
 
 		currGameMode = GameMode.Campaign;
 		currGameState = GameState.Menu;
@@ -651,7 +706,6 @@ public class GameManager : MonoBehaviour {
 	public void StartSurvival() {
 		if (SceneManager.GetActiveScene ().name != "Main")
 			SceneManager.LoadScene ("Main");
-		ClearAllCharacters();
 
 		SpawnSurvivalSpawner();
 
