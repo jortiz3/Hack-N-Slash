@@ -21,7 +21,7 @@ public class CloudScript : MonoBehaviour {
 	}
 
 	void FixedUpdate () {
-		if (GameManager.currGameState == GameState.Active || GameManager.currGameState == GameState.Cutscene) {
+		if (GameManager.currGameState == GameState.Active) {
 			if (image.enabled) {
 				transform.position += speed;
 

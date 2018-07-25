@@ -34,6 +34,8 @@ public class PlayerInput : MonoBehaviour {
 	private bool joystick_up;
 	private bool joystick_down;
 
+	private bool joystick_max_up;
+
 	public void Attack() {
 		if (joystickDirection != Vector3.zero) { //holding the joy stick
 			if (joystick_up) {
@@ -110,7 +112,13 @@ public class PlayerInput : MonoBehaviour {
 									Character.player.ReceivePlayerInput ("Attack_Backward");
 								break;
 							case "swipe_up":
-								Character.player.ReceivePlayerInput ("Attack_Up");
+								if (Character.player.isOnGround && Mathf.Abs (Character.player.Velocity.x) < 0.01f) { //if the player is on the ground and is not moving
+									if (Character.player.DoorInRange != null) { //player is in front of a door and has not attempted to open a locked door
+										Character.player.DoorInRange.EnterDoor (Character.player); //open the door
+									}
+								} else { //player is moving or in the air
+									Character.player.ReceivePlayerInput ("Attack_Up"); //attack normally
+								}
 								break;
 							case "swipe_down":
 								Character.player.ReceivePlayerInput ("Attack");
@@ -149,28 +157,38 @@ public class PlayerInput : MonoBehaviour {
 						joystick_left = false;
 						joystick_down = false;
 						joystick_up = false;
+						joystick_max_up = false;
 					} else if (joystickAngle < 2.09) { //holding up
 						joystick_right = false;
 						joystick_left = false;
 						joystick_down = false;
 						joystick_up = true;
+
+						if (joystickDirection.y > 0.85f) {
+							joystick_max_up = true;
+						} else {
+							joystick_max_up = false;
+						}
 					} else if (joystickAngle < 4.18) { //holding left
 						Character.player.ReceivePlayerInput ("Run" + joystickDirection.x.ToString ());
 						joystick_right = false;
 						joystick_left = true;
 						joystick_down = false;
 						joystick_up = false;
+						joystick_max_up = false;
 					} else if (joystickAngle < 5.49) { //holding down
 						joystick_right = false;
 						joystick_left = false;
 						joystick_down = true;
 						joystick_up = false;
+						joystick_max_up = false;
 					}
 				} else {
 					joystick_right = false;
 					joystick_left = false;
 					joystick_down = false;
 					joystick_up = false;
+					joystick_max_up = false;
 				}
 			}//end control scheme if
 		}// end gamestate if
@@ -279,7 +297,7 @@ public class PlayerInput : MonoBehaviour {
 	void Update() {
 		if (editModeEnabled) {
 			if (Input.touchCount == 1) { //reposition
-				Vector2 currTouchPos = Input.GetTouch(0).position; //get the current touch
+				Vector2 currTouchPos = Input.GetTouch (0).position; //get the current touch
 				if ((currTouchPos - (Vector2)editObject.position).magnitude < editObject.sizeDelta.magnitude / 2) { //if the touch is close enough to the current object
 					float marginWidth = Screen.width * 0.05f; //get the current margin the left and right sides of the screen
 					if (currTouchPos.x > marginWidth && currTouchPos.x < Screen.width - marginWidth) { //ensure the player is dragging between the margins
@@ -290,7 +308,7 @@ public class PlayerInput : MonoBehaviour {
 					}
 				}
 			} else if (Input.touchCount == 2) { //scale if 2 fingers being used
-				Touch firstTouch = Input.GetTouch(0);
+				Touch firstTouch = Input.GetTouch (0);
 				Touch secondTouch = Input.GetTouch (1); //get both fingers
 
 				firstTouchPrevPos = firstTouch.position - firstTouch.deltaPosition;
@@ -302,13 +320,24 @@ public class PlayerInput : MonoBehaviour {
 				float ScaleModifier = (firstTouch.deltaPosition - secondTouch.deltaPosition).magnitude * scaleSpeed; //how much will we be changing the scale this frame
 				Vector3 newScale = editObject.localScale; //get the current scale
 				if (prevTouchDifference > currTouchDifference) { //previous distance greater than current -- fingers pinching -- we want the object to get smaller
-					newScale = new Vector3(Mathf.Clamp(newScale.x - ScaleModifier,0.5f,2f),Mathf.Clamp(newScale.y - ScaleModifier,0.5f,2f),Mathf.Clamp(newScale.z - ScaleModifier,0.5f,2f)); //decrease scale, but clamp
+					newScale = new Vector3 (Mathf.Clamp (newScale.x - ScaleModifier, 0.5f, 2f), Mathf.Clamp (newScale.y - ScaleModifier, 0.5f, 2f), Mathf.Clamp (newScale.z - ScaleModifier, 0.5f, 2f)); //decrease scale, but clamp
 				} else if (prevTouchDifference < currTouchDifference) { //previous distance less than current -- fingers spreading -- we want the object to get bigger
-					newScale = new Vector3(Mathf.Clamp(newScale.x + ScaleModifier,0.5f,2f),Mathf.Clamp(newScale.y + ScaleModifier,0.5f,2f),Mathf.Clamp(newScale.z + ScaleModifier,0.5f,2f)); //increase scale, but clamp
+					newScale = new Vector3 (Mathf.Clamp (newScale.x + ScaleModifier, 0.5f, 2f), Mathf.Clamp (newScale.y + ScaleModifier, 0.5f, 2f), Mathf.Clamp (newScale.z + ScaleModifier, 0.5f, 2f)); //increase scale, but clamp
 				}
 				editObject.localScale = newScale; //apply the new scale
 			}
-		} //end edit enabled
+		} else if (GameManager.currGameState == GameState.Active && currControlScheme == ControlScheme.Default) { //if the game is active
+			if (Character.player.gameObject.activeSelf) { //if the player isn't currently in a door
+				if (Character.player.isOnGround && Mathf.Abs (Character.player.Velocity.x) < 0.01f) { //if the player is on the ground and is not moving
+					if (Character.player.DoorInRange != null) { //player is in front of a door and has not attempted to open a locked door
+						if (joystick_max_up) { //player is tilting the joystick to the max
+							Character.player.DoorInRange.EnterDoor (Character.player);
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 	struct TouchInfo {

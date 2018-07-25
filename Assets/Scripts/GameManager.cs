@@ -11,6 +11,9 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
+//-finish doors
+//	--player not moving, is on ground, joystick is up to go through door && has key
+//-finish items
 //-different ways to complete mission -- cutscenes begin & end every mission
 //	--reach location -- complete (via checkpoint)
 //	--defeat enemy -- add cutscene to play upon enemy death
@@ -68,10 +71,11 @@ public class GameManager : MonoBehaviour {
 	private static string selectedOutfit;
 	private static string selectedWeapon;
 	private static string selectedWeaponSpecialization;
-	private static int currency;
-	private static int currencyEarned;
-	private static List<string> unlocks;
-	private static List<string> missions;
+	private static int currency; //currency player currently has
+	private static int currencyEarned; //currency player has recently earned
+	private static List<string> unlocks; //outfits & weapons player has unlocked
+	private static List<string> missions; //missions player has already completed
+	private static List<string> items; //which currency objects player has already obtained
 	private static Cutscene currCutscene;
 
 	private string selectedCampaignMission;
@@ -102,6 +106,7 @@ public class GameManager : MonoBehaviour {
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string[] Missions { get { return missions.ToArray (); } }
+	public static string[] Items { get { return items.ToArray (); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
@@ -617,6 +622,7 @@ public class GameManager : MonoBehaviour {
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 			unlocks = new List<string>();
 			missions = new List<string> ();
+			items = new List<string> ();
 
 			if (loadedData != null) {
 				currency = loadedData.currency;
@@ -625,7 +631,7 @@ public class GameManager : MonoBehaviour {
 				unlocks.AddRange (loadedData.unlocks);
 				//challenges
 				missions.AddRange (loadedData.missions);
-				//extra00
+				items.AddRange (loadedData.items);
 				//extra01
 				//extra02
 			} else {

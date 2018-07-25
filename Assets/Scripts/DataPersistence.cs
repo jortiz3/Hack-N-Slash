@@ -11,7 +11,7 @@ public class DataPersistence {
 
 	public static PlayerData Load() {
 		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
-		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
+		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled", 1) == 1 ? true : false; //set the sound toggle using the stored playerpref
 
 		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
 		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume", 0.5f); //set the sound effects volume using the stored playerpref
@@ -53,7 +53,7 @@ public class DataPersistence {
 		playerData.unlocks = GameManager.Unlocks;
 		//challenges
 		playerData.missions = GameManager.Missions; 
-		//extra00
+		playerData.items = GameManager.Items;
 		//extra01
 		//extra02
 
