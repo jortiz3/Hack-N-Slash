@@ -11,9 +11,10 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-finish doors
-//	--player not moving, is on ground, joystick is up to go through door && has key
+//-fix level spawning, world boundaries -- move everything to sprites
 //-finish items
+//		--in loadlevel(), go through item list, show previously collected items differently -- partially see through? different color?
+//		--resolve checkpoints and previously collected items -- level is destroyed and reloaded
 //-different ways to complete mission -- cutscenes begin & end every mission
 //	--reach location -- complete (via checkpoint)
 //	--defeat enemy -- add cutscene to play upon enemy death
@@ -71,14 +72,16 @@ public class GameManager : MonoBehaviour {
 	private static string selectedOutfit;
 	private static string selectedWeapon;
 	private static string selectedWeaponSpecialization;
+	private static string selectedCampaignMission;
 	private static int currency; //currency player currently has
 	private static int currencyEarned; //currency player has recently earned
 	private static List<string> unlocks; //outfits & weapons player has unlocked
 	private static List<string> missions; //missions player has already completed
-	private static List<string> items; //which currency objects player has already obtained
+	private static List<string> items; //which objects player has already obtained -- i.e. "Chapter 1_Prologue_Currency01"
+	private static List<string> checkpointItems; //which objects the player has obtained up until the current checkpoint
 	private static Cutscene currCutscene;
 
-	private string selectedCampaignMission;
+
 	private Transform campaignMissionsParent;
 	private Transform campaignTabsParent;
 	private Transform missionReportParent;
@@ -110,6 +113,7 @@ public class GameManager : MonoBehaviour {
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
+	public static string SelectedCampaignMission { get { return selectedCampaignMission; } }
 	public static bool SoundEnabled { get { return soundToggle.isOn; } set { soundToggle.isOn = value; } }
 	public static float BGMVolume { get { return bgmSlider.value; } set { bgmSlider.value = value; } }
 	public static float SFXVolume { get { return sfxSlider.value; } set { sfxSlider.value = value; } }
@@ -132,6 +136,7 @@ public class GameManager : MonoBehaviour {
 			CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
 		}
 		currencyEarned += missionCompleteBonus;
+		RecordItemsObtainedByPlayer (ref items, true, true); //adds items to remembered items and increases currency earned
 		currency += currencyEarned; //add the currency the player earned
 		StartCampaign(); //display campaign screen
 		DisplayMissionReportScreen (true); //show the mission report
@@ -272,6 +277,7 @@ public class GameManager : MonoBehaviour {
 
 	public void FailCurrentCampaignMission() {
 		currencyEarned = 0;
+		RecordItemsObtainedByPlayer (ref checkpointItems, false, false);
 		StartCampaign(); //display campaign screen
 		DisplayMissionReportScreen (false); //show the mission report
 		Time.timeScale = 0f;
@@ -344,6 +350,7 @@ public class GameManager : MonoBehaviour {
 
 		if (getDefaultPlayerSpawnLocation) { //if we need to get the location
 			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position; //get the location from the level
+			checkpointItems.Clear(); //reset the items the player has collected since the last checkpoint
 			getDefaultPlayerSpawnLocation = false; //reset the bool in case we need to use checkpoint location next time level is loaded
 		}
 
@@ -351,7 +358,11 @@ public class GameManager : MonoBehaviour {
 			PlayCutscene (bgParent.GetChild(0).Find("Start_Cutscene").GetComponent<Cutscene>()); //play opening cutscene
 		}
 
-		SpawnPlayer(); //spawn player after we get the location
+		SpawnPlayer(); //spawn player after we get the location and after the cutscene
+
+		if (!getDefaultPlayerSpawnLocation) {
+			//somehow give the player the items they had before
+		}
 
 		Time.timeScale = 1f;
 
@@ -390,6 +401,22 @@ public class GameManager : MonoBehaviour {
 			}
 		} else {
 			purchaseUnsuccessfulPanel.SetActive (true); //unable to purchase; inform the player
+		}
+	}
+
+	private void RecordItemsObtainedByPlayer(ref List<string> list, bool onlySingleAcquirance, bool rewardCurrency) {
+		string itemName;
+		foreach (Item i in Character.player.Inventory) {
+			if (!onlySingleAcquirance || onlySingleAcquirance && i.SingleAcquirance) {
+				itemName = i.ToString();
+				if (!list.Contains (itemName)) {
+					list.Add (itemName);
+
+					if (rewardCurrency && itemName.Contains("Currency")) {
+						currencyEarned += 50;
+					}
+				}
+			}
 		}
 	}
 
@@ -623,6 +650,7 @@ public class GameManager : MonoBehaviour {
 			unlocks = new List<string>();
 			missions = new List<string> ();
 			items = new List<string> ();
+			checkpointItems = new List<string> ();
 
 			if (loadedData != null) {
 				currency = loadedData.currency;

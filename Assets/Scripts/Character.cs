@@ -59,6 +59,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
 	public Door DoorInRange { get { return doorInRange; } set { doorInRange = value; } }
 	public Color SpriteColor { get { return sr.color; } }
+	public Item[] Inventory { get { return inventory.ToArray(); } }
 
 	protected void AddTorque (float torque) {
 		rb2D.AddTorque (torque);
@@ -202,7 +203,7 @@ public abstract class Character : MonoBehaviour {
 	public bool HasItem (string itemName, int quantity) { //character collected enough parts for weapon?
 		int total = 0; //total number of the item that this character has
 		for (int i = 0; i < inventory.Count; i++) { //go through inventory
-			if (inventory [i].name.Equals (itemName)) { //if item name matches
+			if (inventory [i].ToString().Equals (itemName)) { //if item name matches
 				total++; //add to the total
 				if (total >= quantity) //if the character has enough
 					return true; //return true

@@ -87,7 +87,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void FixedUpdate() {
-		if (GameManager.currGameState == GameState.Active) {
+		if (GameManager.currGameState == GameState.Active && Character.player != null) {
 			if (PlayerInput.currControlScheme == ControlScheme.Buttonless) {
 				if (Input.touchCount > 0) { //if the player is touching the screen
 					Touch currTouch;

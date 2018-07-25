@@ -9,15 +9,13 @@ public class Checkpoint : MonoBehaviour {
 
 	private AudioSource aSource;
 	[SerializeField]
-	private AudioClip soundEffect;
-	[SerializeField]
 	private Cutscene cutsceneToTrigger;
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (!GameManager.currPlayerSpawnLocation.Equals(transform.position)) { //if the current spawn location is not this checkpoint
 			GameManager.currPlayerSpawnLocation = transform.position; //set this checkpoint as spawn location
 
-			if (soundEffect != null && GameManager.SoundEnabled) { //if there is a sound effect & sound is enabled
+			if (GameManager.SoundEnabled && aSource.clip != null) { //if there is a sound effect & sound is enabled
 				aSource.volume = GameManager.SFXVolume; //set the volume
 				aSource.Play (); //play sound effect
 			}
@@ -30,6 +28,5 @@ public class Checkpoint : MonoBehaviour {
 
 	void Start() {
 		aSource = GetComponent<AudioSource> (); //get the audio source
-		aSource.clip = soundEffect; //set the clip
 	}
 }

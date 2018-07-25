@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class Door : MonoBehaviour {
 
 	public static bool TutorialDisplayed;
@@ -9,23 +10,39 @@ public class Door : MonoBehaviour {
 	[SerializeField]
 	private Item keyToUnlockDoor;
 	[SerializeField]
+	private AudioClip lockedSoundEffect;
+	[SerializeField]
+	private AudioClip openedSoundEffect;
+	private AudioSource aSource;
+	[SerializeField]
 	private Cutscene cutsceneToPlay;
 	[SerializeField]
 	private Transform locationToMoveTo;
 	[SerializeField]
-	private float timeDelay;
+	private float moveTimeDelay;
 
 	private List<GameObjectToMove> charactersToMove;
 
 	public void EnterDoor(Character characterAttemptingToEnter) {
-		if (keyToUnlockDoor == null || Character.player.HasItem (keyToUnlockDoor)) {
-			if (locationToMoveTo != null) {
-				MoveGameObject (characterAttemptingToEnter.gameObject);
-			} else if (cutsceneToPlay != null) {
-				GameManager.currGameManager.PlayCutscene (cutsceneToPlay);
+		if (keyToUnlockDoor == null || characterAttemptingToEnter.HasItem (keyToUnlockDoor)) {
+			if (locationToMoveTo != null) { //if there is a location to move too
+				MoveGameObject (characterAttemptingToEnter.gameObject); //add the player to the list
+
+				if (GameManager.SoundEnabled && openedSoundEffect != null) { //sound enabled && sound effect available
+					aSource.volume = GameManager.SFXVolume;
+					aSource.clip = openedSoundEffect;
+					aSource.Play ();
+				}
+			}
+			if (cutsceneToPlay != null) { //if there is a cutscene
+				GameManager.currGameManager.PlayCutscene (cutsceneToPlay); //play the cutscene
 			}
 		} else {
-			//play locked door sound
+			if (GameManager.SoundEnabled && lockedSoundEffect != null) { //sound enabled && sound effect available
+				aSource.volume = GameManager.SFXVolume;
+				aSource.clip = lockedSoundEffect;
+				aSource.Play ();
+			}
 		}
 		characterAttemptingToEnter.DoorInRange = null; //only allow one frame to attempt to enter, they will need to exit collision and reenter
 	}
@@ -42,7 +59,7 @@ public class Door : MonoBehaviour {
 	}
 
 	private void MoveGameObject(GameObject go) {
-		charactersToMove.Add (new GameObjectToMove(go, timeDelay));
+		charactersToMove.Add (new GameObjectToMove(go, moveTimeDelay));
 		go.SetActive (false);
 	}
 
@@ -72,6 +89,7 @@ public class Door : MonoBehaviour {
 	}
 
 	void Start() {
+		aSource = GetComponent<AudioSource> ();
 		charactersToMove = new List<GameObjectToMove> ();
 	}
 
