@@ -359,7 +359,7 @@ public abstract class Character : MonoBehaviour {
 		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
 	}
 
-	public void ReceiveItem (Item i) {
+	public void ReceiveItem(Item i) {
 		inventory.Add (i);
 	}
 

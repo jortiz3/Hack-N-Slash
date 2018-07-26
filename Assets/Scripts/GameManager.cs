@@ -359,9 +359,12 @@ public class GameManager : MonoBehaviour {
 		}
 
 		SpawnPlayer(); //spawn player after we get the location and after the cutscene
+		Camera.main.transform.position = new Vector3(Character.player.transform.position.x, Character.player.transform.position.y, -10);
+
 
 		if (!getDefaultPlayerSpawnLocation) {
-			//somehow give the player the items they had before
+			//bgParent.GetChild (0).Find ("Items"); //change previously collected items to be different looking
+			//add items to player inventory
 		}
 
 		Time.timeScale = 1f;
@@ -630,7 +633,7 @@ public class GameManager : MonoBehaviour {
 			DontDestroyOnLoad (gameObject);
 
 			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
-			bgParent = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
+			bgParent = GameObject.Find ("Level").transform;
 			loadingScreen = menu.transform.GetChild (menu.transform.childCount - 1).GetComponent<Image> ();
 			cutsceneParent = menu.transform.Find ("Cutscene");
 
