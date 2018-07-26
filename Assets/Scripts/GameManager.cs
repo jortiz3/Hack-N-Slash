@@ -355,7 +355,7 @@ public class GameManager : MonoBehaviour {
 		}
 
 		if (nextGameState == GameState.Cutscene) { //if a mission if being loaded
-			PlayCutscene (bgParent.GetChild(0).Find("Start_Cutscene").GetComponent<Cutscene>()); //play opening cutscene
+			PlayCutscene (bgParent.GetChild(0).Find("Cutscenes").Find("Start").GetComponent<Cutscene>()); //play opening cutscene
 		}
 
 		SpawnPlayer(); //spawn player after we get the location and after the cutscene
