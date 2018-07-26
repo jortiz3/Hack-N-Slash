@@ -348,10 +348,13 @@ public class GameManager : MonoBehaviour {
 			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
 		}
 
-		if (getDefaultPlayerSpawnLocation) { //if we need to get the location
+		bool loadItems = false;
+		if (getDefaultPlayerSpawnLocation) { //player is starting a new level or is starting a level over -- we need to get the original start position for level
 			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position; //get the location from the level
-			checkpointItems.Clear(); //reset the items the player has collected since the last checkpoint
+			checkpointItems.Clear (); //reset the items the player has collected since the last checkpoint
 			getDefaultPlayerSpawnLocation = false; //reset the bool in case we need to use checkpoint location next time level is loaded
+		} else {
+			loadItems = true;
 		}
 
 		if (nextGameState == GameState.Cutscene) { //if a mission if being loaded
@@ -362,14 +365,22 @@ public class GameManager : MonoBehaviour {
 		Camera.main.transform.position = new Vector3(Character.player.transform.position.x, Character.player.transform.position.y, -10);
 
 
-		if (!getDefaultPlayerSpawnLocation) {
-			//bgParent.GetChild (0).Find ("Items"); //change previously collected items to be different looking
-			//add items to player inventory
+		if (loadItems) { //player reached a checkpoint and is retrying the level
+			if (checkpointItems.Count > 0) { //see if player previously attained any items
+				Transform itemsParent = bgParent.GetChild (0).Find ("Items"); //get items parent
+				Transform currItem;
+				foreach (string itemName in checkpointItems) { //go through items collected prior to checkpoint
+					currItem = itemsParent.Find((itemName.Split('_'))[2]); //search for transform -- "Chapter [n]_Mission [n]_Item Name"
+					if (currItem != null) { //verify item is in the level after it was loaded
+						currItem.GetComponent<Item>().PickedUpBy (Character.player, false); //add item to current player inventory
+					}
+				}
+			}
 		}
 
-		Time.timeScale = 1f;
+		Time.timeScale = 1f; //return time to normal -- needs to be normal to wait for seconds
 
-		yield return new WaitForSeconds (1);
+		yield return new WaitForSeconds (1); //timescale needs to be >0 to work
 
 		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
 		loadingScreen.color = Color.clear; //hide load screen

@@ -189,6 +189,8 @@ public class PlayerInput : MonoBehaviour {
 					joystick_down = false;
 					joystick_up = false;
 					joystick_max_up = false;
+
+					Character.player.ReceivePlayerInput ("Run0");
 				}
 			}//end control scheme if
 		}// end gamestate if

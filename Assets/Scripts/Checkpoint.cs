@@ -7,12 +7,14 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))] //ensure there is always audio source on gameobject
 public class Checkpoint : MonoBehaviour {
 
+	private static float previousCheckpointTime;
+
 	private AudioSource aSource;
 	[SerializeField]
 	private Cutscene cutsceneToTrigger;
 
 	void OnTriggerEnter2D (Collider2D other) {
-		if (!GameManager.currPlayerSpawnLocation.Equals(transform.position)) { //if the current spawn location is not this checkpoint
+		if (Time.time - previousCheckpointTime > 5f || GameManager.currPlayerSpawnLocation == Vector3.zero) { //if it has been a reasonable amount of time since the last checkpoint was used, we can use this checkpoint again
 			GameManager.currPlayerSpawnLocation = transform.position; //set this checkpoint as spawn location
 
 			if (GameManager.SoundEnabled && aSource.clip != null) { //if there is a sound effect & sound is enabled
@@ -28,5 +30,6 @@ public class Checkpoint : MonoBehaviour {
 
 	void Start() {
 		aSource = GetComponent<AudioSource> (); //get the audio source
+		previousCheckpointTime = Time.time;
 	}
 }

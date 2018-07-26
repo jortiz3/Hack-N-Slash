@@ -7,6 +7,7 @@ public class Item : MonoBehaviour {
 	
 	[SerializeField, Tooltip("The player can only receive the reward for obtaining this item the first time they acquire it.")]
 	private bool singleAcquirance;
+	private Rigidbody2D rb2d;
 	private SpriteRenderer sr;
 	[SerializeField, Tooltip("Color this object should be if the player has already collected this item.")]
 	private Color collectedColor;
@@ -14,6 +15,12 @@ public class Item : MonoBehaviour {
 	private bool obtained;
 
 	public bool SingleAcquirance { get { return singleAcquirance; } }
+
+	void Awake() {
+		aSource = GetComponent<AudioSource> ();
+		rb2d = GetComponent<Rigidbody2D> ();
+		sr = GetComponent<SpriteRenderer> ();
+	}
 
 	void FixedUpdate() {
 		if (GameManager.currGameState == GameState.Active) {
@@ -26,17 +33,25 @@ public class Item : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D other) {
-		Character c = other.GetComponent<Character>();
-		if (c != null) {
-			PickUp (c);
+		if (!obtained) {
+			Character c = other.GetComponent<Character> ();
+			if (c != null) {
+				PickedUpBy (c, true);
+			}
 		}
 	}
 
-	protected virtual void PickUp(Character c) {
+	public virtual void PickedUpBy(Character c, bool playSoundEffect) {
 		c.ReceiveItem (this); //give the item to the character
-		PlaySoundEffect();
-		obtained = true;
-		//in future, play pickup animation
+		if (playSoundEffect)
+			PlaySoundEffect();
+		
+		sr.color = collectedColor; //change object color
+		GetComponent<Collider2D>().enabled = false; //ensure this object won't collide with anything
+		rb2d.gravityScale = 0; //turn off gravity
+		rb2d.velocity = Vector2.up * 0.15f; // make object float up
+
+		obtained = true; //allow the object to disappear once sound effect ends
 	}
 
 	private void PlaySoundEffect() {
@@ -44,11 +59,6 @@ public class Item : MonoBehaviour {
 			aSource.volume = GameManager.SFXVolume;
 			aSource.Play ();
 		}
-	}
-
-	void Start() {
-		aSource = GetComponent<AudioSource> ();
-		obtained = false;
 	}
 
 	public override string ToString () {
