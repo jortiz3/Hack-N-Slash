@@ -16,6 +16,7 @@ public class Checkpoint : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (Time.time - previousCheckpointTime > 5f || GameManager.currPlayerSpawnLocation == Vector3.zero) { //if it has been a reasonable amount of time since the last checkpoint was used, we can use this checkpoint again
 			GameManager.currPlayerSpawnLocation = transform.position; //set this checkpoint as spawn location
+			GameManager.currGameManager.RecordItemsObtainedByPlayerAtCheckpoint();
 
 			if (GameManager.SoundEnabled && aSource.clip != null) { //if there is a sound effect & sound is enabled
 				aSource.volume = GameManager.SFXVolume; //set the volume

@@ -277,7 +277,6 @@ public class GameManager : MonoBehaviour {
 
 	public void FailCurrentCampaignMission() {
 		currencyEarned = 0;
-		RecordItemsObtainedByPlayer (ref checkpointItems, false, false);
 		StartCampaign(); //display campaign screen
 		DisplayMissionReportScreen (false); //show the mission report
 		Time.timeScale = 0f;
@@ -315,7 +314,7 @@ public class GameManager : MonoBehaviour {
 
 		ClearAllCharacters (); //clear all remaining enemies
 
-		bool backgroundIsMissing = !bgParent.GetChild (0).tag.Equals ("Level");
+		bool backgroundIsMissing = bgParent.childCount > 0 ? !bgParent.GetChild (0).tag.Equals ("Level") : true;
 		bool bgNeedsToBeInstantiated = false;
 		string bgFilePath;
 		GameState nextGameState;
@@ -416,6 +415,10 @@ public class GameManager : MonoBehaviour {
 		} else {
 			purchaseUnsuccessfulPanel.SetActive (true); //unable to purchase; inform the player
 		}
+	}
+
+	public void RecordItemsObtainedByPlayerAtCheckpoint() {
+		RecordItemsObtainedByPlayer (ref checkpointItems, false, false);
 	}
 
 	private void RecordItemsObtainedByPlayer(ref List<string> list, bool onlySingleAcquirance, bool rewardCurrency) {
