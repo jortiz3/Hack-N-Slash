@@ -1,13 +1,23 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ScreenBoundary : MonoBehaviour {
 	private bool moveCamera;
+    [SerializeField]
+    private MovementAxis axis;
+    private Vector3 cameraVelocity;
+
+    public enum MovementAxis { Horizontal, Vertical };
 
 	void FixedUpdate() {
 		if (moveCamera) {
-			Camera.main.transform.position += (Vector3)Character.player.Velocity * Time.fixedDeltaTime;
+            cameraVelocity = Vector3.zero;
+            if (axis == MovementAxis.Horizontal) {
+                cameraVelocity.x = Character.player.Velocity.x * Time.fixedDeltaTime;
+            }
+            else {
+                cameraVelocity.y = Character.player.Velocity.y * Time.fixedDeltaTime;
+            }
+            Camera.main.transform.position += cameraVelocity;
 		}
 	}
 

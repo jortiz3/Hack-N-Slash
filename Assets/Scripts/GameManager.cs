@@ -11,15 +11,11 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-fix level spawning, world boundaries -- move everything to sprites
-//-finish items
-//		--in loadlevel(), go through item list, show previously collected items differently -- partially see through? different color?
-//		--resolve checkpoints and previously collected items -- level is destroyed and reloaded
-//-different ways to complete mission -- cutscenes begin & end every mission
-//	--reach location -- complete (via checkpoint)
-//	--defeat enemy -- add cutscene to play upon enemy death
+//-different ways to complete mission -- cutscenes begin & end every mission -- complete
+//	--reach location -- complete (via checkpoint & door)
+//	--defeat enemy -- add cutscene to play upon enemy death -- complete (via AdvancedEnemy)
 //	--collect items?
-//	--puzzle?
+//	--puzzle? -- complete via doors, checkpoint & enemies
 //-Challenges
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
@@ -322,7 +318,7 @@ public class GameManager : MonoBehaviour {
 		if (currGameMode == GameMode.Survival) {
 			bgFilePath = "Survival_" + ((selectedSurvivalWave - 1) / 25);
 				
-			if (!bgParent.GetChild (0).name.Contains (bgFilePath) || //background is not what it needs to be
+			if (backgroundIsMissing || !bgParent.GetChild (0).name.Contains (bgFilePath) || //background is not what it needs to be
 				(selectedSurvivalWave - 1) / 25 !=  currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
 				bgNeedsToBeInstantiated = true;
 			}

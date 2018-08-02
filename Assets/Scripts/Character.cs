@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
+[RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
 public abstract class Character : MonoBehaviour {
 
 	public static Player player;
@@ -14,7 +14,7 @@ public abstract class Character : MonoBehaviour {
 	private static float defaultFlinchTime = 1.5f;
 	[SerializeField]
 	private float moveSpeed;
-	private BoxCollider2D bc2D;
+	private Collider2D c2D;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
@@ -220,14 +220,14 @@ public abstract class Character : MonoBehaviour {
 
 		transform.SetParent (characterParent);
 
-		bc2D = gameObject.GetComponent<BoxCollider2D> ();
+		c2D = gameObject.GetComponent<Collider2D> ();
 		rb2D = gameObject.GetComponent<Rigidbody2D> ();
 		anim = gameObject.GetComponent<Animator> ();
 		sr = gameObject.GetComponent<SpriteRenderer> ();
 
 		defaultSRColor = sr.color;
 
-		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<BoxCollider2D>().size.y)) + 0.05f;
+		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
 		groundLandingDelay = 0f;
 
 		hp = maxhp;
@@ -514,8 +514,8 @@ public abstract class Character : MonoBehaviour {
 			if (!statText.gameObject.activeSelf)
 				statText.gameObject.SetActive (true);
 
-			if (hp <= 0 && bc2D.enabled) {
-				bc2D.enabled = false;
+			if (hp <= 0 && c2D.enabled) {
+				c2D.enabled = false;
 				rb2D.gravityScale /= 4f;
 			}
 
