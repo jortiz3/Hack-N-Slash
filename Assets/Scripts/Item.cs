@@ -13,6 +13,10 @@ public class Item : MonoBehaviour {
 	private Color collectedColor;
 	private AudioSource aSource;
 	private bool obtained;
+    [SerializeField]
+    private Cutscene cutsceneToPlayOnPickup;
+    [SerializeField]
+    private int quantityRequiredForCutscene = 1;
 
 	public bool SingleAcquirance { get { return singleAcquirance; } }
 
@@ -20,9 +24,20 @@ public class Item : MonoBehaviour {
 		aSource = GetComponent<AudioSource> ();
 		rb2d = GetComponent<Rigidbody2D> ();
 		sr = GetComponent<SpriteRenderer> ();
+
+        if (quantityRequiredForCutscene <= 0) {
+            quantityRequiredForCutscene = 1;
+        }
 	}
 
-	void FixedUpdate() {
+    public bool Equals(Item other) {
+        if (cutsceneToPlayOnPickup == other.cutsceneToPlayOnPickup && singleAcquirance == other.singleAcquirance) {
+            return true;
+        }
+        return false;
+    }
+
+    void FixedUpdate() {
 		if (GameManager.currGameState == GameState.Active) {
 			if (obtained) { //item was obtained
 				if (!aSource.isPlaying) { //sound effect finished playing
@@ -42,7 +57,6 @@ public class Item : MonoBehaviour {
 	}
 
 	public virtual void PickedUpBy(Character c, bool playSoundEffect) {
-		c.ReceiveItem (this); //give the item to the character
 		if (playSoundEffect)
 			PlaySoundEffect();
 		
@@ -52,7 +66,13 @@ public class Item : MonoBehaviour {
 		rb2d.velocity = Vector2.up * 0.15f; // make object float up
 
 		obtained = true; //allow the object to disappear once sound effect ends
-	}
+
+        if (c.ReceiveItem(this) >= quantityRequiredForCutscene) { //give the item to the character && see if enough of item obtained
+             if (cutsceneToPlayOnPickup != null) { //if there is a cutscene to play
+                GameManager.currGameManager.PlayCutscene(cutsceneToPlayOnPickup); //play the cutscene
+            }
+        }
+    }
 
 	private void PlaySoundEffect() {
 		if (GameManager.SoundEnabled && aSource.clip != null) {

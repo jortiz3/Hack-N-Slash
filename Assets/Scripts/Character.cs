@@ -359,8 +359,15 @@ public abstract class Character : MonoBehaviour {
 		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
 	}
 
-	public void ReceiveItem(Item i) {
-		inventory.Add (i);
+	public int ReceiveItem(Item i) {
+		inventory.Add (i); //add item to the inventory
+        int total = 0; //initialize the total
+        foreach (Item obtained in inventory) { //go through the inventory
+            if (obtained.Equals(i)) { //see how many of this item are in the inventory
+                total++; //increment total
+            }
+        }
+        return total; //return total
 	}
 
 	private void ReceiveKnockback(Character c) {
