@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿//Written by Justin Ortiz
+
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
-[RequireComponent(typeof(BoxCollider2D)), RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
+[RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
 public abstract class Character : MonoBehaviour {
 
 	public static Player player;
@@ -11,7 +14,7 @@ public abstract class Character : MonoBehaviour {
 	private static float defaultFlinchTime = 1.5f;
 	[SerializeField]
 	private float moveSpeed;
-	private BoxCollider2D bc2D;
+	private Collider2D c2D;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
@@ -38,6 +41,8 @@ public abstract class Character : MonoBehaviour {
 	private Color sliderColor_critical = Color.white;
 	private bool critAvailable;
 	private Text statText;
+	private List<Item> inventory;
+	private Door doorInRange;
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
 	public int MaxHP { get { return maxhp; } }
@@ -52,7 +57,9 @@ public abstract class Character : MonoBehaviour {
 	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
 	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+	public Door DoorInRange { get { return doorInRange; } set { doorInRange = value; } }
 	public Color SpriteColor { get { return sr.color; } }
+	public Item[] Inventory { get { return inventory.ToArray(); } }
 
 	protected void AddTorque (float torque) {
 		rb2D.AddTorque (torque);
@@ -131,6 +138,7 @@ public abstract class Character : MonoBehaviour {
 		Destroy (statText.gameObject);
 		if (attackTimerSlider != null)
 			Destroy (attackTimerSlider.gameObject);
+		inventory.Clear ();
 		Destroy (gameObject);
 	}
 
@@ -185,6 +193,25 @@ public abstract class Character : MonoBehaviour {
 		return new Vector2 (Screen.width / 15f, Screen.height / 15f);
 	}
 
+	public bool HasItem (Item i) { //has key?
+		if (inventory.Contains (i)) { //if character has key
+			return true; //return true
+		}
+		return false; //else return false
+	}
+
+	public bool HasItem (string itemName, int quantity) { //character collected enough parts for weapon?
+		int total = 0; //total number of the item that this character has
+		for (int i = 0; i < inventory.Count; i++) { //go through inventory
+			if (inventory [i].ToString().Equals (itemName)) { //if item name matches
+				total++; //add to the total
+				if (total >= quantity) //if the character has enough
+					return true; //return true
+			}
+		}
+		return false; //went through whole list, and didn't have enough
+	}
+
 	protected void Initialize () {
 		if (cameraCanvas == null)
 			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
@@ -193,14 +220,14 @@ public abstract class Character : MonoBehaviour {
 
 		transform.SetParent (characterParent);
 
-		bc2D = gameObject.GetComponent<BoxCollider2D> ();
+		c2D = gameObject.GetComponent<Collider2D> ();
 		rb2D = gameObject.GetComponent<Rigidbody2D> ();
 		anim = gameObject.GetComponent<Animator> ();
 		sr = gameObject.GetComponent<SpriteRenderer> ();
 
 		defaultSRColor = sr.color;
 
-		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<BoxCollider2D>().size.y)) + 0.05f;
+		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
 		groundLandingDelay = 0f;
 
 		hp = maxhp;
@@ -223,6 +250,8 @@ public abstract class Character : MonoBehaviour {
 				attackTimerSlider.maxValue = weapon.currentAttackDelay.y;
 			attackTimerSlider.gameObject.SetActive (false);
 		}
+
+		inventory = new List<Item> ();
 	}
 
 	protected void Jump() {
@@ -261,6 +290,9 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
+		if (GameManager.currGameState != GameState.Active)
+			return;
+
 		if (!isInvulnerable) { //enemies typically never invulnerable
 			if (!isFlinching) {
 				if (gameObject.tag.Equals ("Player")) {
@@ -325,6 +357,17 @@ public abstract class Character : MonoBehaviour {
 	public void ReceiveDamageFrom(Weapon w) {
 		ReceiveKnockback (w.Wielder);
 		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
+	}
+
+	public int ReceiveItem(Item i) {
+		inventory.Add (i); //add item to the inventory
+        int total = 0; //initialize the total
+        foreach (Item obtained in inventory) { //go through the inventory
+            if (obtained.Equals(i)) { //see how many of this item are in the inventory
+                total++; //increment total
+            }
+        }
+        return total; //return total
 	}
 
 	private void ReceiveKnockback(Character c) {
@@ -394,6 +437,10 @@ public abstract class Character : MonoBehaviour {
 					rb2D.AddForce (new Vector2 (xVel * moveSpeed, 0)); //only able to make slight adjustments mid-air;
 			}
 		}
+	}
+
+	protected void StopMovement() {
+		rb2D.velocity = Vector2.zero;
 	}
 
 	protected void StopRotation() {
@@ -474,8 +521,8 @@ public abstract class Character : MonoBehaviour {
 			if (!statText.gameObject.activeSelf)
 				statText.gameObject.SetActive (true);
 
-			if (hp <= 0 && bc2D.enabled) {
-				bc2D.enabled = false;
+			if (hp <= 0 && c2D.enabled) {
+				c2D.enabled = false;
 				rb2D.gravityScale /= 4f;
 			}
 

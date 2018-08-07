@@ -29,17 +29,18 @@ public class Player : Character {
 
 	public override void Die () {
 		if (infiniteRespawn) {
-			Respawn (Vector3.zero);
+			Respawn (GameManager.currPlayerSpawnLocation);
 		} else if (numOfRespawnsRemaining > 0) {
-			Respawn (Vector3.zero);
+			Respawn (GameManager.currPlayerSpawnLocation);
 			numOfRespawnsRemaining--;
 		} else {
 			if (GameManager.currGameState == GameState.Active) {
 				switch (GameManager.currGameMode) {
-				case GameMode.Story:
+				case GameMode.Campaign:
+					GameManager.currGameManager.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager.currGameManager.EndSurvivalWave ("died");
+					GameManager.currGameManager.EndSurvivalWave ("died"); //fail survival
 					break;
 				}
 			}

@@ -1,4 +1,6 @@
-﻿using System;
+﻿//Written by Justin Ortiz
+
+using System;
 using System.IO;
 using UnityEngine;
 using System.Collections;
@@ -9,7 +11,7 @@ public class DataPersistence {
 
 	public static PlayerData Load() {
 		GameManager.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
-		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled") == 1 ? true : false; //set the sound toggle using the stored playerpref
+		GameManager.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled", 1) == 1 ? true : false; //set the sound toggle using the stored playerpref
 
 		GameManager.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
 		GameManager.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume", 0.5f); //set the sound effects volume using the stored playerpref
@@ -19,6 +21,8 @@ public class DataPersistence {
 		GameManager.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Two-handed");
 
 		PlayerInput.currControlScheme = (ControlScheme)PlayerPrefs.GetInt ("Control Scheme", (int)ControlScheme.Default);
+
+		Door.TutorialDisplayed = PlayerPrefs.GetInt ("Door Tutorial", 0) == 1 ? true : false;
 
 		FileStream file;
 		if (File.Exists (saveLocation)) {
@@ -47,9 +51,9 @@ public class DataPersistence {
 		playerData.highestSurvivalWave = GameManager.currGameManager.HighestSurvivalWave;
 		playerData.survivalStreak = GameManager.currGameManager.CurrentSurvivalStreak;
 		playerData.unlocks = GameManager.Unlocks;
-		//challenges
-		//missions
-		//extra00
+        playerData.challenges = GameManager.Challenges;
+		playerData.missions = GameManager.Missions; 
+		playerData.items = GameManager.Items;
 		//extra01
 		//extra02
 

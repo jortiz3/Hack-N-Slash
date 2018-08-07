@@ -15,7 +15,6 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	[SerializeField]
 	protected MovementType movementType = MovementType.Run;
 	protected Behaviour behaviour = Behaviour.Aggressive;
-
 	private int remainingSpawns;
 	private float spawnTimer;
 	[SerializeField]
@@ -23,9 +22,10 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	[SerializeField]
 	private float attackDelay;
 	private float currAttackTimer;
-
 	[SerializeField, Tooltip("What is the cruising altitude for this flying enemy?")]
 	protected float flyingHeight; //somehow make this the height above current platform
+	[SerializeField, Tooltip("Plays when this enemy dies. (Can be left null)")]
+	private Cutscene cutsceneToPlayOnDeath; //in case this enemy is the objective of the level, the final cutscene will play
 
 	public enum MovementType { Run, FlySwoop, FlyBomber, Jumper }
 	public enum Behaviour { Aggressive, StandGround, Evasive }
@@ -37,6 +37,9 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 					c.Die ();
 				}
 			}
+		}
+		if (cutsceneToPlayOnDeath != null) {
+			GameManager.currGameManager.PlayCutscene (cutsceneToPlayOnDeath);
 		}
 		base.Die ();
 	}
@@ -122,7 +125,6 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	}
 
 	protected override void UpdateEnemy () {
-
 		if (remainingSpawns > 0) { //spawn minions
 			if (!isFlinching && !isAttacking && isOnGround) {
 				if (spawnTimer <= 0) {
