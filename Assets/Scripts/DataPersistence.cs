@@ -51,7 +51,7 @@ public class DataPersistence {
 		playerData.highestSurvivalWave = GameManager.currGameManager.HighestSurvivalWave;
 		playerData.survivalStreak = GameManager.currGameManager.CurrentSurvivalStreak;
 		playerData.unlocks = GameManager.Unlocks;
-		//challenges
+        playerData.challenges = GameManager.Challenges;
 		playerData.missions = GameManager.Missions; 
 		playerData.items = GameManager.Items;
 		//extra01

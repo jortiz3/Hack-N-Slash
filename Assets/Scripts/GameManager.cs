@@ -11,12 +11,11 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-different ways to complete mission -- cutscenes begin & end every mission -- complete
-//	--reach location -- complete (via checkpoint & door)
-//	--defeat enemy -- add cutscene to play upon enemy death -- complete (via AdvancedEnemy)
-//	--collect items?
-//	--puzzle? -- complete via doors, checkpoint & enemies
 //-Challenges
+//  --Method in GameManager to receive challenge updates
+//  --finish check requirements met method in challenges class
+//  --sort completed challenges towards bottom?
+//  --save completed challenges (temporarily at checkpoints, permanently upon level complete)
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -75,12 +74,14 @@ public class GameManager : MonoBehaviour {
 	private static List<string> missions; //missions player has already completed
 	private static List<string> items; //which objects player has already obtained -- i.e. "Chapter 1_Prologue_Currency01"
 	private static List<string> checkpointItems; //which objects the player has obtained up until the current checkpoint
+    private static List<string> challenges; //challenges the player has completed
 	private static Cutscene currCutscene;
 
 
 	private Transform campaignMissionsParent;
 	private Transform campaignTabsParent;
 	private Transform missionReportParent;
+    private Transform challengesParent;
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
 	private Text displayedSurvivalWaveWarning;
@@ -106,6 +107,7 @@ public class GameManager : MonoBehaviour {
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string[] Missions { get { return missions.ToArray (); } }
 	public static string[] Items { get { return items.ToArray (); } }
+    public static string[] Challenges { get { return challenges.ToArray(); } }
 	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
@@ -470,10 +472,22 @@ public class GameManager : MonoBehaviour {
 				} else { //weapon not unlocked
 					weapon.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
 				}
-				//weapon.sizeDelta = new Vector2 (weapon.rect.height, weapon.rect.height);
+				weapon.sizeDelta = new Vector2 (weapon.rect.height, weapon.rect.height);
 			}
 			ResizeHorizontalLayoutGroup (weaponSpecialization); //ensure each weaponspec has enough space
 		}
+
+        //challenges
+        Challenge challenge;
+        foreach (RectTransform challengeRectTransform in challengesParent) { //each child object in challengeParent should have a Challenge script
+            challenge = challengeRectTransform.GetComponent<Challenge>();
+            if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
+                challenge.MarkComplete(); //mark it as complete
+                challenge.gameObject.SetActive(false);
+            }
+            challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, challengeRectTransform.rect.width / 5);
+        }
+        ResizeVerticalLayoutGroup(challengesParent.GetComponent<RectTransform>());
 
 		//campaign missions
 		foreach (Transform chapter in campaignMissionsParent) {
@@ -493,6 +507,18 @@ public class GameManager : MonoBehaviour {
 
 		parent.sizeDelta = newSizeDelta;
 	}
+
+    public void ResizeVerticalLayoutGroup (RectTransform parent) {
+        Vector2 newSizeDelta = Vector2.zero; //start with value of 0
+        float spacing = parent.GetComponent<VerticalLayoutGroup>().spacing;
+        foreach (RectTransform child in parent) { //go through all children of rect transform
+            if (child.gameObject.activeSelf) { //if the child is active/shown
+                newSizeDelta.y += child.sizeDelta.y + spacing; //add to the width
+            }
+        }
+
+        parent.sizeDelta = newSizeDelta;
+    }
 
 	public void RetryCampaignMission() { //player just failed a mission
 		getDefaultPlayerSpawnLocation = false; //if a checkpoint was triggered, then we will start from there
@@ -661,6 +687,7 @@ public class GameManager : MonoBehaviour {
 
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 			unlocks = new List<string>();
+            challenges = new List<string>();
 			missions = new List<string> ();
 			items = new List<string> ();
 			checkpointItems = new List<string> ();
@@ -670,7 +697,7 @@ public class GameManager : MonoBehaviour {
 				highestSurvivalWave = loadedData.highestSurvivalWave;
 				currSurvivalStreak = loadedData.survivalStreak;
 				unlocks.AddRange (loadedData.unlocks);
-				//challenges
+                challenges.AddRange(loadedData.challenges);//challenges
 				missions.AddRange (loadedData.missions);
 				items.AddRange (loadedData.items);
 				//extra01
@@ -684,7 +711,6 @@ public class GameManager : MonoBehaviour {
 				unlocks.Add ("Test Dagger");
 				//challenges
 				//missions
-				//extra00
 				//extra01
 				//extra02
 			}
@@ -701,7 +727,10 @@ public class GameManager : MonoBehaviour {
 			unlocks_outfitsParent = GameObject.Find("Outfit Layout Group").transform; //get the transform parent
 			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
 
-			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
+            challengesParent = GameObject.Find("Challenges Layout Group").transform; //get the transform parent
+            challengesParent.parent.parent.parent.gameObject.SetActive(false);
+
+            displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
 			displayPurchaseConfirmationButton_Weapon = GameObject.Find ("Purchase Weapon Button");
 			displayPurchaseConfirmationButton_Weapon.SetActive (false);
