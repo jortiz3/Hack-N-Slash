@@ -1,18 +1,20 @@
 ﻿//written by Justin Ortiz
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
-//Challenge Format:         [Chapter]_[Mission]_[Requirement Type]_[final parameter]
+//Challenge Format:         [chapter]_[mission]_[requirement type]:[parameter]_[requirement type]:[parameter]_...
 
-public class Challenge : MonoBehaviour  {
-    private static string[] requirementTypeKeywords = { "Difficulty", "Item", "Time", "Enemy" };
+public class Challenge : MonoBehaviour {
+    private static string[] requirementTypeKeywords = { "difficulty", "item", "time", "enemy", "outfit", "weapon" }; //Time is in seconds
 
     [SerializeField, Tooltip("Challenge description displayed for the player to see.")]
-	private string description;
-    [SerializeField, Tooltip("Format: [Chapter]_[Mission]_[Requirement Type]_[final parameter]")]
+    private string description;
+    [SerializeField, Tooltip("Format: [chapter]_[mission]_[requirement type]:[parameter]_[requirement type]:[parameter]_...")]
     private string requirement;
-    private int requirementType;
-    [SerializeField, Tooltip("Formats: 'Currency_[int amount]' && '[unlock name]'")]
+    private string[] requirementInfo;
+    private int[] requirementTypes;
+    [SerializeField, Tooltip("Formats: 'currency_[int amount]' && '[unlock name]'")]
     private string reward;
     private bool complete;
     private Transform challengeCompleteParent;
@@ -21,53 +23,89 @@ public class Challenge : MonoBehaviour  {
     public string Description { get { return description; } }
     public string Reward { get { return reward; } }
     public bool Complete { get { return complete; } }
-    
+
     public bool CheckRequirementMet(string actionPerformed) { // Checks to see if the challenge requirement has been met
-        if (requirementType == -1) { //no valid requirement present
+        if (requirementTypes == null) { //no valid requirement present
             return false;
         }
 
-        int actionType = GetRequirementType(actionPerformed); //get the type of action
+        string[] actionInfo;
+        int[] actionTypes = GetRequirementTypes(actionPerformed, out actionInfo); //get the requirement types within action
 
-        if (actionType == requirementType) { //if the action is the same type as the requirement
-            string[] actionInfo = actionPerformed.Split('_');
-            string[] requirementInfo = requirement.Split('_'); //split the info -- chapter, mission, req type, etc.
-
-            if (actionInfo.Length != requirementInfo.Length) { //typo in script or inspector, so they don't have same amount of parameters
-                return false;
+        for (int i = 0; i < 2; i++) { //check the chapter and mission to verify they are the same
+            if (!actionInfo[i].Equals(requirementInfo[i])) { //if any of info does not match
+                return false; //return false
             }
+        }
 
-            for (int i = 0; i < actionInfo.Length - 1; i++) { //go through all except last piece of info -- last piece may be higher
-                if (!actionInfo[i].Equals(requirementInfo[i])) { //if any of info does not match
-                    return false; //return false
+        bool requirementMet;
+        for (int currRequirement = 0; currRequirement < requirementTypes.Length; currRequirement++) { //go through each requirement
+            requirementMet = false; //initialize as false
+            for (int currAction = 0; currAction < actionTypes.Length; currAction++) { //go through all actions
+                if (requirementTypes[currRequirement] == -1) { //if one of the requirements aren't valid
+                    return false; //fail the check
                 }
-            }
 
-            if (requirementType == 0 || requirementType == 1) { //difficulty challenge or item collection challenge
-                int actionDifficulty, requirementDifficulty; //declare the difficulties
-                if (int.TryParse(actionInfo[actionInfo.Length - 1], out actionDifficulty)) { // try to get the action difficulty
-                    if (int.TryParse(requirementInfo[requirementInfo.Length - 1], out requirementDifficulty)) { //try to get the requirement difficulty
-                        if (actionDifficulty >= requirementDifficulty) { //see if it is equal or greater
-                            return true;
+                if (actionTypes[currAction] == requirementTypes[currRequirement]) { //if the action is the same type as the requirement
+                    if (requirementTypes[currRequirement] == 0 || requirementTypes[currRequirement] == 1 ||
+                        requirementTypes[currRequirement] == 3) { //difficulty challenge or item collection challenge or enemy challenge
+                        int actionParameter, requirementParameter; //declare the parameters
+                        if (int.TryParse(actionInfo[currAction + 2].Split(':')[1], out actionParameter)) { // try to get the action difficulty/item qty/enemy qty
+                            if (int.TryParse(requirementInfo[currRequirement + 2].Split(':')[1], out requirementParameter)) { //try to get the requirement parameter
+                                if (actionParameter >= requirementParameter) { //see if it is equal or greater
+                                    requirementMet = true;
+                                    break;
+                                }
+                            }
+                        } else if (actionInfo[currAction + 2].Equals(requirementInfo[currRequirement + 2])) { //see if the action is identical to requirement -- i.e. ..._Enemy_[Name]
+                            requirementMet = true;
+                            break;
+                        }
+                    } else if (requirementTypes[currRequirement] == 2) { //time challenge
+                        float actionTime, requirementTime; //declare the times
+                        if (float.TryParse(actionInfo[currAction + 2].Split(':')[1], out actionTime)) { //try to get the time spent on level
+                            if (float.TryParse(requirementInfo[currRequirement + 2].Split(':')[1], out requirementTime)) { //try to get the time required to complete challenge
+                                if (actionTime <= requirementTime) { //see if it is less than or equal to
+                                    requirementMet = true;
+                                    break;
+                                }
+                            }
+                        }
+                    } else { //undefined keyword
+                        if (actionInfo[currAction + 2].Equals(requirementInfo[currRequirement + 2])) { //see if the action is identical to requirement
+                            requirementMet = true;
+                            break;
                         }
                     }
                 }
-            } else {
-                if (actionPerformed.Equals(requirement)) { //see if the action is identical to requirement
-                    return true;
-                }
+            }
+
+            if (!requirementMet) { //if any of the requirements aren't met, the challenge isn't complete
+                return false;
             }
         }
-        return false;
+        return true; //if we make it through all the requirements as met, then the challenge is complete
     }
 
-    private int GetRequirementType(string reqString) {
-        for (int i = 0; i < requirementTypeKeywords.Length; i++) { //go through challenge keywords
-            if (reqString.Contains(requirementTypeKeywords[i])) { //see what type of challenge it is
-                return i; //return the type
+    private int[] GetRequirementTypes(string reqString, out string[] reqSplitInfo) {
+        reqSplitInfo = reqString.Split('_');
+        List<int> reqTypes = new List<int>();
+        bool keywordFound = false;
+
+        for (int currReqInfo = 2; currReqInfo < reqSplitInfo.Length; currReqInfo++) { //start on the 3rd piece of info -- skip chapter and mission to save time
+            for (int reqTypeKeyword = 0; reqTypeKeyword < requirementTypeKeywords.Length; reqTypeKeyword++) {
+                if (reqSplitInfo[currReqInfo].Contains(requirementTypeKeywords[reqTypeKeyword])) {
+                    reqTypes.Add(reqTypeKeyword);
+                    keywordFound = true;
+                    break;
+                }
+            }
+            if (!keywordFound) {
+                reqTypes.Add(-1);
             }
         }
-        return -1; //no type found
+
+        return reqTypes.ToArray();
     }
 
     public void MarkComplete() {
@@ -82,6 +120,6 @@ public class Challenge : MonoBehaviour  {
         transform.Find("Challenge Name").GetComponent<Text>().text = Name;
         transform.Find("Challenge Description").GetComponent<Text>().text = description;
 
-        requirementType = GetRequirementType(requirement);
+        requirementTypes = GetRequirementTypes(requirement, out requirementInfo);
     }
 }

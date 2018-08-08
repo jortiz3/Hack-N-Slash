@@ -367,6 +367,9 @@ public abstract class Character : MonoBehaviour {
                 total++; //increment total
             }
         }
+        if (i.ChallengeItem) {
+            GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
+        }
         return total; //return total
 	}
 
