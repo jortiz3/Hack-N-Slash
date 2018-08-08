@@ -12,7 +12,9 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-Challenges
-//  --Method in GameManager to receive challenge updates
+//  --Method in GameManager to receive challenge updates (complete)
+//      --complete challenge
+//      --complete campaign using complete challenge and temporary challenges
 //  --finish check requirements met method in challenges class
 //  --sort completed challenges towards bottom?
 //  --save completed challenges (temporarily at checkpoints, permanently upon level complete)
@@ -73,8 +75,10 @@ public class GameManager : MonoBehaviour {
 	private static List<string> unlocks; //outfits & weapons player has unlocked
 	private static List<string> missions; //missions player has already completed
 	private static List<string> items; //which objects player has already obtained -- i.e. "Chapter 1_Prologue_Currency01"
-	private static List<string> checkpointItems; //which objects the player has obtained up until the current checkpoint
+	private static List<string> checkpointItems; //items stored after reaching checkpoint
     private static List<string> challenges; //challenges the player has completed
+    private static List<string> checkpointChallenges; //challenges stored after reaching checkpoint
+    private static List<string> temporaryChallenges; //challenges obtained prior to checkpoint -- can be lost upon death
 	private static Cutscene currCutscene;
 
 
@@ -119,6 +123,30 @@ public class GameManager : MonoBehaviour {
 	public int HighestSurvivalWave { get { return highestSurvivalWave; } }
 	public int CurrentSurvivalStreak { get { return currSurvivalStreak; } }
 
+    public void ChallengeActionComplete(string actionPerformed) { //will be called by other classes to notify GameManager when a challenge might be complete
+        Challenge challenge;
+        for (int i = 0; i < challengesParent.childCount; i++) { //go through all challenges
+            challenge = challengesParent.GetChild(i).GetComponent<Challenge>(); //get challenge component
+            if (!challenge.Complete) { //if the challenge isn't already complete
+                if (challenge.CheckRequirementMet(actionPerformed)) { //check if challenge requirement met
+
+                    if (currGameMode == GameMode.Campaign && currGameState == GameState.Active) { //find a better if statement? may cause bugs
+                        temporaryChallenges.Add(challenge.Name); //temporarily store challenge as complete
+                    } else {
+                        CompleteChallenge(challenge);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void CheckpointReached() {
+        checkpointChallenges.AddRange(temporaryChallenges); //store the temporary challenges
+        temporaryChallenges.Clear(); //clear temporary challenges so we do not duplicate them
+        RecordItemsObtainedByPlayer(ref checkpointItems, false, false); //record the items in the player's inventory
+    }
+
 	private void ClearAllCharacters() {
 		Transform temp = GameObject.FindGameObjectWithTag ("Character Parent").transform;
 		foreach (Transform child in temp) {
@@ -126,7 +154,42 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	public void CompleteCurrentCampaignMission() {
+    private void CompleteCampaignMission(string missionName, bool saveCompletionToArray) { //used in start method and at end of missions
+        string[] missionInfo = missionName.Split('_'); //split the name of the mission -- example: "Chapter 1_Mission 1" -> {"Chapter 1", "Mission 1"}
+
+        Transform currChapterTransform = campaignMissionsParent.Find(missionInfo[0]); //find chapter transform using first piece of mission info -- "Chapter 1"
+        Transform currMissionTransform = currChapterTransform.Find(missionName);
+
+        currMissionTransform.Find("Lock").gameObject.SetActive(false); //hide the lock
+        currMissionTransform.Find("Complete").gameObject.SetActive(true); //show mission as complete
+        if (saveCompletionToArray) {
+            missions.Add(selectedCampaignMission); //record current mission as complete
+        }
+
+        int currMissionIndex = currMissionTransform.GetSiblingIndex(); //get sibling index -- 0
+
+        if ((currMissionIndex + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
+            currChapterTransform.GetChild(currMissionIndex + 1).Find("Lock").gameObject.SetActive(false); //remove lock from next mission
+        } else { //there is no other mission in the current chapter, check for next chapter
+            int chapter = int.Parse((missionInfo[0].Split(' '))[1]); //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
+
+            if (chapter < campaignTabsParent.childCount) { //if there is a next chapter {
+                Toggle tab = campaignTabsParent.GetChild(chapter).GetComponent<Toggle>(); //get tab for next chapter (desired chapter - 1)
+                tab.interactable = true; //make tab usable
+                tab.transform.Find("Lock").gameObject.SetActive(false); //hide the lock
+                campaignMissionsParent.GetChild(chapter).GetChild(0).Find("Lock").gameObject.SetActive(false); //unlock the first mission in the chapter
+            }
+        }
+    }
+
+    private void CompleteChallenge (Challenge challenge) {
+        challenges.Add(challenge.Name); //save challenge as complete
+        challenge.MarkComplete(); //mark challenge complete
+
+        string[] rewardInfo = challenge.Reward.Split('_');
+    }
+
+    public void CompleteCurrentCampaignMission() {
 		int missionCompleteBonus = 200; //add completion bonus for currency
 		if (missions.Contains (selectedCampaignMission)) { //mission previously completed
 			missionCompleteBonus = (int)(missionCompleteBonus * 0.05f); //reduce completion bonus
@@ -140,34 +203,6 @@ public class GameManager : MonoBehaviour {
 		DisplayMissionReportScreen (true); //show the mission report
 		DataPersistence.Save();
 		Time.timeScale = 0f;
-	}
-
-	private void CompleteCampaignMission (string missionName, bool saveCompletionToArray) { //used in start method and at end of missions
-		string[] missionInfo = missionName.Split ('_'); //split the name of the mission -- example: "Chapter 1_Mission 1" -> {"Chapter 1", "Mission 1"}
-
-		Transform currChapterTransform = campaignMissionsParent.Find(missionInfo[0]); //find chapter transform using first piece of mission info -- "Chapter 1"
-		Transform currMissionTransform = currChapterTransform.Find(missionName);
-
-		currMissionTransform.Find ("Lock").gameObject.SetActive (false); //hide the lock
-		currMissionTransform.Find ("Complete").gameObject.SetActive (true); //show mission as complete
-		if (saveCompletionToArray) {
-			missions.Add (selectedCampaignMission); //record current mission as complete
-		}
-
-		int currMissionIndex = currMissionTransform.GetSiblingIndex (); //get sibling index -- 0
-
-		if ((currMissionIndex + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
-			currChapterTransform.GetChild (currMissionIndex + 1).Find ("Lock").gameObject.SetActive (false); //remove lock from next mission
-		} else { //there is no other mission in the current chapter, check for next chapter
-			int chapter = int.Parse ((missionInfo [0].Split (' ')) [1]); //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
-			
-			if (chapter < campaignTabsParent.childCount) { //if there is a next chapter {
-				Toggle tab = campaignTabsParent.GetChild(chapter).GetComponent<Toggle>(); //get tab for next chapter (desired chapter - 1)
-				tab.interactable = true; //make tab usable
-				tab.transform.Find ("Lock").gameObject.SetActive (false); //hide the lock
-				campaignMissionsParent.GetChild (chapter).GetChild (0).Find ("Lock").gameObject.SetActive (false); //unlock the first mission in the chapter
-			}
-		}
 	}
 
 	public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
@@ -274,6 +309,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void FailCurrentCampaignMission() {
+        temporaryChallenges.Clear(); //clear challenges completed prior to reaching a checkpoint
 		currencyEarned = 0;
 		StartCampaign(); //display campaign screen
 		DisplayMissionReportScreen (false); //show the mission report
@@ -415,10 +451,6 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
-	public void RecordItemsObtainedByPlayerAtCheckpoint() {
-		RecordItemsObtainedByPlayer (ref checkpointItems, false, false);
-	}
-
 	private void RecordItemsObtainedByPlayer(ref List<string> list, bool onlySingleAcquirance, bool rewardCurrency) {
 		string itemName;
 		foreach (Item i in Character.player.Inventory) {
@@ -483,7 +515,7 @@ public class GameManager : MonoBehaviour {
             challenge = challengeRectTransform.GetComponent<Challenge>();
             if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
                 challenge.MarkComplete(); //mark it as complete
-                challenge.gameObject.SetActive(false);
+                //challenge.gameObject.SetActive(false);
             }
             challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, challengeRectTransform.rect.width / 5);
         }
@@ -688,6 +720,8 @@ public class GameManager : MonoBehaviour {
 			PlayerData loadedData = DataPersistence.Load (); //load player save data
 			unlocks = new List<string>();
             challenges = new List<string>();
+            checkpointChallenges = new List<string>();
+            temporaryChallenges = new List<string>();
 			missions = new List<string> ();
 			items = new List<string> ();
 			checkpointItems = new List<string> ();
