@@ -6,7 +6,7 @@ using System.Collections.Generic;
 //Challenge Format:         [chapter]_[mission]_[requirement type]:[parameter]_[requirement type]:[parameter]_...
 
 public class Challenge : MonoBehaviour {
-    private static string[] requirementTypeKeywords = { "difficulty", "item", "time", "enemy", "outfit", "weapon" }; //Time is in seconds
+    private static string[] requirementTypeKeywords = { "difficulty", "item", "time", "enemy", "outfit", "weapon", "winstreak" }; //Time is in seconds
 
     [SerializeField, Tooltip("Challenge description displayed for the player to see.")]
     private string description;
@@ -18,11 +18,17 @@ public class Challenge : MonoBehaviour {
     private string reward;
     private bool complete;
     private Transform challengeCompleteParent;
+    [SerializeField]
+    private Sprite notificationSprite;
+    [SerializeField]
+    private Color notificationColor;
 
     public string Name { get { return gameObject.name; } }
     public string Description { get { return description; } }
     public string Reward { get { return reward; } }
     public bool Complete { get { return complete; } }
+    public Sprite NotificationSprite { get { return notificationSprite; } }
+    public Color NotificationColor { get { return notificationColor; } }
 
     public bool CheckRequirementMet(string actionPerformed) { // Checks to see if the challenge requirement has been met
         if (requirementTypes == null) { //no valid requirement present

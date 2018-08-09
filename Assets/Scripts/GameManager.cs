@@ -12,8 +12,14 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-Challenges
+//  --prevent displaying multiple notifications of same challenge
+//  --check requirements for winstreak
 //  --revisit mark complete method?
-//  --sort completed challenges towards bottom?
+//  --Filters for challenges -- survival, campaign, unlocks, currency
+//-display currency in menus
+//  --campaign screen
+//  --survival screen
+//  --unlocks screen
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -54,6 +60,7 @@ public class GameManager : MonoBehaviour {
     public static SurvivalSpawner currSurvivalSpawner;
     public static Vector3 currPlayerSpawnLocation;
     public static Transform cutsceneParent;
+    private static ChallengeNotificationManager challengeManager;
 
     private static MenuScript menu;
     private static Toggle soundToggle;
@@ -128,8 +135,9 @@ public class GameManager : MonoBehaviour {
             if (!challenge.Complete) { //if the challenge isn't already complete
                 if (challenge.CheckRequirementMet(actionPerformed)) { //check if challenge requirement met
 
-                    if (currGameMode == GameMode.Campaign && currGameState == GameState.Active) { //find a better if statement? may cause bugs
+                    if (currGameState == GameState.Active) {
                         temporaryChallenges.Add(challenge.Name); //temporarily store challenge as complete
+                        challengeManager.DisplayNotification(challenge.Name + "\n(Temporary)", null, Color.gray); //show a temporary notification in gray
                     } else {
                         CompleteChallenge(challenge);
                     }
@@ -181,8 +189,9 @@ public class GameManager : MonoBehaviour {
     }
 
     private void CompleteChallenge (Challenge challenge) {
-        challenges.Add(challenge.Name); //store challenge as complete
+        //challenges.Add(challenge.Name); //store challenge as complete
         challenge.MarkComplete(); //mark challenge complete
+        challengeManager.DisplayNotification(challenge.Name, challenge.NotificationSprite, challenge.NotificationColor);
 
         if (challenge.Reward.Contains("currency")) { //if the reward is currency
             string[] rewardInfo = challenge.Reward.Split('_'); //split the info
@@ -191,24 +200,11 @@ public class GameManager : MonoBehaviour {
                 currencyEarned += currencyReward; //add to currency earned
             }
         } else { //reward is an unlock
-            unlocks.Add(challenge.Reward); //add to unlocks list
+            //unlocks.Add(challenge.Reward); //add to unlocks list
         }
     }
 
-    public void CompleteCurrentCampaignMission() {
-        if (!difficultyChanged)
-            ChallengeActionComplete(selectedCampaignMission + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon); //submit action with difficulty
-        else
-            ChallengeActionComplete(selectedCampaignMission + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon); //submit without difficulty
-
-        int missionCompleteBonus = 200; //add completion bonus for currency
-        if (missions.Contains (selectedCampaignMission)) { //mission previously completed
-            missionCompleteBonus = (int)(missionCompleteBonus * 0.05f); //reduce completion bonus
-        } else { //not previously completed
-            CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
-        }
-        currencyEarned += missionCompleteBonus; //add mission complete bonus
-
+    private void CompleteAllTemporaryChallenges() { //goes through temporary and checkpoint lists to complete the challenges -- intended to be used at the end of a survival wave or campaign mission
         checkpointChallenges.AddRange(temporaryChallenges); //store the temporary challenges
         temporaryChallenges.Clear(); //clear the list because they are now stored elsewhere
         Transform currChallenge; //variable to store the current challenge we are looking at
@@ -218,6 +214,27 @@ public class GameManager : MonoBehaviour {
                 CompleteChallenge(currChallenge.GetComponent<Challenge>()); //call our method to complete it
             }
         }
+    }
+
+    public void CompleteCurrentCampaignMission() {
+        challengeManager.ClearAllNotifications();
+
+        currGameState = GameState.Menu; //ensure the challenges are completed correctly without going back to the main menu just yet
+
+        if (!difficultyChanged)
+            ChallengeActionComplete(selectedCampaignMission + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon); //submit action with difficulty
+        else
+            ChallengeActionComplete(selectedCampaignMission + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon); //submit without difficulty
+
+        CompleteAllTemporaryChallenges();
+
+        int missionCompleteBonus = 200; //add completion bonus for currency
+        if (missions.Contains (selectedCampaignMission)) { //mission previously completed
+            missionCompleteBonus = (int)(missionCompleteBonus * 0.05f); //reduce completion bonus
+        } else { //not previously completed
+            CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
+        }
+        currencyEarned += missionCompleteBonus; //add mission complete bonus
 
         RecordItemsObtainedByPlayer(ref items, true, true); //adds items to remembered items and increases currency earned
         currency += currencyEarned; //add the currency the player earned
@@ -311,6 +328,14 @@ public class GameManager : MonoBehaviour {
                 currencyEarned += 20;
             if (currSurvivalStreak % 100 == 0)
                 currencyEarned += 300;
+
+            //challenge actions for surviving
+            if (!difficultyChanged)
+                ChallengeActionComplete("Survival_" + currSurvivalSpawner.CurrentWave + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit action with difficulty
+            else
+                ChallengeActionComplete("Survival_" + currSurvivalSpawner.CurrentWave + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit without difficulty
+
+            CompleteAllTemporaryChallenges();
 
             currency += currencyEarned; //add the currency earned
             UpdateSurvivalDisplayText (); //inform the player how much they earned
@@ -819,6 +844,8 @@ public class GameManager : MonoBehaviour {
 
             purchaseUnsuccessfulPanel = GameObject.Find ("Purchase Unsuccessful");
             purchaseUnsuccessfulPanel.SetActive (false);
+
+            challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
 
             currGameState = GameState.Menu;
 

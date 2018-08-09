@@ -35,8 +35,15 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     }
 
     public override void Die() {
-        if (challengeEnemy)
-            GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_Enemy_" + this.ToString());
+        if (GameManager.currGameState == GameState.Active) {
+            if (challengeEnemy) {
+                if (GameManager.currGameMode == GameMode.Campaign) {
+                    GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_Enemy:" + this.ToString());
+                } else {
+                    GameManager.currGameManager.ChallengeActionComplete("Survival_" + GameManager.currSurvivalSpawner.CurrentWave + "_enemy:" + this.ToString());
+                }
+            }
+        }
         base.Die();
     }
 
@@ -111,7 +118,7 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     }
 
     public override string ToString() {
-        return gameObject.name.Replace(" (Clone)", "");
+        return gameObject.name.Replace("(Clone)", "");
     }
 
     void Update() {
