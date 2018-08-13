@@ -54,7 +54,7 @@ public class Challenge : MonoBehaviour {
 
                 if (actionTypes[currAction] == requirementTypes[currRequirement]) { //if the action is the same type as the requirement
                     if (requirementTypes[currRequirement] == 0 || requirementTypes[currRequirement] == 1 ||
-                        requirementTypes[currRequirement] == 3) { //difficulty challenge or item collection challenge or enemy challenge
+                        requirementTypes[currRequirement] == 3 || requirementTypes[currRequirement] == 6) { //difficulty challenge or item collection challenge or enemy challenge or winstreak
                         int actionParameter, requirementParameter; //declare the parameters
                         if (int.TryParse(actionInfo[currAction + 2].Split(':')[1], out actionParameter)) { // try to get the action difficulty/item qty/enemy qty
                             if (int.TryParse(requirementInfo[currRequirement + 2].Split(':')[1], out requirementParameter)) { //try to get the requirement parameter

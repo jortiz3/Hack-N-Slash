@@ -23,11 +23,14 @@ public class ChallengeNotificationManager : MonoBehaviour {
     }
 
 	public void DisplayNotification(string text, Sprite sprite, Color spriteColor) {
-		notifications.Add(new Notification(text, sprite, spriteColor));
+        Notification newNotification = new Notification(text, sprite, spriteColor);
+        if (!notifications.Contains(newNotification)) { //notifications doesn't already have this notification
+            notifications.Add(newNotification);
 
-        if (notifications.Count == 1) { //if we just added first notification
-            RefreshNotificationPanel(); //refresh panel
-            gameObject.SetActive(true); //show panel
+            if (notifications.Count == 1) { //if we just added first notification
+                RefreshNotificationPanel(); //refresh panel
+                gameObject.SetActive(true); //show panel
+            }
         }
 	}
 

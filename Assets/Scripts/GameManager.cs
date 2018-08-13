@@ -12,8 +12,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
 //-Challenges
-//  --prevent displaying multiple notifications of same challenge
-//  --check requirements for winstreak
 //  --revisit mark complete method?
 //  --Filters for challenges -- survival, campaign, unlocks, currency
 //-display currency in menus
@@ -134,15 +132,19 @@ public class GameManager : MonoBehaviour {
             challenge = challengesParent.GetChild(i).GetComponent<Challenge>(); //get challenge component
             if (!challenge.Complete) { //if the challenge isn't already complete
                 if (challenge.CheckRequirementMet(actionPerformed)) { //check if challenge requirement met
-
-                    if (currGameState == GameState.Active) {
-                        temporaryChallenges.Add(challenge.Name); //temporarily store challenge as complete
-                        challengeManager.DisplayNotification(challenge.Name + "\n(Temporary)", null, Color.gray); //show a temporary notification in gray
-                    } else {
-                        CompleteChallenge(challenge);
+                    if (!temporaryChallenges.Contains(challenge.Name) && !checkpointChallenges.Contains(challenge.Name)) { //make sure challenge not temporarily completed
+                        if (currGameState == GameState.Active) {
+                            temporaryChallenges.Add(challenge.Name); //temporarily store challenge as complete
+                            challengeManager.DisplayNotification(challenge.Name + "\n(Temporary)", challenge.NotificationSprite, Color.gray); //show a temporary notification in gray
+                        } else {
+                            CompleteChallenge(challenge);
+                        }
+                        break;
+                    } else { //challenge already complete
+                        break;
                     }
-                    break;
                 }
+
             }
         }
     }
@@ -280,6 +282,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void EndSurvivalWave(string waveInfo) {
+        currGameState = GameState.Menu; //change the state
+
         if (waveInfo.Equals ("survived")) {
             if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
                 selectedSurvivalWave++; //encourage them to play the next one
@@ -330,6 +334,8 @@ public class GameManager : MonoBehaviour {
                 currencyEarned += 300;
 
             //challenge actions for surviving
+            challengeManager.ClearAllNotifications();
+
             if (!difficultyChanged)
                 ChallengeActionComplete("Survival_" + currSurvivalSpawner.CurrentWave + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit action with difficulty
             else
@@ -346,9 +352,7 @@ public class GameManager : MonoBehaviour {
         }
 
         menu.ChangeState ("Survival");
-        currGameState = GameState.Menu;
         Time.timeScale = 0f; //freeze game
-
         DataPersistence.Save (); //save the game no matter what
     }
 
