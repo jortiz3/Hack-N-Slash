@@ -361,13 +361,16 @@ public abstract class Character : MonoBehaviour {
 
 	public int ReceiveItem(Item i) {
 		inventory.Add (i); //add item to the inventory
-        int total = 0; //initialize the total
-        foreach (Item obtained in inventory) { //go through the inventory
-            if (obtained.Equals(i)) { //see how many of this item are in the inventory
-                total++; //increment total
-            }
-        }
-        return total; //return total
+		int total = 0; //initialize the total
+		foreach (Item obtained in inventory) { //go through the inventory
+			if (obtained.Equals(i)) { //see how many of this item are in the inventory
+				total++; //increment total
+			}
+		}
+		if (i.ChallengeItem) {
+			GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
+		}
+		return total; //return total
 	}
 
 	private void ReceiveKnockback(Character c) {
