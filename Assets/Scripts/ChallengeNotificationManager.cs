@@ -82,7 +82,7 @@ public class ChallengeNotificationManager : MonoBehaviour {
 
 	void Start () {
 		rectTransform = GetComponent<RectTransform>(); //get reference to rect transform
-		rectTransform.sizeDelta = new Vector2(0, Screen.height * 0.2f); //set the height
+		rectTransform.sizeDelta = new Vector2(0, Screen.height * 0.15f); //set the height
 		rectTransform.anchoredPosition = new Vector2(0, 0); //reset the position
 
 		image = transform.Find("Challenge Notification Image").GetComponent<Image>(); //get image child

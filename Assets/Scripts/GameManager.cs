@@ -11,9 +11,6 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-Challenges
-//  --revisit mark complete method?
-//  --Filters for challenges -- survival, campaign, unlocks, currency
 //-display currency in menus
 //  --campaign screen
 //  --survival screen
