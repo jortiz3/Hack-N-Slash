@@ -188,7 +188,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void CompleteChallenge (Challenge challenge) {
-        //challenges.Add(challenge.Name); //store challenge as complete
+        challenges.Add(challenge.Name); //store challenge as complete
         challenge.MarkComplete(); //mark challenge complete
         challengeManager.DisplayNotification(challenge.Name, challenge.NotificationSprite, challenge.NotificationColor);
 
@@ -199,7 +199,7 @@ public class GameManager : MonoBehaviour {
                 currencyEarned += currencyReward; //add to currency earned
             }
         } else { //reward is an unlock
-            //unlocks.Add(challenge.Reward); //add to unlocks list
+            unlocks.Add(challenge.Reward); //add to unlocks list
         }
     }
 
