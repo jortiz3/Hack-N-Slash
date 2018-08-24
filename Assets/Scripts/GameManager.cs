@@ -11,14 +11,9 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-display currency in menus
-//  --campaign screen
-//  --survival screen
-//  --unlocks screen
-//  --IAP screen
-//  --Finish FinalizeCurrencyEarned()
 //-Create Google Dev Account
 //-Add IAP for removing adds >> premium_NoAds
+//-display challenge name for outfits/weapons that require a challenge to unlock >> SelectOutfit SelectWeapon methods
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -110,6 +105,8 @@ public class GameManager : MonoBehaviour {
     private GameObject displayPurchaseConfirmationButton_Weapon;
     private GameObject purchaseUnsuccessfulPanel;
     private List<string> selectedOutfit_weaponSpecializations;
+    private Text currencyText_Survival;
+    private Text currencyText_Unlocks;
     private bool getDefaultPlayerSpawnLocation;
     private float playTime;
     private bool premium_NoAds; //bool to let us know whether the player purchased to remove all ads in the game
@@ -395,7 +392,9 @@ public class GameManager : MonoBehaviour {
         currency += currencyEarned;
 
         //update all text that displays currency
-        string textToDisplay = "Currency: " + currency;
+        string textToDisplay = "Your Currency: " + currency;
+        currencyText_Survival.text = textToDisplay;
+        currencyText_Unlocks.text = textToDisplay;
     }
 
     void FixedUpdate() {
@@ -885,6 +884,11 @@ public class GameManager : MonoBehaviour {
 
             challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
             adManager = GetComponent<AdvertisementManager>();
+
+            currencyText_Survival = GameObject.Find("Survival Currency Text").GetComponent<Text>();
+            currencyText_Unlocks = GameObject.Find("Unlocks Currency Text").GetComponent<Text>();
+
+            FinalizeCurrencyEarned();
 
             currGameState = GameState.Menu;
 
