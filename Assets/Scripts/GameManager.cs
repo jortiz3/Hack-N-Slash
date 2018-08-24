@@ -15,6 +15,10 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //  --campaign screen
 //  --survival screen
 //  --unlocks screen
+//  --IAP screen
+//  --Finish FinalizeCurrencyEarned()
+//-Create Google Dev Account
+//-Add IAP for removing adds >> premium_NoAds
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -58,6 +62,7 @@ public class GameManager : MonoBehaviour {
     private static ChallengeNotificationManager challengeManager;
 
     private static MenuScript menu;
+    private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
     private static Toggle soundToggle;
     private static Slider bgmSlider;
     private static Slider sfxSlider;
@@ -107,6 +112,8 @@ public class GameManager : MonoBehaviour {
     private List<string> selectedOutfit_weaponSpecializations;
     private bool getDefaultPlayerSpawnLocation;
     private float playTime;
+    private bool premium_NoAds; //bool to let us know whether the player purchased to remove all ads in the game
+    private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
 
     public static string[] Unlocks { get { return unlocks.ToArray (); } }
     public static string[] Missions { get { return missions.ToArray (); } }
@@ -236,16 +243,21 @@ public class GameManager : MonoBehaviour {
         currencyEarned += missionCompleteBonus; //add mission complete bonus
 
         RecordItemsObtainedByPlayer(ref items, true, true); //adds items to remembered items and increases currency earned
-        currency += currencyEarned; //add the currency the player earned
+        FinalizeCurrencyEarned();
 
         StartCampaign(); //display campaign screen
         DisplayMissionReportScreen (true); //show the mission report
         DataPersistence.Save(); //save the game
         Time.timeScale = 0f; //pause the game
+        IncrementAdRoundCounter(); //display ad when necessary
     }
 
     public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
         currencyEarned += amount; //add the amount the object is worth
+
+        if (currGameState != GameState.Active) {
+            FinalizeCurrencyEarned(); //update currency & text that displays currency
+        }
     }
 
     public void DecrementSelectedSurvivalWave() {
@@ -340,9 +352,9 @@ public class GameManager : MonoBehaviour {
 
             CompleteAllTemporaryChallenges();
 
-            currency += currencyEarned; //add the currency earned
             UpdateSurvivalDisplayText (); //inform the player how much they earned
-            displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency! You now have: " + currency + "\n+1 survival streak (" + currSurvivalStreak + ")";
+            displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency!" + "\n+1 survival streak (" + currSurvivalStreak + ")";
+            FinalizeCurrencyEarned();
         } else if (waveInfo.Equals ("died")) {
             displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
             currSurvivalStreak = 0; //reset survival streak
@@ -351,6 +363,8 @@ public class GameManager : MonoBehaviour {
         menu.ChangeState ("Survival");
         Time.timeScale = 0f; //freeze game
         DataPersistence.Save (); //save the game no matter what
+
+        IncrementAdRoundCounter(); //display ad when necessary
     }
 
     public void ExitToDesktop () {
@@ -363,6 +377,7 @@ public class GameManager : MonoBehaviour {
         StartCampaign(); //display campaign screen
         DisplayMissionReportScreen (false); //show the mission report
         Time.timeScale = 0f;
+        IncrementAdRoundCounter(); //display an ad when necessary
     }
 
     public void FilterVisibleWeaponUnlocks() {
@@ -376,9 +391,31 @@ public class GameManager : MonoBehaviour {
         ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
     }
 
+    private void FinalizeCurrencyEarned() { //adds currency earned to total & updates all text that displays current amount of currency
+        currency += currencyEarned;
+
+        //update all text that displays currency
+        string textToDisplay = "Currency: " + currency;
+    }
+
     void FixedUpdate() {
         if (currGameState == GameState.Active) {
             playTime += Time.fixedDeltaTime;
+        }
+    }
+
+    private void IncrementAdRoundCounter() {
+        if (!premium_NoAds) {
+            if (currGameMode == GameMode.Campaign) { //campaign missions will take the player longer to play through
+                numOfRoundsSinceLastAd += 1f; //add a higher weight
+            } else { //survival
+                numOfRoundsSinceLastAd += 0.6f; //play 5 rounds before an add is displayed
+            }
+
+            if (numOfRoundsSinceLastAd >= 3) { //if player played enough rounds
+                adManager.DisplayAd(false); //display ad -- inform manager the player didn't opt-in for the ad, so less reward for watching entire ad
+                numOfRoundsSinceLastAd = 0; //reset counter
+            }
         }
     }
 
@@ -847,6 +884,7 @@ public class GameManager : MonoBehaviour {
             purchaseUnsuccessfulPanel.SetActive (false);
 
             challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
+            adManager = GetComponent<AdvertisementManager>();
 
             currGameState = GameState.Menu;
 
