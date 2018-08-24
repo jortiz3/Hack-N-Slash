@@ -124,7 +124,7 @@ public class Challenge : MonoBehaviour {
     void Start() {
         challengeCompleteParent = transform.Find("Challenge Complete");
         transform.Find("Challenge Name").GetComponent<Text>().text = Name;
-        transform.Find("Challenge Description").GetComponent<Text>().text = description;
+        transform.Find("Challenge Description").GetComponent<Text>().text = System.Text.RegularExpressions.Regex.Unescape(description); //unescape turns \n into the utf-8 control character so it will actually work
 
         requirementTypes = GetRequirementTypes(requirement, out requirementInfo);
     }
