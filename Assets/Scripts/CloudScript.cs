@@ -13,7 +13,7 @@ public class CloudScript : MonoBehaviour {
 	private SpriteRenderer sr;
 
 	void FixedUpdate () {
-		if (GameManager.currGameState == GameState.Active) { //if the game is active
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) { //if the game is active
 			if (sr.enabled) { //if the cloud is visible
 				transform.position += speed; //move the cloud
 

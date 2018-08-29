@@ -78,7 +78,7 @@ public class SingleJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, IP
     // this event happens when there is a drag on screen
     public virtual void OnDrag(PointerEventData ped)
     {
-		if (GameManager.currGameState == GameState.Active) { //added by Justin Ortiz
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) { //added by Justin Ortiz
 			Vector2 localPoint = Vector2.zero; // resets the localPoint out parameter of the RectTransformUtility.ScreenPointToLocalPointInRectangle function on each drag event
 
 			// if the point touched on the screen is within the background image of this joystick

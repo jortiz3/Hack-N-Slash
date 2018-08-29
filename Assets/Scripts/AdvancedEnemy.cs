@@ -39,13 +39,13 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 			}
 		}
 		if (cutsceneToPlayOnDeath != null) {
-			GameManager.currGameManager.PlayCutscene (cutsceneToPlayOnDeath);
+			GameManager_SwordSwipe.currGameManager.PlayCutscene (cutsceneToPlayOnDeath);
 		}
 		base.Die ();
 	}
 
 	protected override Vector3 IdentifyTargetLocation () {
-		if (GameManager.currGameMode == GameMode.Survival) {
+		if (GameManager_SwordSwipe.currGameMode == GameMode.Survival) {
 			if (player != null) {
 				return player.transform.position;
 			}

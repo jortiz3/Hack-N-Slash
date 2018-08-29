@@ -11,9 +11,14 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-Create Google Dev Account
-//-Add IAP for removing adds >> premium_NoAds
+//-publish internal test on play store, download on phone, test IAP
+//-Test IAP purchase persistence -- close app, reinstall
 //-display challenge name for outfits/weapons that require a challenge to unlock >> SelectOutfit SelectWeapon methods
+//-filter challenges
+//  --new method Challenge >> bool MeetsFilter(string filter) { return requirement.Contains(filter); }
+//  --new method GameManager
+//      ---set challenge gameobject true/false based on method
+//      ---resize challenge list
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -44,13 +49,13 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //				--tap near character to jump
 //	--ranged weapons: swipe hold to continue to fire??
 
-public class GameManager : MonoBehaviour {
+public class GameManager_SwordSwipe : MonoBehaviour {
 
     public static GameMode currGameMode;
     public static GameDifficulty currDifficulty;
     public static GameState currGameState;
     private static GameState prevGameState; //for return buttons
-    public static GameManager currGameManager;
+    public static GameManager_SwordSwipe currGameManager;
     public static SurvivalSpawner currSurvivalSpawner;
     public static Vector3 currPlayerSpawnLocation;
     public static Transform cutsceneParent;
@@ -77,6 +82,8 @@ public class GameManager : MonoBehaviour {
     private static List<string> challenges; //challenges the player has completed
     private static List<string> checkpointChallenges; //challenges stored after reaching checkpoint
     private static List<string> temporaryChallenges; //challenges obtained prior to checkpoint -- can be lost upon death
+    private static List<string> extra01;
+    private static List<string> extra02;
     private static Cutscene currCutscene;
 
 
@@ -109,13 +116,14 @@ public class GameManager : MonoBehaviour {
     private Text currencyText_Unlocks;
     private bool getDefaultPlayerSpawnLocation;
     private float playTime;
-    private bool premium_NoAds; //bool to let us know whether the player purchased to remove all ads in the game
     private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
 
     public static string[] Unlocks { get { return unlocks.ToArray (); } }
     public static string[] Missions { get { return missions.ToArray (); } }
     public static string[] Items { get { return items.ToArray (); } }
     public static string[] Challenges { get { return challenges.ToArray(); } }
+    public static string[] Extra01 { get { return extra01.ToArray(); } }
+    public static string[] Extra02 { get { return extra02.ToArray(); } }
     public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
     public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
     public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
@@ -404,7 +412,7 @@ public class GameManager : MonoBehaviour {
     }
 
     private void IncrementAdRoundCounter() {
-        if (!premium_NoAds) {
+        if (!AdvertisementManager.Premium_NoAds) {
             if (currGameMode == GameMode.Campaign) { //campaign missions will take the player longer to play through
                 numOfRoundsSinceLastAd += 1f; //add a higher weight
             } else { //survival
@@ -817,6 +825,8 @@ public class GameManager : MonoBehaviour {
             missions = new List<string> ();
             items = new List<string> ();
             checkpointItems = new List<string> ();
+            extra01 = new List<string>();
+            extra02 = new List<string>();
 
             if (loadedData != null) {
                 currency = loadedData.currency;
@@ -826,8 +836,8 @@ public class GameManager : MonoBehaviour {
                 challenges.AddRange(loadedData.challenges);//challenges
                 missions.AddRange (loadedData.missions);
                 items.AddRange (loadedData.items);
-                //extra01
-                //extra02
+                extra01.AddRange(loadedData.extra01);
+                extra02.AddRange(loadedData.extra02);
             } else {
                 highestSurvivalWave = 0;
                 currSurvivalStreak = 0;
@@ -835,10 +845,6 @@ public class GameManager : MonoBehaviour {
                 unlocks.Add ("Stick it to 'em"); //default player
                 unlocks.Add ("Iron Longsword"); //default weapon
                 unlocks.Add ("Test Dagger");
-                //challenges
-                //missions
-                //extra01
-                //extra02
             }
 
             SetDifficulty ((int)currDifficulty); //set the current difficulty to loaded/preset value

@@ -87,7 +87,7 @@ public class PlayerInput : MonoBehaviour {
 	}
 
 	void FixedUpdate() {
-		if (GameManager.currGameState == GameState.Active && Character.player != null) {
+		if (GameManager_SwordSwipe.currGameState == GameState.Active && Character.player != null) {
 			if (PlayerInput.currControlScheme == ControlScheme.Buttonless) {
 				if (Input.touchCount > 0) { //if the player is touching the screen
 					Touch currTouch;
@@ -328,7 +328,7 @@ public class PlayerInput : MonoBehaviour {
 				}
 				editObject.localScale = newScale; //apply the new scale
 			}
-		} else if (GameManager.currGameState == GameState.Active && currControlScheme == ControlScheme.Default) { //if the game is active
+		} else if (GameManager_SwordSwipe.currGameState == GameState.Active && currControlScheme == ControlScheme.Default) { //if the game is active
 			if (Character.player.gameObject.activeSelf) { //if the player isn't currently in a door
 				if (Character.player.isOnGround && Mathf.Abs (Character.player.Velocity.x) < 0.01f) { //if the player is on the ground and is not moving
 					if (Character.player.DoorInRange != null) { //player is in front of a door and has not attempted to open a locked door

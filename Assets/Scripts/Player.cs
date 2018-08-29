@@ -29,18 +29,18 @@ public class Player : Character {
 
 	public override void Die () {
 		if (infiniteRespawn) {
-			Respawn (GameManager.currPlayerSpawnLocation);
+			Respawn (GameManager_SwordSwipe.currPlayerSpawnLocation);
 		} else if (numOfRespawnsRemaining > 0) {
-			Respawn (GameManager.currPlayerSpawnLocation);
+			Respawn (GameManager_SwordSwipe.currPlayerSpawnLocation);
 			numOfRespawnsRemaining--;
 		} else {
-			if (GameManager.currGameState == GameState.Active) {
-				switch (GameManager.currGameMode) {
+			if (GameManager_SwordSwipe.currGameState == GameState.Active) {
+				switch (GameManager_SwordSwipe.currGameMode) {
 				case GameMode.Campaign:
-					GameManager.currGameManager.FailCurrentCampaignMission (); //fail mission
+					GameManager_SwordSwipe.currGameManager.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager.currGameManager.EndSurvivalWave ("died"); //fail survival
+					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("died"); //fail survival
 					break;
 				}
 			}

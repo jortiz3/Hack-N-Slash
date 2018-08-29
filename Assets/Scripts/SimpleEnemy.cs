@@ -23,7 +23,7 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     public override void DetectBeginOtherCharacter(Character otherCharacter) {
         targetCharacter = otherCharacter;
 
-        if ((int)GameManager.currDifficulty < 2) //if the difficulty is below normal, the enemy will pause on detection
+        if ((int)GameManager_SwordSwipe.currDifficulty < 2) //if the difficulty is below normal, the enemy will pause on detection
             PauseMovement();
     }
 
@@ -35,12 +35,12 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     }
 
     public override void Die() {
-        if (GameManager.currGameState == GameState.Active) {
+        if (GameManager_SwordSwipe.currGameState == GameState.Active) {
             if (challengeEnemy) {
-                if (GameManager.currGameMode == GameMode.Campaign) {
-                    GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_Enemy:" + this.ToString());
+                if (GameManager_SwordSwipe.currGameMode == GameMode.Campaign) {
+                    GameManager_SwordSwipe.currGameManager.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_Enemy:" + this.ToString());
                 } else {
-                    GameManager.currGameManager.ChallengeActionComplete("Survival_" + GameManager.currSurvivalSpawner.CurrentWave + "_enemy:" + this.ToString());
+                    GameManager_SwordSwipe.currGameManager.ChallengeActionComplete("Survival_" + GameManager_SwordSwipe.currSurvivalSpawner.CurrentWave + "_enemy:" + this.ToString());
                 }
             }
         }
@@ -56,7 +56,7 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     }
 
     protected virtual Vector3 IdentifyTargetLocation() {
-        if (player != null && GameManager.currGameMode == GameMode.Survival)
+        if (player != null && GameManager_SwordSwipe.currGameMode == GameMode.Survival)
             return player.transform.position; //target is player
         else if (targetCharacter != null)
             return targetCharacter.transform.position;
@@ -122,7 +122,7 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
     }
 
     void Update() {
-        if (GameManager.currGameState == GameState.Active) {
+        if (GameManager_SwordSwipe.currGameState == GameState.Active) {
             UpdateEnemy();
         } else {
             StopMovement();
