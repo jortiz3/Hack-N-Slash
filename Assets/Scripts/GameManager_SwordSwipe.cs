@@ -11,8 +11,6 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-publish internal test on play store, download on phone, test IAP
-//-Test IAP purchase persistence -- close app, reinstall
 //-display challenge name for outfits/weapons that require a challenge to unlock >> SelectOutfit SelectWeapon methods
 //-filter challenges
 //  --new method Challenge >> bool MeetsFilter(string filter) { return requirement.Contains(filter); }
@@ -48,6 +46,7 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //				--swipe from character x to attack
 //				--tap near character to jump
 //	--ranged weapons: swipe hold to continue to fire??
+//-create unity account for common silk studios so apk can be >> com.CommonSilkStudios.SwordSwipe instead of containing my name
 
 public class GameManager_SwordSwipe : MonoBehaviour {
 
@@ -412,7 +411,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
     }
 
     private void IncrementAdRoundCounter() {
-        if (!AdvertisementManager.Premium_NoAds) {
+        if (!AdvertisementManager.IAP_NoAds_Purchased) {
             if (currGameMode == GameMode.Campaign) { //campaign missions will take the player longer to play through
                 numOfRoundsSinceLastAd += 1f; //add a higher weight
             } else { //survival
