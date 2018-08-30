@@ -617,7 +617,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
             if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
                 challenge.MarkComplete(); //mark it as complete
             }
-            challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, challengeRectTransform.rect.width / 5);
+            challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, Screen.height * 0.4f); //keep same width, adjust height to scale with screen dimensions
         }
         ResizeVerticalLayoutGroup(challengesParent.GetComponent<RectTransform>());
 
