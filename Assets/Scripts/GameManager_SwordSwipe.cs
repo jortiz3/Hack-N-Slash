@@ -11,10 +11,12 @@ public enum GameDifficulty { Easiest, Easy, Normal, Masochist };
 public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 
 //To do:
-//-display currency in menus
-//  --campaign screen
-//  --survival screen
-//  --unlocks screen
+//-display challenge name for outfits/weapons that require a challenge to unlock >> SelectOutfit SelectWeapon methods
+//-filter challenges
+//  --new method Challenge >> bool MeetsFilter(string filter) { return requirement.Contains(filter); }
+//  --new method GameManager
+//      ---set challenge gameobject true/false based on method
+//      ---resize challenge list
 //-revisit Spawn class for cleaner register advanced enemy minion solution
 //-continue survival game mode
 //	--Survival Spawner
@@ -44,20 +46,22 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //				--swipe from character x to attack
 //				--tap near character to jump
 //	--ranged weapons: swipe hold to continue to fire??
+//-create unity account for common silk studios so apk can be >> com.CommonSilkStudios.SwordSwipe instead of containing my name
 
-public class GameManager : MonoBehaviour {
+public class GameManager_SwordSwipe : MonoBehaviour {
 
     public static GameMode currGameMode;
     public static GameDifficulty currDifficulty;
     public static GameState currGameState;
     private static GameState prevGameState; //for return buttons
-    public static GameManager currGameManager;
+    public static GameManager_SwordSwipe currGameManager;
     public static SurvivalSpawner currSurvivalSpawner;
     public static Vector3 currPlayerSpawnLocation;
     public static Transform cutsceneParent;
     private static ChallengeNotificationManager challengeManager;
 
     private static MenuScript menu;
+    private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
     private static Toggle soundToggle;
     private static Slider bgmSlider;
     private static Slider sfxSlider;
@@ -77,6 +81,8 @@ public class GameManager : MonoBehaviour {
     private static List<string> challenges; //challenges the player has completed
     private static List<string> checkpointChallenges; //challenges stored after reaching checkpoint
     private static List<string> temporaryChallenges; //challenges obtained prior to checkpoint -- can be lost upon death
+    private static List<string> extra01;
+    private static List<string> extra02;
     private static Cutscene currCutscene;
 
 
@@ -105,13 +111,18 @@ public class GameManager : MonoBehaviour {
     private GameObject displayPurchaseConfirmationButton_Weapon;
     private GameObject purchaseUnsuccessfulPanel;
     private List<string> selectedOutfit_weaponSpecializations;
+    private Text currencyText_Survival;
+    private Text currencyText_Unlocks;
     private bool getDefaultPlayerSpawnLocation;
     private float playTime;
+    private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
 
     public static string[] Unlocks { get { return unlocks.ToArray (); } }
     public static string[] Missions { get { return missions.ToArray (); } }
     public static string[] Items { get { return items.ToArray (); } }
     public static string[] Challenges { get { return challenges.ToArray(); } }
+    public static string[] Extra01 { get { return extra01.ToArray(); } }
+    public static string[] Extra02 { get { return extra02.ToArray(); } }
     public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
     public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
     public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
@@ -236,16 +247,21 @@ public class GameManager : MonoBehaviour {
         currencyEarned += missionCompleteBonus; //add mission complete bonus
 
         RecordItemsObtainedByPlayer(ref items, true, true); //adds items to remembered items and increases currency earned
-        currency += currencyEarned; //add the currency the player earned
+        FinalizeCurrencyEarned();
 
         StartCampaign(); //display campaign screen
         DisplayMissionReportScreen (true); //show the mission report
         DataPersistence.Save(); //save the game
         Time.timeScale = 0f; //pause the game
+        IncrementAdRoundCounter(); //display ad when necessary
     }
 
     public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
         currencyEarned += amount; //add the amount the object is worth
+
+        if (currGameState != GameState.Active) {
+            FinalizeCurrencyEarned(); //update currency & text that displays currency
+        }
     }
 
     public void DecrementSelectedSurvivalWave() {
@@ -340,9 +356,9 @@ public class GameManager : MonoBehaviour {
 
             CompleteAllTemporaryChallenges();
 
-            currency += currencyEarned; //add the currency earned
             UpdateSurvivalDisplayText (); //inform the player how much they earned
-            displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency! You now have: " + currency + "\n+1 survival streak (" + currSurvivalStreak + ")";
+            displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency!" + "\n+1 survival streak (" + currSurvivalStreak + ")";
+            FinalizeCurrencyEarned();
         } else if (waveInfo.Equals ("died")) {
             displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
             currSurvivalStreak = 0; //reset survival streak
@@ -351,6 +367,8 @@ public class GameManager : MonoBehaviour {
         menu.ChangeState ("Survival");
         Time.timeScale = 0f; //freeze game
         DataPersistence.Save (); //save the game no matter what
+
+        IncrementAdRoundCounter(); //display ad when necessary
     }
 
     public void ExitToDesktop () {
@@ -363,6 +381,7 @@ public class GameManager : MonoBehaviour {
         StartCampaign(); //display campaign screen
         DisplayMissionReportScreen (false); //show the mission report
         Time.timeScale = 0f;
+        IncrementAdRoundCounter(); //display an ad when necessary
     }
 
     public void FilterVisibleWeaponUnlocks() {
@@ -376,9 +395,33 @@ public class GameManager : MonoBehaviour {
         ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
     }
 
+    private void FinalizeCurrencyEarned() { //adds currency earned to total & updates all text that displays current amount of currency
+        currency += currencyEarned;
+
+        //update all text that displays currency
+        string textToDisplay = "Your Currency: " + currency;
+        currencyText_Survival.text = textToDisplay;
+        currencyText_Unlocks.text = textToDisplay;
+    }
+
     void FixedUpdate() {
         if (currGameState == GameState.Active) {
             playTime += Time.fixedDeltaTime;
+        }
+    }
+
+    private void IncrementAdRoundCounter() {
+        if (!AdvertisementManager.IAP_NoAds_Purchased) {
+            if (currGameMode == GameMode.Campaign) { //campaign missions will take the player longer to play through
+                numOfRoundsSinceLastAd += 1f; //add a higher weight
+            } else { //survival
+                numOfRoundsSinceLastAd += 0.6f; //play 5 rounds before an add is displayed
+            }
+
+            if (numOfRoundsSinceLastAd >= 3) { //if player played enough rounds
+                adManager.DisplayAd(false); //display ad -- inform manager the player didn't opt-in for the ad, so less reward for watching entire ad
+                numOfRoundsSinceLastAd = 0; //reset counter
+            }
         }
     }
 
@@ -573,7 +616,7 @@ public class GameManager : MonoBehaviour {
             if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
                 challenge.MarkComplete(); //mark it as complete
             }
-            challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, challengeRectTransform.rect.width / 5);
+            challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, Screen.height * 0.4f); //keep same width, adjust height to scale with screen dimensions
         }
         ResizeVerticalLayoutGroup(challengesParent.GetComponent<RectTransform>());
 
@@ -781,6 +824,8 @@ public class GameManager : MonoBehaviour {
             missions = new List<string> ();
             items = new List<string> ();
             checkpointItems = new List<string> ();
+            extra01 = new List<string>();
+            extra02 = new List<string>();
 
             if (loadedData != null) {
                 currency = loadedData.currency;
@@ -790,8 +835,8 @@ public class GameManager : MonoBehaviour {
                 challenges.AddRange(loadedData.challenges);//challenges
                 missions.AddRange (loadedData.missions);
                 items.AddRange (loadedData.items);
-                //extra01
-                //extra02
+                extra01.AddRange(loadedData.extra01);
+                extra02.AddRange(loadedData.extra02);
             } else {
                 highestSurvivalWave = 0;
                 currSurvivalStreak = 0;
@@ -799,10 +844,6 @@ public class GameManager : MonoBehaviour {
                 unlocks.Add ("Stick it to 'em"); //default player
                 unlocks.Add ("Iron Longsword"); //default weapon
                 unlocks.Add ("Test Dagger");
-                //challenges
-                //missions
-                //extra01
-                //extra02
             }
 
             SetDifficulty ((int)currDifficulty); //set the current difficulty to loaded/preset value
@@ -847,6 +888,12 @@ public class GameManager : MonoBehaviour {
             purchaseUnsuccessfulPanel.SetActive (false);
 
             challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
+            adManager = GetComponent<AdvertisementManager>();
+
+            currencyText_Survival = GameObject.Find("Survival Currency Text").GetComponent<Text>();
+            currencyText_Unlocks = GameObject.Find("Unlocks Currency Text").GetComponent<Text>();
+
+            FinalizeCurrencyEarned();
 
             currGameState = GameState.Menu;
 

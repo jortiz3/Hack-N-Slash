@@ -290,7 +290,7 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
-		if (GameManager.currGameState != GameState.Active)
+		if (GameManager_SwordSwipe.currGameState != GameState.Active)
 			return;
 
 		if (!isInvulnerable) { //enemies typically never invulnerable
@@ -306,7 +306,7 @@ public abstract class Character : MonoBehaviour {
 			float difficultyDamageModifier = 1f;
 
 			if (gameObject.tag.Equals ("Player")) { //player takes more damage based on difficulty
-				switch (GameManager.currDifficulty) {
+				switch (GameManager_SwordSwipe.currDifficulty) {
 				case GameDifficulty.Easiest:
 					difficultyDamageModifier = 0.5f;
 					break;
@@ -368,7 +368,7 @@ public abstract class Character : MonoBehaviour {
 			}
 		}
 		if (i.ChallengeItem) {
-			GameManager.currGameManager.ChallengeActionComplete(GameManager.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
+			GameManager_SwordSwipe.currGameManager.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
 		}
 		return total; //return total
 	}

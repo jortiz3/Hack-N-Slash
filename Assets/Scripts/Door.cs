@@ -28,18 +28,18 @@ public class Door : MonoBehaviour {
 			if (locationToMoveTo != null) { //if there is a location to move too
 				MoveGameObject (characterAttemptingToEnter.gameObject); //add the player to the list
 
-				if (GameManager.SoundEnabled && openedSoundEffect != null) { //sound enabled && sound effect available
-					aSource.volume = GameManager.SFXVolume;
+				if (GameManager_SwordSwipe.SoundEnabled && openedSoundEffect != null) { //sound enabled && sound effect available
+					aSource.volume = GameManager_SwordSwipe.SFXVolume;
 					aSource.clip = openedSoundEffect;
 					aSource.Play ();
 				}
 			}
 			if (cutsceneToPlay != null) { //if there is a cutscene
-				GameManager.currGameManager.PlayCutscene (cutsceneToPlay); //play the cutscene
+				GameManager_SwordSwipe.currGameManager.PlayCutscene (cutsceneToPlay); //play the cutscene
 			}
 		} else {
-			if (GameManager.SoundEnabled && lockedSoundEffect != null) { //sound enabled && sound effect available
-				aSource.volume = GameManager.SFXVolume;
+			if (GameManager_SwordSwipe.SoundEnabled && lockedSoundEffect != null) { //sound enabled && sound effect available
+				aSource.volume = GameManager_SwordSwipe.SFXVolume;
 				aSource.clip = lockedSoundEffect;
 				aSource.Play ();
 			}

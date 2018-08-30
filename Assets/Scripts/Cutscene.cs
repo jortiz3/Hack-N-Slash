@@ -56,12 +56,12 @@ public class Cutscene : MonoBehaviour {
 		}
 
 		StopAllAudio(); //may not be necessary
-		GameManager.currGameManager.StopCutscene (this, endMissionOnFinish); //inform game manager cutscene is complete
+		GameManager_SwordSwipe.currGameManager.StopCutscene (this, endMissionOnFinish); //inform game manager cutscene is complete
 		ended = true; //ensure we don't spawn multiple bosses
 	}
 
 	void FixedUpdate () {
-		if (GameManager.currGameState == GameState.Cutscene) { //cutscene to show, not complete
+		if (GameManager_SwordSwipe.currGameState == GameState.Cutscene) { //cutscene to show, not complete
 			if (currDelayTime > 0) { //we are in a delay
 				currDelayTime -= Time.fixedDeltaTime;
 			} else if (!delayComplete) { //we finished a delay, narration text was cleared
@@ -95,15 +95,15 @@ public class Cutscene : MonoBehaviour {
 
 		if (currNarration < scenes [currScene].SceneNarration.Length) { //if there is another narration for the current scene
 			SetNarrationText();
-			PlayAudio (narrationAudioSource, scenes [currScene].SceneNarration [currNarration].NarrationAudioClip, GameManager.BGMVolume);
-			PlayAudio (soundEffectAudioSource, scenes [currScene].SceneNarration [currNarration].SoundEffect, GameManager.SFXVolume);
+			PlayAudio (narrationAudioSource, scenes [currScene].SceneNarration [currNarration].NarrationAudioClip, GameManager_SwordSwipe.BGMVolume);
+			PlayAudio (soundEffectAudioSource, scenes [currScene].SceneNarration [currNarration].SoundEffect, GameManager_SwordSwipe.SFXVolume);
 		} else {
 			NextScene (); //go to the next scene
 		}
 	}
 
 	private void PlayAudio (AudioSource aSource, AudioClip aClip, float volume) {
-		if (GameManager.SoundEnabled) {
+		if (GameManager_SwordSwipe.SoundEnabled) {
 			if (aClip != null) { //ensure there is a clip
 				if (aSource.isPlaying) //is the narrator currently speaking?
 					aSource.Stop (); //stop the narrator
@@ -125,10 +125,10 @@ public class Cutscene : MonoBehaviour {
 
 	void Start() {
 		if (narrationAudioSource == null) {
-			narrationAudioSource = GameManager.cutsceneParent.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
-			soundEffectAudioSource = GameManager.cutsceneParent.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
-			image = GameManager.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
-			subtitleText = GameManager.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
+			narrationAudioSource = GameManager_SwordSwipe.cutsceneParent.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
+			soundEffectAudioSource = GameManager_SwordSwipe.cutsceneParent.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
+			image = GameManager_SwordSwipe.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
+			subtitleText = GameManager_SwordSwipe.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
 
 		delayComplete = true;

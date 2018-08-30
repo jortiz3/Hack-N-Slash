@@ -46,7 +46,7 @@ public class CharacterSpawner : MonoBehaviour {
 	}
 
 	void Update () {
-		if (GameManager.currGameState == GameState.Active) {
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) {
 			if (!Depleted) {
 				if (spawnTimer > 0) {
 					spawnTimer -= Time.deltaTime;

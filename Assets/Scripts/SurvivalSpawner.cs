@@ -20,8 +20,8 @@ public class SurvivalSpawner : MonoBehaviour {
 	public int NumberOfWaves { get { return waveList.Length; } }
 
 	void Awake () {
-		if (GameManager.currSurvivalSpawner == null) {
-			GameManager.currSurvivalSpawner = this;
+		if (GameManager_SwordSwipe.currSurvivalSpawner == null) {
+			GameManager_SwordSwipe.currSurvivalSpawner = this;
 			transform.SetParent (GameObject.Find("Spawners").transform);
 		} else {
 			Destroy (gameObject);
@@ -60,7 +60,7 @@ public class SurvivalSpawner : MonoBehaviour {
 	}
 
 	void Update () {
-		if (GameManager.currGameState == GameState.Active) { //only update while user is playing
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) { //only update while user is playing
 			if (!Depleted) { //while there are characters to spawn
 				if (spawnTimer > 0) { //if currently between spawns
 					spawnTimer -= Time.deltaTime; //update spawn timer
@@ -70,7 +70,7 @@ public class SurvivalSpawner : MonoBehaviour {
 					spawnTimer = Random.Range (waveList[currentWave].spawnTimeRange.x, waveList[currentWave].spawnTimeRange.y); //randomize the spawn timer
 				}
 			} else if (Character.numOfEnemies < 1) { //if the user has slain all the enemies
-				GameManager.currGameManager.EndSurvivalWave ("survived");
+				GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("survived");
 			}
 		}
 	}

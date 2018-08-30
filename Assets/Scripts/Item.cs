@@ -41,7 +41,7 @@ public class Item : MonoBehaviour {
     }
 
     void FixedUpdate() {
-        if (GameManager.currGameState == GameState.Active) {
+        if (GameManager_SwordSwipe.currGameState == GameState.Active) {
             if (obtained) { //item was obtained
                 if (!aSource.isPlaying) { //sound effect finished playing
                     gameObject.SetActive(false); //hide object
@@ -72,19 +72,19 @@ public class Item : MonoBehaviour {
 
         if (c.ReceiveItem(this) >= quantityRequiredForCutscene) { //give the item to the character && see if enough of item obtained
             if (cutsceneToPlayOnPickup != null) { //if there is a cutscene to play
-                GameManager.currGameManager.PlayCutscene(cutsceneToPlayOnPickup); //play the cutscene
+                GameManager_SwordSwipe.currGameManager.PlayCutscene(cutsceneToPlayOnPickup); //play the cutscene
             }
         }
     }
 
     private void PlaySoundEffect() {
-        if (GameManager.SoundEnabled && aSource.clip != null) {
-            aSource.volume = GameManager.SFXVolume;
+        if (GameManager_SwordSwipe.SoundEnabled && aSource.clip != null) {
+            aSource.volume = GameManager_SwordSwipe.SFXVolume;
             aSource.Play();
         }
     }
 
     public override string ToString() {
-        return GameManager.SelectedCampaignMission + "_" + gameObject.name;
+        return GameManager_SwordSwipe.SelectedCampaignMission + "_" + gameObject.name;
     }
 }
