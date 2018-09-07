@@ -26,7 +26,6 @@ public class AdvertisementManager : MonoBehaviour, IStoreListener {
 			Advertisement.Show(options);
             optIn = OptIn;
 		}
-		
 	}
 
 	private void HandleAdvertisementCallback(ShowResult result) {

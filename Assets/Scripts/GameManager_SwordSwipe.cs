@@ -756,10 +756,16 @@ public class GameManager_SwordSwipe : MonoBehaviour {
     }
 
     public void SetSelectedSurvivalWave(InputField inputField) {
-        selectedSurvivalWave = int.Parse (inputField.text);
+        int temp;
+        if (int.TryParse(inputField.text, out temp)) { //see if input is valid
+            selectedSurvivalWave = temp; //if valid, set the wave
+        } else {
+            selectedSurvivalWave = 1; //if not valid, set to wave 1
+        }
+        
         if (selectedSurvivalWave > highestSurvivalWave + 1)
             selectedSurvivalWave = highestSurvivalWave + 1;
-        else if (selectedSurvivalWave < 0)
+        else if (selectedSurvivalWave <= 0)
             selectedSurvivalWave = 1;
 
         inputField.text = selectedSurvivalWave.ToString ();
