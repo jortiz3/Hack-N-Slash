@@ -116,6 +116,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
     private bool getDefaultPlayerSpawnLocation;
     private float playTime;
     private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
+    private bool ad_rewards_given;
+    private bool iap_rewards_given;
 
     public static string[] Unlocks { get { return unlocks.ToArray (); } }
     public static string[] Missions { get { return missions.ToArray (); } }
@@ -198,6 +200,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         }
     }
 
+    private void CompleteAllTemporaryChallenges() { //goes through temporary and checkpoint lists to complete the challenges -- intended to be used at the end of a survival wave or campaign mission
+        checkpointChallenges.AddRange(temporaryChallenges); //store the temporary challenges
+        temporaryChallenges.Clear(); //clear the list because they are now stored elsewhere
+        Transform currChallenge; //variable to store the current challenge we are looking at
+        foreach (string challengeName in checkpointChallenges) { //go through the list of challenges
+            currChallenge = challengesParent.Find(challengeName); //get the transform for the challenge in the menu
+            if (currChallenge != null) { //if we found it
+                CompleteChallenge(currChallenge.GetComponent<Challenge>()); //call our method to complete it
+            }
+        }
+    }
+
     private void CompleteChallenge (Challenge challenge) {
         challenges.Add(challenge.Name); //store challenge as complete
         challenge.MarkComplete(); //mark challenge complete
@@ -211,18 +225,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
             }
         } else { //reward is an unlock
             unlocks.Add(challenge.Reward); //add to unlocks list
-        }
-    }
-
-    private void CompleteAllTemporaryChallenges() { //goes through temporary and checkpoint lists to complete the challenges -- intended to be used at the end of a survival wave or campaign mission
-        checkpointChallenges.AddRange(temporaryChallenges); //store the temporary challenges
-        temporaryChallenges.Clear(); //clear the list because they are now stored elsewhere
-        Transform currChallenge; //variable to store the current challenge we are looking at
-        foreach (string challengeName in checkpointChallenges) { //go through the list of challenges
-            currChallenge = challengesParent.Find(challengeName); //get the transform for the challenge in the menu
-            if (currChallenge != null) { //if we found it
-                CompleteChallenge(currChallenge.GetComponent<Challenge>()); //call our method to complete it
-            }
         }
     }
 
@@ -250,10 +252,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         FinalizeCurrencyEarned();
 
         StartCampaign(); //display campaign screen
+        IncrementAdRoundCounter(); //display ad button when necessary
         DisplayMissionReportScreen (true); //show the mission report
         DataPersistence.Save(); //save the game
         Time.timeScale = 0f; //pause the game
-        IncrementAdRoundCounter(); //display ad when necessary
     }
 
     public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
@@ -264,14 +266,30 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         }
     }
 
-    public void DecrementSelectedSurvivalWave() {
-        if (selectedSurvivalWave > 1) {
-            selectedSurvivalWave--;
-        } else {
-            selectedSurvivalWave = 1;
+    private string CurrencyEarnedText() {
+        string currencyEarnedText = currencyEarned.ToString() + " currency";
+        if (IAPManager.IAP_Rewards_Purchased) { //if the player purchased premium
+            if (!iap_rewards_given) {//if the reward has not already been applied
+                currencyEarned *= 2; //double currency earned
+                iap_rewards_given = true;
+            }
+            currencyEarnedText += " (x2 premium bonus!)"; //display bonus was applied
         }
 
-        UpdateSurvivalDisplayText ();
+        if (ad_rewards_given) { //if the player watched the post-mission ad
+            currencyEarnedText += " (+25% ad bonus!)";
+        }
+        return currencyEarnedText;
+    }
+
+    public void DecrementSelectedSurvivalWave() {
+        if (selectedSurvivalWave > 1) { //if we are able to decrement
+            selectedSurvivalWave--; //decrement
+        } else { //if we are past point of decrement
+            selectedSurvivalWave = 1; //reset
+        }
+
+        UpdateSurvivalWaveText (); //update display text
     }
 
     private void DisplayMissionReportScreen(bool missionSuccessful) {
@@ -283,12 +301,16 @@ public class GameManager_SwordSwipe : MonoBehaviour {
             result.text = "Mission Complete!";
             result.color = Color.green;
 
-            info.text = "Mission Rating: A+\nCurrency Earned: " + currencyEarned + "\nTotal currency: " + currency;
+            info.text = "Mission Rating: A+\nCurrency Earned: " + CurrencyEarnedText() + "\nTotal currency: " + currency;
+
+            if (numOfRoundsSinceLastAd == 0 && !ad_rewards_given) {
+                info.text += "\n\nWatch an ad using the button below to earn +25% more rewards!";
+            }
         } else {
             result.text = "Mission Failure";
             result.color = Color.black;
 
-            info.text = "Mission Rating: F\nCurrency Earned: " + currencyEarned + "\nTotal currency: " + currency;
+            info.text = "Mission Rating: F\nCurrency Earned: " + CurrencyEarnedText() + "\nTotal currency: " + currency;
         }
 
         missionReportParent.gameObject.SetActive (true);
@@ -339,12 +361,20 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
             currSurvivalStreak++; //increase their survival streak
 
-            if (currSurvivalStreak % 5 == 0) //bonuses for surviving multiple waves in a row
-                currencyEarned += 5;
-            if (currSurvivalStreak % 20 == 0)
-                currencyEarned += 20;
-            if (currSurvivalStreak % 100 == 0)
-                currencyEarned += 300;
+            if (currSurvivalStreak > 5) //bonuses for surviving multiple waves in a row
+                currencyEarned += 10;
+            else if (currSurvivalStreak > 10)
+                currencyEarned += 25;
+            else if (currSurvivalStreak > 20)
+                currencyEarned += 50;
+            else if (currSurvivalStreak > 30)
+                currencyEarned += 100;
+            else if (currSurvivalStreak > 40)
+                currencyEarned += 200;
+            else if (currSurvivalStreak > 50)
+                currencyEarned += 400;
+
+            
 
             //challenge actions for surviving
             challengeManager.ClearAllNotifications();
@@ -356,8 +386,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
             CompleteAllTemporaryChallenges();
 
-            UpdateSurvivalDisplayText (); //inform the player how much they earned
-            displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + currencyEarned + " currency!" + "\n+1 survival streak (" + currSurvivalStreak + ")";
+            UpdateSurvivalWaveText (); //update current wave and warning
+            UpdateSurvivalCompleteText(); //show player info from last
+            
             FinalizeCurrencyEarned();
         } else if (waveInfo.Equals ("died")) {
             displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
@@ -411,15 +442,20 @@ public class GameManager_SwordSwipe : MonoBehaviour {
     }
 
     private void IncrementAdRoundCounter() {
-        if (!AdvertisementManager.IAP_NoAds_Purchased) {
+        if (!IAPManager.IAP_Rewards_Purchased) {
             if (currGameMode == GameMode.Campaign) { //campaign missions will take the player longer to play through
                 numOfRoundsSinceLastAd += 1f; //add a higher weight
             } else { //survival
                 numOfRoundsSinceLastAd += 0.6f; //play 5 rounds before an add is displayed
             }
 
-            if (numOfRoundsSinceLastAd >= 3) { //if player played enough rounds
-                adManager.DisplayAd(false); //display ad -- inform manager the player didn't opt-in for the ad, so less reward for watching entire ad
+            if (numOfRoundsSinceLastAd >= 0) { //if player played enough rounds
+                //show opt-in button for ads/extra rewards
+                if (currGameMode == GameMode.Campaign) {
+                    adManager.ShowButton(true);
+                } else {
+                    adManager.ShowButton(false);
+                }
                 numOfRoundsSinceLastAd = 0; //reset counter
             }
         }
@@ -432,7 +468,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
             selectedSurvivalWave++;
         }
 
-        UpdateSurvivalDisplayText ();
+        UpdateSurvivalWaveText ();
     }
 
     private IEnumerator LoadLevel () {
@@ -443,6 +479,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
         difficultyChanged = false; //show the player has not changed the difficulty yet during this mission
         currencyEarned = 0; //show the player has not earned any currency yet for this mission
+        iap_rewards_given = false;
+        ad_rewards_given = false;
 
         ClearAllCharacters (); //clear all remaining enemies
 
@@ -533,6 +571,20 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         currCutscene = c;
         currCutscene.gameObject.SetActive (true); //ensure the cutscene object can update
         currGameState = GameState.Cutscene; //change gamestate
+    }
+
+    public void PostMissionAdComplete(bool finished) {
+        if (finished) {
+            if (!ad_rewards_given) {
+                currencyEarned = (int)(currencyEarned * 1.25f);
+                ad_rewards_given = true;
+            }
+            if (currGameMode == GameMode.Campaign) {
+                DisplayMissionReportScreen(true); //Ads can only be displayed when the mission is successful
+            } else {
+                UpdateSurvivalCompleteText();
+            }
+        }
     }
 
     public void PurchaseSelectedItem() {
@@ -932,7 +984,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
         currGameMode = GameMode.Survival;
         currGameState = GameState.Menu;
-        UpdateSurvivalDisplayText ();
+        UpdateSurvivalWaveText ();
         menu.ChangeState ("Survival");
     }
 
@@ -985,8 +1037,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
             + "\n\nYour Currency: " + currency;
     }
 
-    private void UpdateSurvivalDisplayText() {
+    private void UpdateSurvivalWaveText() {
         displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
         displayedSurvivalWaveWarning.text = currSurvivalSpawner.GetWaveWarning (selectedSurvivalWave); //update the wave warning text
+
+        
+    }
+    
+    private void UpdateSurvivalCompleteText() {
+        displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + CurrencyEarnedText() + "\n+1 survival streak (" + currSurvivalStreak + ")"; //inform the player how much they earned
+
+        if (numOfRoundsSinceLastAd == 0 && !ad_rewards_given) {
+            displayedSurvivalWaveInfo.text += "\n\nWatch an ad using the button below to earn +25% more rewards!";
+        }
     }
 }
