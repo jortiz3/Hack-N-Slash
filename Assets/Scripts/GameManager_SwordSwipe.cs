@@ -55,6 +55,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
     public static GameState currGameState;
     private static GameState prevGameState; //for return buttons
     public static GameManager_SwordSwipe currGameManager;
+    public static CameraManager currCameraManager;
     public static SurvivalSpawner currSurvivalSpawner;
     public static Vector3 currPlayerSpawnLocation;
     public static Transform cutsceneParent;
@@ -398,7 +399,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         menu.ChangeState ("Survival");
         Time.timeScale = 0f; //freeze game
         DataPersistence.Save (); //save the game no matter what
-
         IncrementAdRoundCounter(); //display ad when necessary
     }
 
@@ -842,6 +842,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
         Instantiate(Resources.Load("Characters/Player/" + selectedOutfit), currPlayerSpawnLocation, Quaternion.Euler(Vector3.zero));
         Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
         Character.player.Wield(w);
+        currCameraManager.Follow(Character.player.transform);
     }
 
     private void SpawnSurvivalSpawner() {
