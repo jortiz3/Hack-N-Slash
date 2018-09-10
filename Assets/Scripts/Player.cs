@@ -44,7 +44,7 @@ public class Player : Character {
 					break;
 				}
 			}
-			base.Die ();
+            base.Die ();
 		}
 	}
 
