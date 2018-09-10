@@ -15,8 +15,8 @@ public class SurvivalSpawner : MonoBehaviour {
 	private int remainingSpawns;
 
 	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
-	public int CurrentWave { get { return currentWave; } }
-	public int PreviousWave { get { return previousWave; } }
+	public int CurrentWave { get { return currentWave + 1; } }
+	public int PreviousWave { get { return previousWave + 1; } }
 	public int NumberOfWaves { get { return waveList.Length; } }
 
 	void Awake () {
