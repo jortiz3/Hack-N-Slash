@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 114585619514535002}
   - component: {fileID: 95576369817235752}
   - component: {fileID: 50276552845599238}
-  - component: {fileID: 61185231794573468}
+  - component: {fileID: 70653187893563600}
   m_Layer: 11
   m_Name: Snake
   m_TagString: Enemy
@@ -120,8 +120,8 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 6.06, y: 1.28}
   m_EdgeRadius: 0
---- !u!61 &61185231794573468
-BoxCollider2D:
+--- !u!70 &70653187893563600
+CapsuleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -133,18 +133,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.9, y: 0.35}
-    newSize: {x: 1.9, y: 0.35}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1.75, y: 0.25}
-  m_EdgeRadius: 0
+  m_Size: {x: 1.8999999, y: 0.34999996}
+  m_Direction: 1
 --- !u!95 &95576369817235752
 Animator:
   serializedVersion: 3

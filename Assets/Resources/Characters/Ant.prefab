@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 114384512591515218}
   - component: {fileID: 95714171887735112}
   - component: {fileID: 50319275721454050}
-  - component: {fileID: 61840192387761182}
+  - component: {fileID: 70144713583390188}
   m_Layer: 11
   m_Name: Ant
   m_TagString: Enemy
@@ -120,8 +120,8 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.72, y: 0.76}
   m_EdgeRadius: 0
---- !u!61 &61840192387761182
-BoxCollider2D:
+--- !u!70 &70144713583390188
+CapsuleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -132,19 +132,9 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.06}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.49, y: 0.43}
-    newSize: {x: 0.49, y: 0.43}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 0.42, y: 0.31}
-  m_EdgeRadius: 0
+  m_Offset: {x: 0, y: -0.05}
+  m_Size: {x: 0.49, y: 0.3}
+  m_Direction: 1
 --- !u!95 &95714171887735112
 Animator:
   serializedVersion: 3

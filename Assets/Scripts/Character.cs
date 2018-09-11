@@ -19,15 +19,14 @@ public abstract class Character : MonoBehaviour {
 	private Animator anim;
 	private SpriteRenderer sr;
 	private Color defaultSRColor;
-	private float groundDetectDist;
-	private float groundLandingDelay;
 	private Weapon weapon;
 	private int hp;
 	[SerializeField]
 	protected int maxhp;
 	private Slider hpSlider;
 	protected bool hpSliderAlwaysActive;
-	private float attackTimer; //used to delay attacks and as the time until the attack expires
+    private float sliderOffset;
+    private float attackTimer; //used to delay attacks and as the time until the attack expires
 	private float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
 	[SerializeField]
@@ -186,7 +185,7 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected virtual Vector3 GetHPSliderPos() {
-		return transform.position + (Vector3.up * groundDetectDist);
+		return transform.position + (Vector3.up * sliderOffset);
 	}
 
 	protected virtual Vector2 GetHPSliderSizeDelta() {
@@ -227,8 +226,7 @@ public abstract class Character : MonoBehaviour {
 
 		defaultSRColor = sr.color;
 
-		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
-		groundLandingDelay = 0f;
+		sliderOffset = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
 
 		hp = maxhp;
 		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
@@ -271,22 +269,30 @@ public abstract class Character : MonoBehaviour {
 
 		if (weapon != null)
 			weapon.Land ();
-
-		groundLandingDelay = 0;
 	}
 
 	void OnCollisionEnter2D(Collision2D otherObj) {
-		if (otherObj.transform.position.y < transform.position.y) { //if other object is below
-			if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
-				LandOnGround();
-			}
-		}
-
 		if (otherObj.gameObject.tag.Equals ("Player")) { //if the other object is the player
 			if (!isFlinching) { //and this isn't flinching
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
 			}
-		}
+		} else {
+            bool shouldLandOnGround = false;
+
+            if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
+                shouldLandOnGround = true;
+            } else  {
+                if (otherObj.transform.position.y < transform.position.y) { //if other object is below
+                    if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
+                        shouldLandOnGround = true; //land
+                    }
+                }
+            }
+
+            if (shouldLandOnGround) { //if the character should land
+                LandOnGround(); //land
+            }
+        }
 	}
 
 	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
@@ -451,21 +457,11 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected void UpdateAnimations() {
-		
-		if (rb2D.velocity.y < -0.0001f) {
-			anim.SetBool ("Falling", true);
-			anim.SetBool ("Jump", true);
-			if (weapon != null)
-				weapon.Fall ();
-		} else if (rb2D.velocity.y > 0.0001f) {
-			anim.SetBool ("Falling", false);
-			anim.SetBool ("Jump", true);
-		} else if (!isOnGround && isFalling) { //velocity is ~0 && we haven't moved vertically for a bit
-			groundLandingDelay += Time.fixedDeltaTime;
-
-			if (groundLandingDelay >= 0.15f)
-				LandOnGround ();
-		}
+        if (rb2D.velocity.y < -0.5f) { //if the character is moving downward
+            anim.SetBool("Falling", true); //character is falling
+            if (weapon != null) //if character has weapon
+                weapon.Fall(); //tell weapon to play fall anim
+        }
 
 		if (anim.GetBool("Attack_Expire") && !isAttacking) {
 			anim.SetBool ("Attack_Expire", false);
@@ -502,7 +498,7 @@ public abstract class Character : MonoBehaviour {
 					}
 				}
 
-				attackTimerSlider.transform.position = transform.position + (Vector3.down * groundDetectDist);
+				attackTimerSlider.transform.position = transform.position + (Vector3.down * sliderOffset);
 
 				if (!attackTimerSlider.gameObject.activeSelf)
 					attackTimerSlider.gameObject.SetActive (true);
@@ -516,7 +512,7 @@ public abstract class Character : MonoBehaviour {
 				sr.color = Color.red;
 
 			hpSlider.transform.position = GetHPSliderPos();
-			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.12f));
+			statText.transform.position = transform.position + (Vector3.down * (sliderOffset + 0.12f));
 
 			if (!hpSlider.gameObject.activeSelf)
 				hpSlider.gameObject.SetActive (true);

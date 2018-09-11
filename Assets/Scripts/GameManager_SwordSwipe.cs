@@ -449,7 +449,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
                 numOfRoundsSinceLastAd += 0.6f; //play 5 rounds before an add is displayed
             }
 
-            if (numOfRoundsSinceLastAd >= 0) { //if player played enough rounds
+            if (numOfRoundsSinceLastAd >= 3) { //if player played enough rounds
                 //show opt-in button for ads/extra rewards
                 if (currGameMode == GameMode.Campaign) {
                     adManager.ShowButton(true);

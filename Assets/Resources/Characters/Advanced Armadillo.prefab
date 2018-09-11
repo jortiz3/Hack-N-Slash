@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 114685793424318832}
   - component: {fileID: 95369951870115430}
   - component: {fileID: 50912187609896506}
-  - component: {fileID: 61821730380156016}
+  - component: {fileID: 70678980786217724}
   m_Layer: 11
   m_Name: Advanced Armadillo
   m_TagString: Enemy
@@ -207,8 +207,8 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 10.69, y: 3.95}
   m_EdgeRadius: 0
---- !u!61 &61821730380156016
-BoxCollider2D:
+--- !u!70 &70678980786217724
+CapsuleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -220,18 +220,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.76, y: 1.48}
-    newSize: {x: 2.76, y: 1.48}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 2, y: 1.48}
-  m_EdgeRadius: 0
+  m_Size: {x: 2.4, y: 1.4}
+  m_Direction: 1
 --- !u!95 &95369951870115430
 Animator:
   serializedVersion: 3

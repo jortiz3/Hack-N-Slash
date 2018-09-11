@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 114444696462029458}
   - component: {fileID: 50212985804292704}
   - component: {fileID: 95703143367992490}
-  - component: {fileID: 61648863431462240}
+  - component: {fileID: 70788123277132944}
   m_Layer: 11
   m_Name: Boar
   m_TagString: Enemy
@@ -178,8 +178,8 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 7.17, y: 2.25}
   m_EdgeRadius: 0
---- !u!61 &61648863431462240
-BoxCollider2D:
+--- !u!70 &70788123277132944
+CapsuleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -191,18 +191,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.49, y: 0.78}
-    newSize: {x: 1.49, y: 0.78}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1.49, y: 0.78}
-  m_EdgeRadius: 0
+  m_Size: {x: 1.5, y: 0.8}
+  m_Direction: 1
 --- !u!95 &95363613989300082
 Animator:
   serializedVersion: 3
