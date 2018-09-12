@@ -44,7 +44,7 @@ public class Player : Character {
 					break;
 				}
 			}
-            base.Die ();
+			base.Die ();
 		}
 	}
 
@@ -53,13 +53,17 @@ public class Player : Character {
 	}
 
 	public void ReceivePlayerInput (string input) {
-		if (input.Contains ("Run")) {
-			input = input.Replace ("Run", "");
-			Run (float.Parse (input));
-		} else if (input.Equals ("Jump")) {
-			Jump ();
+		if (input.Contains("Run")) {
+			input = input.Replace("Run", "");
+			Run(float.Parse(input));
+		} else if (input.Equals("Jump")) {
+			Jump();
+		} else if (input.Equals("Crouch")) {
+			Crouch();
+		} else if (input.Equals("UnCrouch")) {
+			UnCrouch();
 		} else {
-			Attack (input);
+			Attack(input);
 		}
 	}
 

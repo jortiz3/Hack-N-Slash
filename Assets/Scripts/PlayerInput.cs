@@ -35,6 +35,7 @@ public class PlayerInput : MonoBehaviour {
 	private bool joystick_down;
 
 	private bool joystick_max_up;
+	private bool joystick_max_down;
 
 	public void Attack() {
 		if (joystickDirection != Vector3.zero) { //holding the joy stick
@@ -121,7 +122,7 @@ public class PlayerInput : MonoBehaviour {
 								}
 								break;
 							case "swipe_down":
-								Character.player.ReceivePlayerInput ("Attack");
+								Character.player.ReceivePlayerInput ("Crouch");
 								//Attack ("Attack_Down");
 								break;
 							case "jump":
@@ -149,39 +150,58 @@ public class PlayerInput : MonoBehaviour {
 			} else if (currControlScheme == ControlScheme.Default) {
 				joystickDirection = joystick.GetInputDirection ();
 				if (joystickDirection != Vector3.zero) {
-					joystickAngle = Mathf.Acos (Vector3.Dot (Vector3.right, joystickDirection)); //angle between the swipe and directly to the right
-
-					if (joystickAngle < 1.04 || joystickAngle >= 5.23) { //holding right
-						Character.player.ReceivePlayerInput ("Run" + joystickDirection.x.ToString ());
-						joystick_right = true;
-						joystick_left = false;
+					joystickAngle = Vector3.SignedAngle(Vector3.right, joystickDirection, Vector3.forward); //angle between the swipe and directly to the right
+					
+					if (joystickAngle > 0) {
+						joystick_max_down = false;
 						joystick_down = false;
-						joystick_up = false;
-						joystick_max_up = false;
-					} else if (joystickAngle < 2.09) { //holding up
-						joystick_right = false;
-						joystick_left = false;
-						joystick_down = false;
-						joystick_up = true;
 
-						if (joystickDirection.y > 0.85f) {
-							joystick_max_up = true;
-						} else {
+						if (joystickAngle < 60) { //holding right
+							joystick_right = true;
+							joystick_left = false;
+							joystick_up = false;
+							joystick_max_up = false;
+						} else if (joystickAngle < 120) { //holding up
+							joystick_right = false;
+							joystick_left = false;
+							joystick_up = true;
+
+							if (joystickDirection.y > 0.85f) {
+								joystick_max_up = true;
+							} else {
+								joystick_max_up = false;
+							}
+						} else if (joystickAngle < 180) { //holding left
+							joystick_right = false;
+							joystick_left = true;
+							joystick_up = false;
 							joystick_max_up = false;
 						}
-					} else if (joystickAngle < 4.18) { //holding left
-						Character.player.ReceivePlayerInput ("Run" + joystickDirection.x.ToString ());
-						joystick_right = false;
-						joystick_left = true;
-						joystick_down = false;
+					} else {
 						joystick_up = false;
 						joystick_max_up = false;
-					} else if (joystickAngle < 5.49) { //holding down
-						joystick_right = false;
-						joystick_left = false;
-						joystick_down = true;
-						joystick_up = false;
-						joystick_max_up = false;
+
+						if (joystickAngle < -120) { //holding left again (lower hemisphere)
+							joystick_right = false;
+							joystick_left = true;
+							joystick_down = false;
+							joystick_max_down = false;
+						} else if (joystickAngle < -60) { //holding down
+							joystick_right = false;
+							joystick_left = false;
+							joystick_down = true;
+
+							if (joystickDirection.y < -0.85f) {
+								joystick_max_down = true;
+							} else {
+								joystick_max_down = false;
+							}
+						} else { //holding right again (lower hemisphere)
+							joystick_right = true;
+							joystick_left = false;
+							joystick_down = false;
+							joystick_max_down = false;
+						}
 					}
 				} else {
 					joystick_right = false;
@@ -189,8 +209,15 @@ public class PlayerInput : MonoBehaviour {
 					joystick_down = false;
 					joystick_up = false;
 					joystick_max_up = false;
+					joystick_max_down = false;
 
 					Character.player.ReceivePlayerInput ("Run0");
+				}
+
+				if (joystick_max_down) {
+					Character.player.ReceivePlayerInput("Crouch");
+				} else if (joystick_left || joystick_right) {
+					Character.player.ReceivePlayerInput("Run" + joystickDirection.x.ToString());
 				}
 			}//end control scheme if
 		}// end gamestate if

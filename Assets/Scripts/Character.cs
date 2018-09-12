@@ -2,7 +2,6 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
@@ -13,8 +12,11 @@ public abstract class Character : MonoBehaviour {
 	protected static Transform cameraCanvas;
 	private static float defaultFlinchTime = 1.5f;
 	[SerializeField]
+	private Collider2D collider_upperbody;
+	[SerializeField]
+	private Collider2D collider_lowerbody;
+	[SerializeField]
 	private float moveSpeed;
-	private Collider2D c2D;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
@@ -25,8 +27,8 @@ public abstract class Character : MonoBehaviour {
 	protected int maxhp;
 	private Slider hpSlider;
 	protected bool hpSliderAlwaysActive;
-    private float sliderOffset;
-    private float attackTimer; //used to delay attacks and as the time until the attack expires
+	private float sliderOffset;
+	private float attackTimer; //used to delay attacks and as the time until the attack expires
 	private float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
 	[SerializeField]
@@ -51,6 +53,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isFacingLeft { get { return !isFacingRight; } }
 	public bool isJumping { get { return anim.GetBool ("Jump"); } }
 	public bool isFalling { get { return anim.GetBool ("Falling"); } }
+	public bool isCrouching { get { return anim.GetBool("Crouch"); } }
 	public bool isOnGround { get { return !isJumping && !isFalling ? true : false; } }
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
@@ -122,6 +125,15 @@ public abstract class Character : MonoBehaviour {
 		}
 
 		attackTimer = 0;
+	}
+
+	protected void Crouch() {
+		if (!isCrouching) {
+			anim.SetBool("Crouch", true);
+			if (collider_upperbody != null) {
+				collider_upperbody.enabled = false;
+			}
+		}
 	}
 
 	public virtual void DetectBeginOtherCharacter (Character otherCharacter) {
@@ -218,15 +230,14 @@ public abstract class Character : MonoBehaviour {
 			characterParent = GameObject.FindGameObjectWithTag ("Character Parent").transform;
 
 		transform.SetParent (characterParent);
-
-		c2D = gameObject.GetComponent<Collider2D> ();
+		
 		rb2D = gameObject.GetComponent<Rigidbody2D> ();
 		anim = gameObject.GetComponent<Animator> ();
 		sr = gameObject.GetComponent<SpriteRenderer> ();
 
 		defaultSRColor = sr.color;
 
-		sliderOffset = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
+		sliderOffset = ((sr.sprite.bounds.extents.y * 2f) * (gameObject.GetComponent<Collider2D>().bounds.size.y));
 
 		hp = maxhp;
 		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
@@ -253,13 +264,18 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected void Jump() {
-		if (!isAttacking && !isJumping) {
-			anim.SetBool ("Jump", true);
+		if (!isAttacking && !isJumping) { //if character is able to jump
+
+			if (isCrouching) { //if character is crouching
+				UnCrouch(); //force them to not crouch
+			}
+
+			anim.SetBool ("Jump", true); //set bool for jumping
 
 			if (weapon != null)
-				weapon.Jump ();
+				weapon.Jump (); //tell weapon to jump
 
-			rb2D.AddForce (Vector2.up * rb2D.mass * 300);
+			rb2D.AddForce (Vector2.up * rb2D.mass * 300); //add up force
 		}
 	}
 
@@ -277,22 +293,22 @@ public abstract class Character : MonoBehaviour {
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
 			}
 		} else {
-            bool shouldLandOnGround = false;
+			bool shouldLandOnGround = false;
 
-            if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
-                shouldLandOnGround = true;
-            } else  {
-                if (otherObj.transform.position.y < transform.position.y) { //if other object is below
-                    if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
-                        shouldLandOnGround = true; //land
-                    }
-                }
-            }
+			if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
+				shouldLandOnGround = true;
+			} else  {
+				if (otherObj.transform.position.y < transform.position.y) { //if other object is below
+					if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
+						shouldLandOnGround = true; //land
+					}
+				}
+			}
 
-            if (shouldLandOnGround) { //if the character should land
-                LandOnGround(); //land
-            }
-        }
+			if (shouldLandOnGround) { //if the character should land
+				LandOnGround(); //land
+			}
+		}
 	}
 
 	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
@@ -409,6 +425,10 @@ public abstract class Character : MonoBehaviour {
 		if (rb2D.gravityScale < 1)
 			rb2D.gravityScale = 1;
 
+		if (isCrouching) {
+			UnCrouch();
+		}
+
 		if (!isAttacking) {
 			xVel = Mathf.Clamp(xVel, -1, 1);
 
@@ -456,12 +476,19 @@ public abstract class Character : MonoBehaviour {
 		rb2D.angularVelocity = 0;
 	}
 
+	protected void UnCrouch() {
+		anim.SetBool("Crouch", false);
+		if (collider_upperbody != null) {
+			collider_upperbody.enabled = true;
+		}
+	}
+
 	protected void UpdateAnimations() {
-        if (rb2D.velocity.y < -0.5f) { //if the character is moving downward
-            anim.SetBool("Falling", true); //character is falling
-            if (weapon != null) //if character has weapon
-                weapon.Fall(); //tell weapon to play fall anim
-        }
+		if (rb2D.velocity.y < -0.5f) { //if the character is moving downward
+			anim.SetBool("Falling", true); //character is falling
+			if (weapon != null) //if character has weapon
+				weapon.Fall(); //tell weapon to play fall anim
+		}
 
 		if (anim.GetBool("Attack_Expire") && !isAttacking) {
 			anim.SetBool ("Attack_Expire", false);
@@ -520,8 +547,16 @@ public abstract class Character : MonoBehaviour {
 			if (!statText.gameObject.activeSelf)
 				statText.gameObject.SetActive (true);
 
-			if (hp <= 0 && c2D.enabled) {
-				c2D.enabled = false;
+			if (hp <= 0) {
+				if (collider_lowerbody != null) {
+					if (collider_lowerbody.enabled) {
+						collider_lowerbody.enabled = false;
+					}
+				}
+				UnCrouch();
+				if (collider_upperbody != null) {
+					collider_upperbody.enabled = false;
+				}
 				rb2D.gravityScale /= 4f;
 			}
 
