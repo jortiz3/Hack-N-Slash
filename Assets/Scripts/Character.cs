@@ -11,6 +11,7 @@ public abstract class Character : MonoBehaviour {
 	private static Transform characterParent;
 	protected static Transform cameraCanvas;
 	private static float defaultFlinchTime = 1.5f;
+
 	[SerializeField]
 	private Collider2D collider_upperbody;
 	[SerializeField]
@@ -57,7 +58,7 @@ public abstract class Character : MonoBehaviour {
 	public bool isOnGround { get { return !isJumping && !isFalling ? true : false; } }
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
-	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
+	public bool isFlinching { get { return anim.GetBool("Flinching"); } }
 	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
 	public Door DoorInRange { get { return doorInRange; } set { doorInRange = value; } }
 	public Color SpriteColor { get { return sr.color; } }
@@ -287,6 +288,24 @@ public abstract class Character : MonoBehaviour {
 			weapon.Land ();
 	}
 
+	protected void LookAt(Transform other) {
+		bool flipNeeded = false;
+		if (other.position.x < transform.position.x) { //object is left of character
+			if (isFacingRight) { //character is looking right
+				flipNeeded = true; //we need to flip
+			}
+		} else { //object is to the right
+			if (isFacingLeft) { // character is facing left
+				flipNeeded = true; //flip needed
+			}
+		}
+
+		if (flipNeeded) {
+			sr.flipX = !sr.flipX; //flip the sprite
+			weapon.FaceToggle(); //flip the weapon sprite
+		}
+	}
+
 	void OnCollisionEnter2D(Collision2D otherObj) {
 		if (otherObj.gameObject.tag.Equals ("Player")) { //if the other object is the player
 			if (!isFlinching) { //and this isn't flinching
@@ -322,6 +341,8 @@ public abstract class Character : MonoBehaviour {
 				} else {
 					flinchTimer = defaultFlinchTime;
 				}
+
+				anim.SetBool("Flinching", true);
 			}
 
 			float damage = 0;
@@ -374,11 +395,13 @@ public abstract class Character : MonoBehaviour {
 	public void ReceiveDamageFrom(Character c) {
 		ReceiveKnockback (c);
 		ReceiveDamage (c.baseAttackDamage, false); //handle damage
+		LookAt(c.transform);
 	}
 
 	public void ReceiveDamageFrom(Weapon w) {
 		ReceiveKnockback (w.Wielder);
 		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
+		LookAt(w.Wielder.transform);
 	}
 
 	public int ReceiveItem(Item i) {
@@ -560,7 +583,12 @@ public abstract class Character : MonoBehaviour {
 				rb2D.gravityScale /= 4f;
 			}
 
-			flinchTimer -= Time.fixedDeltaTime;
+			
+			if (flinchTimer > 0) {
+				flinchTimer -= Time.fixedDeltaTime;
+			} else if (isFlinching){
+				anim.SetBool("Flinching", false);
+			}
 		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
 			if (hp > 0) {
 				sr.color = defaultSRColor;
