@@ -58,8 +58,12 @@ public class Player : Character {
 			Run(float.Parse(input));
 		} else if (input.Equals("Jump")) {
 			Jump();
-		} else if (input.Equals("Crouch")) {
-			Crouch();
+		} else if (input.Equals("Crouch/DropThrough")) {
+			if (isOnAPlatform) {
+				DropThroughPlatform();
+			} else {
+				Crouch();
+			}
 		} else if (input.Equals("UnCrouch")) {
 			UnCrouch();
 		} else {

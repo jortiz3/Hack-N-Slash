@@ -27,8 +27,6 @@ public class Cutscene : MonoBehaviour {
 	private int currScene; //current scene to display
 	private int currNarration; //current narration
 	private float currDisplayTime; //how much time is left for current narration
-	private float currDelayTime; //delay between scenes to give player time to process what they have seen
-	private bool delayComplete;
 	private bool ended;
 
 	private void ClearNarrationText() {
@@ -62,13 +60,7 @@ public class Cutscene : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (GameManager_SwordSwipe.currGameState == GameState.Cutscene) { //cutscene to show, not complete
-			if (currDelayTime > 0) { //we are in a delay
-				currDelayTime -= Time.fixedDeltaTime;
-			} else if (!delayComplete) { //we finished a delay, narration text was cleared
-				SetSprite (); //show current picture
-				NextNarration(); //go to first narration -- 0
-				delayComplete = true;
-			} else if (currDisplayTime > 0) { //narration is being displayed
+			if (currDisplayTime > 0) { //narration is being displayed
 				currDisplayTime -= Time.fixedDeltaTime;
 			} else {
 				NextNarration ();
@@ -81,10 +73,8 @@ public class Cutscene : MonoBehaviour {
 
 		if (currScene < scenes.Length) { //another scene to show
 			currNarration = -1; //reset narration to -1
-			ClearNarrationText (); //clear narration text
-
-			currDelayTime = 2f; //set delay so player can process
-			delayComplete = false;
+			SetSprite();
+			NextNarration();
 		} else { //no more scenes
 			EndCutscene();
 		}
@@ -130,8 +120,7 @@ public class Cutscene : MonoBehaviour {
 			image = GameManager_SwordSwipe.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
 			subtitleText = GameManager_SwordSwipe.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
-
-		delayComplete = true;
+		
 		ended = false;
 
 		currScene = 0; //set to the first scene

@@ -123,7 +123,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: f7ea77a36da47634fa719a75e51a3da1, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
@@ -186,7 +186,7 @@ CapsuleCollider2D:
   m_GameObject: {fileID: 1333606262401110}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: f7ea77a36da47634fa719a75e51a3da1, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -278,6 +278,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3bf30e442f6a9194fb01f5b7c9850985, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collider_upperbody: {fileID: 0}
+  collider_lowerbody: {fileID: 70391968519823274}
   moveSpeed: 0.8
   maxhp: 20
   baseAttackDamage: 6

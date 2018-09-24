@@ -45,6 +45,7 @@ public abstract class Character : MonoBehaviour {
 	private Text statText;
 	private List<Item> inventory;
 	private Door doorInRange;
+	private DropthroughPlatform platform;
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
 	public int MaxHP { get { return maxhp; } }
@@ -59,7 +60,8 @@ public abstract class Character : MonoBehaviour {
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
 	public bool isFlinching { get { return anim.GetBool("Flinching"); } }
-	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+	public bool isInvulnerable { get { return invulnTimer > 0 ? true : false; } }
+	public bool isOnAPlatform { get { return platform != null ? true : false; } }
 	public Door DoorInRange { get { return doorInRange; } set { doorInRange = value; } }
 	public Color SpriteColor { get { return sr.color; } }
 	public Item[] Inventory { get { return inventory.ToArray(); } }
@@ -152,6 +154,12 @@ public abstract class Character : MonoBehaviour {
 			Destroy (attackTimerSlider.gameObject);
 		inventory.Clear ();
 		Destroy (gameObject);
+	}
+
+	protected void DropThroughPlatform() {
+		if (isOnAPlatform) {
+			platform.DropThrough(gameObject);
+		}
 	}
 
 	protected void Fly (Vector2 direction) {
@@ -302,7 +310,9 @@ public abstract class Character : MonoBehaviour {
 
 		if (flipNeeded) {
 			sr.flipX = !sr.flipX; //flip the sprite
-			weapon.FaceToggle(); //flip the weapon sprite
+
+			if (weapon != null)
+				weapon.FaceToggle(); //flip the weapon sprite
 		}
 	}
 
@@ -313,10 +323,14 @@ public abstract class Character : MonoBehaviour {
 			}
 		} else {
 			bool shouldLandOnGround = false;
+			DropthroughPlatform temp = otherObj.gameObject.GetComponent<DropthroughPlatform>(); //check to see if we are colliding with a new platform
 
-			if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
+			if (temp != null) { //if colliding with new platform
+				platform = temp; //set reference
+				shouldLandOnGround = true; //land on ground
+			} else if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
 				shouldLandOnGround = true;
-			} else  {
+			} else {
 				if (otherObj.transform.position.y < transform.position.y) { //if other object is below
 					if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
 						shouldLandOnGround = true; //land
@@ -326,6 +340,14 @@ public abstract class Character : MonoBehaviour {
 
 			if (shouldLandOnGround) { //if the character should land
 				LandOnGround(); //land
+			}
+		}
+	}
+
+	void OnCollisionExit2D(Collision2D collision) {
+		if (isOnAPlatform) { //character on a platform
+			if (collision.gameObject.Equals(platform.gameObject)) { //the object we are no longer colliding with is the platform
+				platform = null; //remove reference to platform
 			}
 		}
 	}

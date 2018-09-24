@@ -215,7 +215,7 @@ public class PlayerInput : MonoBehaviour {
 				}
 
 				if (joystick_max_down) {
-					Character.player.ReceivePlayerInput("Crouch");
+					Character.player.ReceivePlayerInput("Crouch/DropThrough");
 				} else if (joystick_left || joystick_right) {
 					Character.player.ReceivePlayerInput("Run" + joystickDirection.x.ToString());
 				}
