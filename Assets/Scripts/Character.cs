@@ -2,7 +2,6 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
@@ -12,21 +11,24 @@ public abstract class Character : MonoBehaviour {
 	private static Transform characterParent;
 	protected static Transform cameraCanvas;
 	private static float defaultFlinchTime = 1.5f;
+
+	[SerializeField]
+	private Collider2D collider_upperbody;
+	[SerializeField]
+	private Collider2D collider_lowerbody;
 	[SerializeField]
 	private float moveSpeed;
-	private Collider2D c2D;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
 	private Color defaultSRColor;
-	private float groundDetectDist;
-	private float groundLandingDelay;
 	private Weapon weapon;
 	private int hp;
 	[SerializeField]
 	protected int maxhp;
 	private Slider hpSlider;
 	protected bool hpSliderAlwaysActive;
+	private float sliderOffset;
 	private float attackTimer; //used to delay attacks and as the time until the attack expires
 	private float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
@@ -43,6 +45,7 @@ public abstract class Character : MonoBehaviour {
 	private Text statText;
 	private List<Item> inventory;
 	private Door doorInRange;
+	private DropthroughPlatform platform;
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
 	public int MaxHP { get { return maxhp; } }
@@ -52,11 +55,13 @@ public abstract class Character : MonoBehaviour {
 	public bool isFacingLeft { get { return !isFacingRight; } }
 	public bool isJumping { get { return anim.GetBool ("Jump"); } }
 	public bool isFalling { get { return anim.GetBool ("Falling"); } }
+	public bool isCrouching { get { return anim.GetBool("Crouch"); } }
 	public bool isOnGround { get { return !isJumping && !isFalling ? true : false; } }
 	public bool isAttacking { get { return anim.GetCurrentAnimatorStateInfo (0).IsTag ("Attack"); } }
 	public bool isRunning { get { return isOnGround && Velocity.x != 0; } }
-	public bool isFlinching { get { return flinchTimer > 0 ? true : false; } }
-	public bool isInvulnerable { get{ return invulnTimer > 0 ? true : false; } }
+	public bool isFlinching { get { return anim.GetBool("Flinching"); } }
+	public bool isInvulnerable { get { return invulnTimer > 0 ? true : false; } }
+	public bool isOnAPlatform { get { return platform != null ? true : false; } }
 	public Door DoorInRange { get { return doorInRange; } set { doorInRange = value; } }
 	public Color SpriteColor { get { return sr.color; } }
 	public Item[] Inventory { get { return inventory.ToArray(); } }
@@ -125,6 +130,15 @@ public abstract class Character : MonoBehaviour {
 		attackTimer = 0;
 	}
 
+	protected void Crouch() {
+		if (!isCrouching) {
+			anim.SetBool("Crouch", true);
+			if (collider_upperbody != null) {
+				collider_upperbody.enabled = false;
+			}
+		}
+	}
+
 	public virtual void DetectBeginOtherCharacter (Character otherCharacter) {
 		// empty void for other classes to fill out if necessary
 	}
@@ -140,6 +154,12 @@ public abstract class Character : MonoBehaviour {
 			Destroy (attackTimerSlider.gameObject);
 		inventory.Clear ();
 		Destroy (gameObject);
+	}
+
+	protected void DropThroughPlatform() {
+		if (isOnAPlatform) {
+			platform.DropThrough(gameObject);
+		}
 	}
 
 	protected void Fly (Vector2 direction) {
@@ -186,7 +206,7 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected virtual Vector3 GetHPSliderPos() {
-		return transform.position + (Vector3.up * groundDetectDist);
+		return transform.position + (Vector3.up * sliderOffset);
 	}
 
 	protected virtual Vector2 GetHPSliderSizeDelta() {
@@ -219,16 +239,14 @@ public abstract class Character : MonoBehaviour {
 			characterParent = GameObject.FindGameObjectWithTag ("Character Parent").transform;
 
 		transform.SetParent (characterParent);
-
-		c2D = gameObject.GetComponent<Collider2D> ();
+		
 		rb2D = gameObject.GetComponent<Rigidbody2D> ();
 		anim = gameObject.GetComponent<Animator> ();
 		sr = gameObject.GetComponent<SpriteRenderer> ();
 
 		defaultSRColor = sr.color;
 
-		groundDetectDist = (sr.sprite.bounds.extents.y * (gameObject.GetComponent<Collider2D>().bounds.size.y)) + 0.05f;
-		groundLandingDelay = 0f;
+		sliderOffset = ((sr.sprite.bounds.extents.y * 2f) * (gameObject.GetComponent<Collider2D>().bounds.size.y));
 
 		hp = maxhp;
 		hpSlider = (GameObject.Instantiate (Resources.Load ("UI/hpSlider"), cameraCanvas) as GameObject).GetComponent<Slider> ();
@@ -255,13 +273,18 @@ public abstract class Character : MonoBehaviour {
 	}
 
 	protected void Jump() {
-		if (!isAttacking && !isJumping) {
-			anim.SetBool ("Jump", true);
+		if (!isAttacking && !isJumping) { //if character is able to jump
+
+			if (isCrouching) { //if character is crouching
+				UnCrouch(); //force them to not crouch
+			}
+
+			anim.SetBool ("Jump", true); //set bool for jumping
 
 			if (weapon != null)
-				weapon.Jump ();
+				weapon.Jump (); //tell weapon to jump
 
-			rb2D.AddForce (Vector2.up * rb2D.mass * 300);
+			rb2D.AddForce (Vector2.up * rb2D.mass * 300); //add up force
 		}
 	}
 
@@ -271,20 +294,60 @@ public abstract class Character : MonoBehaviour {
 
 		if (weapon != null)
 			weapon.Land ();
-
-		groundLandingDelay = 0;
 	}
 
-	void OnCollisionEnter2D(Collision2D otherObj) {
-		if (otherObj.transform.position.y < transform.position.y) { //if other object is below
-			if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
-				LandOnGround();
+	protected void LookAt(Transform other) {
+		bool flipNeeded = false;
+		if (other.position.x < transform.position.x) { //object is left of character
+			if (isFacingRight) { //character is looking right
+				flipNeeded = true; //we need to flip
+			}
+		} else { //object is to the right
+			if (isFacingLeft) { // character is facing left
+				flipNeeded = true; //flip needed
 			}
 		}
 
+		if (flipNeeded) {
+			sr.flipX = !sr.flipX; //flip the sprite
+
+			if (weapon != null)
+				weapon.FaceToggle(); //flip the weapon sprite
+		}
+	}
+
+	void OnCollisionEnter2D(Collision2D otherObj) {
 		if (otherObj.gameObject.tag.Equals ("Player")) { //if the other object is the player
 			if (!isFlinching) { //and this isn't flinching
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
+			}
+		} else {
+			bool shouldLandOnGround = false;
+			DropthroughPlatform temp = otherObj.gameObject.GetComponent<DropthroughPlatform>(); //check to see if we are colliding with a new platform
+
+			if (temp != null) { //if colliding with new platform
+				platform = temp; //set reference
+				shouldLandOnGround = true; //land on ground
+			} else if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
+				shouldLandOnGround = true;
+			} else {
+				if (otherObj.transform.position.y < transform.position.y) { //if other object is below
+					if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
+						shouldLandOnGround = true; //land
+					}
+				}
+			}
+
+			if (shouldLandOnGround) { //if the character should land
+				LandOnGround(); //land
+			}
+		}
+	}
+
+	void OnCollisionExit2D(Collision2D collision) {
+		if (isOnAPlatform) { //character on a platform
+			if (collision.gameObject.Equals(platform.gameObject)) { //the object we are no longer colliding with is the platform
+				platform = null; //remove reference to platform
 			}
 		}
 	}
@@ -300,6 +363,8 @@ public abstract class Character : MonoBehaviour {
 				} else {
 					flinchTimer = defaultFlinchTime;
 				}
+
+				anim.SetBool("Flinching", true);
 			}
 
 			float damage = 0;
@@ -352,11 +417,13 @@ public abstract class Character : MonoBehaviour {
 	public void ReceiveDamageFrom(Character c) {
 		ReceiveKnockback (c);
 		ReceiveDamage (c.baseAttackDamage, false); //handle damage
+		LookAt(c.transform);
 	}
 
 	public void ReceiveDamageFrom(Weapon w) {
 		ReceiveKnockback (w.Wielder);
 		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
+		LookAt(w.Wielder.transform);
 	}
 
 	public int ReceiveItem(Item i) {
@@ -402,6 +469,10 @@ public abstract class Character : MonoBehaviour {
 	protected void Run(float xVel) {
 		if (rb2D.gravityScale < 1)
 			rb2D.gravityScale = 1;
+
+		if (isCrouching) {
+			UnCrouch();
+		}
 
 		if (!isAttacking) {
 			xVel = Mathf.Clamp(xVel, -1, 1);
@@ -450,21 +521,18 @@ public abstract class Character : MonoBehaviour {
 		rb2D.angularVelocity = 0;
 	}
 
-	protected void UpdateAnimations() {
-		
-		if (rb2D.velocity.y < -0.0001f) {
-			anim.SetBool ("Falling", true);
-			anim.SetBool ("Jump", true);
-			if (weapon != null)
-				weapon.Fall ();
-		} else if (rb2D.velocity.y > 0.0001f) {
-			anim.SetBool ("Falling", false);
-			anim.SetBool ("Jump", true);
-		} else if (!isOnGround && isFalling) { //velocity is ~0 && we haven't moved vertically for a bit
-			groundLandingDelay += Time.fixedDeltaTime;
+	protected void UnCrouch() {
+		anim.SetBool("Crouch", false);
+		if (collider_upperbody != null) {
+			collider_upperbody.enabled = true;
+		}
+	}
 
-			if (groundLandingDelay >= 0.15f)
-				LandOnGround ();
+	protected void UpdateAnimations() {
+		if (rb2D.velocity.y < -0.5f) { //if the character is moving downward
+			anim.SetBool("Falling", true); //character is falling
+			if (weapon != null) //if character has weapon
+				weapon.Fall(); //tell weapon to play fall anim
 		}
 
 		if (anim.GetBool("Attack_Expire") && !isAttacking) {
@@ -502,7 +570,7 @@ public abstract class Character : MonoBehaviour {
 					}
 				}
 
-				attackTimerSlider.transform.position = transform.position + (Vector3.down * groundDetectDist);
+				attackTimerSlider.transform.position = transform.position + (Vector3.down * sliderOffset);
 
 				if (!attackTimerSlider.gameObject.activeSelf)
 					attackTimerSlider.gameObject.SetActive (true);
@@ -516,7 +584,7 @@ public abstract class Character : MonoBehaviour {
 				sr.color = Color.red;
 
 			hpSlider.transform.position = GetHPSliderPos();
-			statText.transform.position = transform.position + (Vector3.down * (groundDetectDist + 0.12f));
+			statText.transform.position = transform.position + (Vector3.down * (sliderOffset + 0.12f));
 
 			if (!hpSlider.gameObject.activeSelf)
 				hpSlider.gameObject.SetActive (true);
@@ -524,12 +592,25 @@ public abstract class Character : MonoBehaviour {
 			if (!statText.gameObject.activeSelf)
 				statText.gameObject.SetActive (true);
 
-			if (hp <= 0 && c2D.enabled) {
-				c2D.enabled = false;
+			if (hp <= 0) {
+				if (collider_lowerbody != null) {
+					if (collider_lowerbody.enabled) {
+						collider_lowerbody.enabled = false;
+					}
+				}
+				UnCrouch();
+				if (collider_upperbody != null) {
+					collider_upperbody.enabled = false;
+				}
 				rb2D.gravityScale /= 4f;
 			}
 
-			flinchTimer -= Time.fixedDeltaTime;
+			
+			if (flinchTimer > 0) {
+				flinchTimer -= Time.fixedDeltaTime;
+			} else if (isFlinching){
+				anim.SetBool("Flinching", false);
+			}
 		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
 			if (hp > 0) {
 				sr.color = defaultSRColor;

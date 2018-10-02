@@ -9,12 +9,20 @@ using System.Runtime.Serialization.Formatters.Binary;
 public class DataPersistence {
 	private static string saveLocation = Application.persistentDataPath + "/meta.dat";
 
+	public static void DeleteAllSaveData() { //to be used for testing
+		PlayerPrefs.DeleteAll();
+
+		if (File.Exists(saveLocation)) {
+			File.Delete(saveLocation);
+		}
+	}
+
 	public static PlayerData Load() {
 #if UNITY_EDITOR
-        PlayerPrefs.DeleteAll();
+		DeleteAllSaveData();
 #endif
 
-        GameManager_SwordSwipe.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
+		GameManager_SwordSwipe.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
 		GameManager_SwordSwipe.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled", 1) == 1 ? true : false; //set the sound toggle using the stored playerpref
 
 		GameManager_SwordSwipe.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
@@ -58,10 +66,10 @@ public class DataPersistence {
 		playerData.challenges = GameManager_SwordSwipe.Challenges;
 		playerData.missions = GameManager_SwordSwipe.Missions; 
 		playerData.items = GameManager_SwordSwipe.Items;
-        playerData.extra01 = GameManager_SwordSwipe.Extra01;
-        playerData.extra02 = GameManager_SwordSwipe.Extra02;
+		playerData.extra01 = GameManager_SwordSwipe.Extra01;
+		playerData.extra02 = GameManager_SwordSwipe.Extra02;
 
-        BinaryFormatter formatter = new BinaryFormatter ();
+		BinaryFormatter formatter = new BinaryFormatter ();
 		formatter.Serialize (file, playerData);
 		file.Close ();
 	}
