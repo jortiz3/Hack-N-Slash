@@ -2,6 +2,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody2D)), RequireComponent(typeof(Animator)), DisallowMultipleComponent, System.Serializable]
@@ -46,6 +47,16 @@ public abstract class Character : MonoBehaviour {
 	private List<Item> inventory;
 	private Door doorInRange;
 	private DropthroughPlatform platform;
+	[SerializeField]
+	protected float soundEffectDelay_movement = 1f; //time between each 'footstep' noise
+	private float soundEffectTimer_movement; //how long it has been since the last one
+	[SerializeField]
+	private AudioClip[] soundEffect_movement; //list of footstep sound effects to randomize
+	[SerializeField]
+	private AudioClip soundEffect_jump;
+	[SerializeField]
+	private AudioClip soundEffect_impact;
+
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
 	public int MaxHP { get { return maxhp; } }
@@ -284,16 +295,27 @@ public abstract class Character : MonoBehaviour {
 			if (weapon != null)
 				weapon.Jump (); //tell weapon to jump
 
+			if (soundEffect_jump != null && GameManager_SwordSwipe.SoundEnabled) //if there is a jump sound effect
+				GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_jump, transform.position); //play the sound effect
+
 			rb2D.AddForce (Vector2.up * rb2D.mass * 300); //add up force
 		}
 	}
 
-	protected void LandOnGround() {
+	private IEnumerator LandOnGround () {
 		anim.SetBool ("Jump", false);
 		anim.SetBool ("Falling", false);
 
 		if (weapon != null)
 			weapon.Land ();
+		
+		if (soundEffect_movement.Length > 0) {
+			int index_movementEffect = Random.Range(0, soundEffect_movement.Length); //get current footstep noise
+
+			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position);
+			yield return new WaitForEndOfFrame();
+			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position);
+		}
 	}
 
 	protected void LookAt(Transform other) {
@@ -339,7 +361,7 @@ public abstract class Character : MonoBehaviour {
 			}
 
 			if (shouldLandOnGround) { //if the character should land
-				LandOnGround(); //land
+				StartCoroutine(LandOnGround()); //land
 			}
 		}
 	}
@@ -411,6 +433,9 @@ public abstract class Character : MonoBehaviour {
 
 			if (!gameObject.tag.Equals ("Player"))
 				AttackExpire ();
+
+			if (soundEffect_impact != null && GameManager_SwordSwipe.SoundEnabled)
+				GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_impact, transform.position);
 		}
 	}
 
@@ -499,6 +524,16 @@ public abstract class Character : MonoBehaviour {
 
 					if (weapon != null)
 						weapon.Move ();
+
+					if (GameManager_SwordSwipe.SoundEnabled) {
+						if (soundEffectTimer_movement >= soundEffectDelay_movement) {
+							if (soundEffect_movement.Length > 0) {
+								GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[Random.Range(0, soundEffect_movement.Length)], transform.position);
+							}
+							soundEffectTimer_movement = 0;
+						}
+						soundEffectTimer_movement += Time.deltaTime;
+					}
 				} else { //else character is idle
 					anim.SetBool ("Run", false);
 					anim.SetBool ("Idle", true);

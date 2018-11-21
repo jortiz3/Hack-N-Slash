@@ -30,20 +30,22 @@ public class ScrollingBackground : MonoBehaviour {
 	}
 
 	void Update() {
-		if (parallax) {
-			AdjustPosition(new Vector3(-Character.player.Velocity.x * parallaxMultiplier.x, -Character.player.Velocity.y * parallaxMultiplier.y));
-		}
-		
-		if (Character.player.transform.position.x > rightEdge) { //player passed right edge of background
-			AdjustPosition(horizontalDistance);
-		} else if (Character.player.transform.position.x < leftEdge) { //player passed right edge of background
-			AdjustPosition(-horizontalDistance);
-		}
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) {
+			if (parallax) {
+				AdjustPosition(new Vector3(-Character.player.Velocity.x * parallaxMultiplier.x, -Character.player.Velocity.y * parallaxMultiplier.y));
+			}
 
-		if (Character.player.transform.position.y > topEdge) { //player passed top edge of background
-			AdjustPosition(verticalDistance);
-		} else if (Character.player.transform.position.y < bottomEdge) { //player passed bottom edge of background
-			AdjustPosition(-verticalDistance);
+			if (Character.player.transform.position.x > rightEdge) { //player passed right edge of background
+				AdjustPosition(horizontalDistance);
+			} else if (Character.player.transform.position.x < leftEdge) { //player passed right edge of background
+				AdjustPosition(-horizontalDistance);
+			}
+
+			if (Character.player.transform.position.y > topEdge) { //player passed top edge of background
+				AdjustPosition(verticalDistance);
+			} else if (Character.player.transform.position.y < bottomEdge) { //player passed bottom edge of background
+				AdjustPosition(-verticalDistance);
+			}
 		}
 	}
 

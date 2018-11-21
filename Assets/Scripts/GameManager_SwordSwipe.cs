@@ -119,6 +119,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
 	private bool ad_rewards_given;
 	private bool iap_rewards_given;
+	private AudioSource audioSource;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string[] Missions { get { return missions.ToArray (); } }
@@ -573,6 +574,19 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		currGameState = GameState.Cutscene; //change gamestate
 	}
 
+	public void PlaySoundEffect(AudioClip effect, Vector3 sourcePosition) {
+		sourcePosition.z = 0;
+		Vector3 listenerPosition = transform.position;
+		listenerPosition.z = 0;
+
+		float distance = (listenerPosition - sourcePosition).magnitude;
+
+		if (distance < 10) {
+			audioSource.volume = SFXVolume; //use distance to make SFX louder/quieter
+			audioSource.PlayOneShot(effect);
+		}
+	}
+
 	public void PostMissionAdComplete(bool finished) {
 		if (finished) {
 			if (!ad_rewards_given) {
@@ -858,6 +872,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		if (currGameManager == null) {
 			currGameManager = this;
 			DontDestroyOnLoad (gameObject);
+
+			audioSource = gameObject.GetComponent<AudioSource>();
 
 			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
 			bgParent = GameObject.Find ("Level").transform;

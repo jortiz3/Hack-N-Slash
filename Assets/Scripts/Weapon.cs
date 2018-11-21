@@ -35,6 +35,9 @@ public class Weapon : MonoBehaviour {
 	private int unlockCost;
 	[SerializeField]
 	private string specialization;
+	
+	[SerializeField]
+	private AudioClip soundEffect_attack;
 
 	public int Damage { get { return damage; } }
 	public int UnlockCost { get { return unlockCost; } }
@@ -100,6 +103,9 @@ public class Weapon : MonoBehaviour {
 			if (currProjectile >= projectiles.Length)
 				currProjectile = 0;
 		}
+
+		if (soundEffect_attack != null && GameManager_SwordSwipe.SoundEnabled)
+			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_attack, transform.position);
 	}
 
 	public void Attack_Available() {
@@ -111,6 +117,45 @@ public class Weapon : MonoBehaviour {
 		anim.SetBool ("Run", false);
 		anim.SetBool ("Idle", true);
 		currAnim = 0;
+	}
+
+	void Awake() {
+		if (transform.parent != null) {
+			wielder = transform.parent.GetComponent<Character>();
+		}
+
+		sr = gameObject.GetComponent<SpriteRenderer>();
+		anim = gameObject.GetComponent<Animator>();
+		bc2D = gameObject.GetComponent<BoxCollider2D>();
+
+		if (!bc2D.isTrigger)
+			bc2D.isTrigger = true;
+		if (bc2D.enabled)
+			bc2D.enabled = false;
+
+		currAnim = 0;
+
+		if (attackDelayRanges.Length >= 1)
+			currAttackDelay = attackDelayRanges[currAnim];
+		else
+			currAttackDelay = new Vector2(0.1f, 0.7f);
+
+		if (critRanges.Length >= 1)
+			currCritRange = critRanges[currAnim];
+		else
+			currCritRange = new Vector2(0.3f, 0.5f);
+
+		if (hitboxEnableRanges.Length >= 1)
+			currhbEnableRange = hitboxEnableRanges[currAnim];
+		else
+			currhbEnableRange = new Vector2(0f, 0.3f);
+
+
+		currProjectile = 0;
+		for (int i = 0; i < projectiles.Length; i++) {
+			if (projectiles[i] != null)
+				projectiles[i].SetOwner(this);
+		}
 	}
 
 	public void FaceLeft() {
@@ -165,45 +210,6 @@ public class Weapon : MonoBehaviour {
 			Character otherCharacter = otherObj.GetComponent<Character> ();
 			if (otherCharacter != null) //if it is actually a character
 				otherCharacter.ReceiveDamageFrom (this);
-		}
-	}
-
-	void Awake() {
-		if (transform.parent != null) {
-			wielder = transform.parent.GetComponent<Character>();
-		}
-
-		sr = gameObject.GetComponent<SpriteRenderer> ();
-		anim = gameObject.GetComponent<Animator> ();
-		bc2D = gameObject.GetComponent<BoxCollider2D> ();
-
-		if (!bc2D.isTrigger)
-			bc2D.isTrigger = true;
-		if (bc2D.enabled)
-			bc2D.enabled = false;
-
-		currAnim = 0;
-
-		if (attackDelayRanges.Length >= 1)
-			currAttackDelay = attackDelayRanges [currAnim];
-		else
-			currAttackDelay = new Vector2 (0.1f, 0.7f);
-
-		if (critRanges.Length >= 1)
-			currCritRange = critRanges [currAnim];
-		else
-			currCritRange = new Vector2 (0.3f, 0.5f);
-
-		if (hitboxEnableRanges.Length >= 1)
-			currhbEnableRange = hitboxEnableRanges [currAnim];
-		else
-			currhbEnableRange = new Vector2 (0f, 0.3f);
-
-
-		currProjectile = 0;
-		for (int i = 0; i < projectiles.Length; i++) {
-			if (projectiles[i] != null)
-				projectiles[i].SetOwner (this);
 		}
 	}
 }
