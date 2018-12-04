@@ -50,6 +50,8 @@ public abstract class Character : MonoBehaviour {
 	[SerializeField]
 	protected float soundEffectDelay_movement = 1f; //time between each 'footstep' noise
 	private float soundEffectTimer_movement; //how long it has been since the last one
+	[SerializeField, Range(0.1f, 1.5f)]
+	private float soundEffectVolumeMod_movement = 0.8f;
 	[SerializeField]
 	private AudioClip[] soundEffect_movement; //list of footstep sound effects to randomize
 	[SerializeField]
@@ -296,7 +298,7 @@ public abstract class Character : MonoBehaviour {
 				weapon.Jump (); //tell weapon to jump
 
 			if (soundEffect_jump != null && GameManager_SwordSwipe.SoundEnabled) //if there is a jump sound effect
-				GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_jump, transform.position); //play the sound effect
+				AudioManager.PlaySoundEffect(soundEffect_jump, transform.position, soundEffectVolumeMod_movement); //play the sound effect
 
 			rb2D.AddForce (Vector2.up * rb2D.mass * 300); //add up force
 		}
@@ -312,9 +314,9 @@ public abstract class Character : MonoBehaviour {
 		if (soundEffect_movement.Length > 0) {
 			int index_movementEffect = Random.Range(0, soundEffect_movement.Length); //get current footstep noise
 
-			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position);
+			AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
 			yield return new WaitForEndOfFrame();
-			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position);
+			AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
 		}
 	}
 
@@ -435,7 +437,7 @@ public abstract class Character : MonoBehaviour {
 				AttackExpire ();
 
 			if (soundEffect_impact != null && GameManager_SwordSwipe.SoundEnabled)
-				GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_impact, transform.position);
+				AudioManager.PlaySoundEffect(soundEffect_impact, transform.position, 1f);
 		}
 	}
 
@@ -528,7 +530,7 @@ public abstract class Character : MonoBehaviour {
 					if (GameManager_SwordSwipe.SoundEnabled) {
 						if (soundEffectTimer_movement >= soundEffectDelay_movement) {
 							if (soundEffect_movement.Length > 0) {
-								GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_movement[Random.Range(0, soundEffect_movement.Length)], transform.position);
+								AudioManager.PlaySoundEffect(soundEffect_movement[Random.Range(0, soundEffect_movement.Length)], transform.position, soundEffectVolumeMod_movement);
 							}
 							soundEffectTimer_movement = 0;
 						}

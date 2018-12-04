@@ -105,7 +105,7 @@ public class Weapon : MonoBehaviour {
 		}
 
 		if (soundEffect_attack != null && GameManager_SwordSwipe.SoundEnabled)
-			GameManager_SwordSwipe.currGameManager.PlaySoundEffect(soundEffect_attack, transform.position);
+			AudioManager.PlaySoundEffect(soundEffect_attack, transform.position, 1f);
 	}
 
 	public void Attack_Available() {

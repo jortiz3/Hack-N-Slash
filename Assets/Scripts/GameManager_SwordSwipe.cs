@@ -60,6 +60,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public static Vector3 currPlayerSpawnLocation;
 	public static Transform cutsceneParent;
 	private static ChallengeNotificationManager challengeManager;
+	private static AudioManager audioManager;
 
 	private static MenuScript menu;
 	private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
@@ -119,7 +120,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
 	private bool ad_rewards_given;
 	private bool iap_rewards_given;
-	private AudioSource audioSource;
 
 	public static string[] Unlocks { get { return unlocks.ToArray (); } }
 	public static string[] Missions { get { return missions.ToArray (); } }
@@ -572,19 +572,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		currCutscene = c;
 		currCutscene.gameObject.SetActive (true); //ensure the cutscene object can update
 		currGameState = GameState.Cutscene; //change gamestate
-	}
-
-	public void PlaySoundEffect(AudioClip effect, Vector3 sourcePosition) {
-		sourcePosition.z = 0;
-		Vector3 listenerPosition = transform.position;
-		listenerPosition.z = 0;
-
-		float distance = (listenerPosition - sourcePosition).magnitude;
-
-		if (distance < 10) {
-			audioSource.volume = SFXVolume; //use distance to make SFX louder/quieter
-			audioSource.PlayOneShot(effect);
-		}
+		audioManager.StopBackgroundMusic(); //stop bgm
 	}
 
 	public void PostMissionAdComplete(bool finished) {
@@ -811,6 +799,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		Destroy (w.gameObject);
 	}
 
+	public void SetBGM(AudioClip music) {
+		audioManager.SetNextClip(music);
+	}
+
 	public void SetDifficulty(Dropdown difficulty) {
 		SetDifficulty (difficulty.value);
 	}
@@ -848,7 +840,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 	public void SkipCurrentCutscene() {
 		if (missions.Contains(selectedCampaignMission) || //if the player has already beaten the current mission
-			(currCutscene.gameObject.name.ToLower().Contains("start") && !getDefaultPlayerSpawnLocation)) { //or the player is continuing from a checkpoint and the current cutscene is the start cutscene
+			(currCutscene.gameObject.name.ToLower().Contains("start") && !getDefaultPlayerSpawnLocation) || //or the player is continuing from a checkpoint and the current cutscene is the start cutscene
+			currCutscene.AlwaysSkippable) { //or the cutscene is always skippable
 			currCutscene.EndCutscene (); //allow them to skip the cutscene
 		}
 	}
@@ -872,8 +865,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		if (currGameManager == null) {
 			currGameManager = this;
 			DontDestroyOnLoad (gameObject);
-
-			audioSource = gameObject.GetComponent<AudioSource>();
 
 			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
 			bgParent = GameObject.Find ("Level").transform;
@@ -966,6 +957,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
 			adManager = GetComponent<AdvertisementManager>();
 
+			audioManager = GetComponent<AudioManager>();
+
 			currencyText_Survival = GameObject.Find("Survival Currency Text").GetComponent<Text>();
 			currencyText_Unlocks = GameObject.Find("Unlocks Currency Text").GetComponent<Text>();
 
@@ -1015,6 +1008,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		cutsceneParent.gameObject.SetActive (false); //hide pictures, subtitles, etc.
 		c.gameObject.SetActive (false); //prevent cutscene from updating further
 		currGameState = GameState.Active; //change gamestate
+		audioManager.StartBackgroundMusic(); // play bgm
 	}
 
 	public void StopCutscene (Cutscene c, bool completeMission) {

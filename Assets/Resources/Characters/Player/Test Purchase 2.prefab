@@ -239,6 +239,7 @@ MonoBehaviour:
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
   sliderColor_critical: {r: 0.32352942, g: 0.8600404, b: 1, a: 1}
   soundEffectDelay_movement: 0.3
+  soundEffectVolumeMod_movement: 0.7
   soundEffect_movement: []
   soundEffect_jump: {fileID: 0}
   soundEffect_impact: {fileID: 0}
