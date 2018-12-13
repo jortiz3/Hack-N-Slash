@@ -489,6 +489,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		bool backgroundIsMissing = bgParent.childCount > 0 ? !bgParent.GetChild (0).tag.Equals ("Level") : true;
 		bool bgNeedsToBeInstantiated = false;
 		string bgFilePath;
+		string survivalSongPath;
 		GameState nextGameState;
 
 		if (currGameMode == GameMode.Survival) {
@@ -497,6 +498,11 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			if (backgroundIsMissing || !bgParent.GetChild (0).name.Contains (bgFilePath) || //background is not what it needs to be
 				(selectedSurvivalWave - 1) / 25 !=  currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
 				bgNeedsToBeInstantiated = true;
+			}
+
+			if (!audioManager.CurrentSong.Equals(bgFilePath)) { //if the desired survival song doesn't match
+				survivalSongPath = "Audio/Music/" + bgFilePath; //get the filepath for the next song
+				audioManager.TransitionBackgroundMusic(Resources.Load<AudioClip>(survivalSongPath));
 			}
 
 			bgFilePath = "Levels/" + bgFilePath;

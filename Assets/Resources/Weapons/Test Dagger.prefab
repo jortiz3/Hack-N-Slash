@@ -212,7 +212,7 @@ MonoBehaviour:
   hitboxOffsetRight: {x: 0.6, y: 0}
   unlockCost: 50
   specialization: One-handed
-  soundEffect_attack: {fileID: 0}
+  soundEffect_attack: {fileID: 8300000, guid: 41528a7f4be6af746b486cb4b22b8777, type: 3}
 --- !u!212 &212075371269949256
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -9,6 +9,8 @@ public class AudioManager : MonoBehaviour {
 	private AudioClip nextClip;
 	private bool fadeInProgress;
 
+	public string CurrentSong { get { return audioSource_BGM.clip.name; } }
+
 	void Awake() {
 		audioSource_BGM = transform.Find("AudioSource_Music").GetComponent<AudioSource>(); //get the component asap
 	}
@@ -76,6 +78,9 @@ public class AudioManager : MonoBehaviour {
 	}
 
 	public void TransitionBackgroundMusic(AudioClip clip) {
+		if (clip == null) {
+			return;
+		}
 		StartCoroutine(FadeBGM(false));
 		SetNextClip(clip);
 		StartCoroutine(FadeBGM(true));

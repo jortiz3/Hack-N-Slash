@@ -471,7 +471,7 @@ MonoBehaviour:
   hitboxOffsetRight: {x: 0, y: 0}
   unlockCost: 0
   specialization: Mixed
-  soundEffect_attack: {fileID: 0}
+  soundEffect_attack: {fileID: 8300000, guid: 41528a7f4be6af746b486cb4b22b8777, type: 3}
 --- !u!114 &114489502292599336
 MonoBehaviour:
   m_ObjectHideFlags: 1

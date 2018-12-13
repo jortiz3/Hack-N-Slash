@@ -310,13 +310,15 @@ public abstract class Character : MonoBehaviour {
 
 		if (weapon != null)
 			weapon.Land ();
-		
-		if (soundEffect_movement.Length > 0) {
-			int index_movementEffect = Random.Range(0, soundEffect_movement.Length); //get current footstep noise
 
-			AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
-			yield return new WaitForEndOfFrame();
-			AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
+		if (GameManager_SwordSwipe.SoundEnabled) {
+			if (soundEffect_movement.Length > 0) {
+				int index_movementEffect = Random.Range(0, soundEffect_movement.Length); //get current footstep noise
+
+				AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
+				yield return new WaitForEndOfFrame();
+				AudioManager.PlaySoundEffect(soundEffect_movement[index_movementEffect], transform.position, soundEffectVolumeMod_movement);
+			}
 		}
 	}
 
@@ -346,24 +348,9 @@ public abstract class Character : MonoBehaviour {
 				otherObj.gameObject.GetComponent<Character> ().ReceiveDamageFrom (this); //damage the player
 			}
 		} else {
-			bool shouldLandOnGround = false;
-			DropthroughPlatform temp = otherObj.gameObject.GetComponent<DropthroughPlatform>(); //check to see if we are colliding with a new platform
-
-			if (temp != null) { //if colliding with new platform
-				platform = temp; //set reference
-				shouldLandOnGround = true; //land on ground
-			} else if (otherObj.gameObject.name.ToLower().Contains("ground")) { //ground tilemap
-				shouldLandOnGround = true;
-			} else {
-				if (otherObj.transform.position.y < transform.position.y) { //if other object is below
-					if (transform.position.x > otherObj.transform.position.x && transform.position.x < otherObj.transform.position.x + otherObj.collider.bounds.size.x) { //other object is centered below
-						shouldLandOnGround = true; //land
-					}
-				}
-			}
-
-			if (shouldLandOnGround) { //if the character should land
-				StartCoroutine(LandOnGround()); //land
+			DropthroughPlatform dropthrough = otherObj.gameObject.GetComponent<DropthroughPlatform>();
+			if (dropthrough != null) {
+				platform = dropthrough;
 			}
 		}
 	}
@@ -432,9 +419,8 @@ public abstract class Character : MonoBehaviour {
 			hp -= (int)(damage); //take away the appropriate health
 
 			hpSlider.value = hp;
-
-			if (!gameObject.tag.Equals ("Player"))
-				AttackExpire ();
+			
+			AttackExpire ();
 
 			if (soundEffect_impact != null && GameManager_SwordSwipe.SoundEnabled)
 				AudioManager.PlaySoundEffect(soundEffect_impact, transform.position, 1f);
@@ -570,9 +556,19 @@ public abstract class Character : MonoBehaviour {
 			anim.SetBool("Falling", true); //character is falling
 			if (weapon != null) //if character has weapon
 				weapon.Fall(); //tell weapon to play fall anim
+		} else if (!isOnGround) { //if the character is not marked as not on the ground
+			if (rb2D.velocity.y < 0.5f) { //already know character is not moving downward, need to know if moving slowly
+				Vector2 characterPosition = transform.position;
+				Vector2 endPosition = characterPosition + (Vector2.down * sr.sprite.bounds.extents.y);
+				RaycastHit2D hit = Physics2D.Linecast(characterPosition, endPosition);
+
+				if (hit) {
+					StartCoroutine(LandOnGround());
+				}
+			}
 		}
 
-		if (anim.GetBool("Attack_Expire") && !isAttacking) {
+		if (anim.GetBool("Attack_Expire") && !isAttacking) { //if the current attack needs to expire and the player is not attacking atm
 			anim.SetBool ("Attack_Expire", false);
 			anim.SetBool ("Run", false);
 			anim.SetBool ("Idle", true);
