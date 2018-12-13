@@ -83,13 +83,21 @@ public abstract class Character : MonoBehaviour {
 		rb2D.AddTorque (torque);
 	}
 
-	protected void Attack(string triggerName) {
-		if (!isFlinching || gameObject.tag.Equals ("Player")) {
+	protected void Attack(string triggerName) { //the character wants to attack
+		if (!isFlinching || //if the character isn't flinching
+			(gameObject.tag.Equals ("Player") && GameManager_SwordSwipe.currDifficulty < GameDifficulty.Normal)) { //or the character is the player and has the difficulty set below normal
 			if (weapon != null) {
 				if (attackTimer < (weapon.currentAttackDelay.y - weapon.currentAttackDelay.x) && !anim.GetBool ("Attack_Expire")) { //attackTimer starts at max value, so we need to make sure the min delay is upheld
 
 					weapon.Attack (triggerName);
 					anim.SetTrigger (triggerName);
+					if (isFlinching) { //if the character is flinching
+						anim.SetBool("Flinching", false); //reset bool so we can see the attack animation
+
+						if (weapon != null) { //if they have a weapon
+							weapon.Flinch(false); //reset bool so we can see the attack animation
+						}
+					}
 
 					if (triggerName.Equals ("Attack_Forward")) { //if swinging forward (aka power attack)
 						if (!gameObject.tag.Equals ("Player") || Mathf.Abs (rb2D.velocity.x) < moveSpeed / 2f) { //if not going too fast -- don't want to be skating across world with power attacks
@@ -117,8 +125,16 @@ public abstract class Character : MonoBehaviour {
 				}
 			} else {
 				anim.SetTrigger ("Attack");
-				anim.SetBool ("Run", false);
+				anim.SetBool ("Run", false); //this and next line may not be necessary
 				anim.SetBool ("Idle", false);
+
+				if (isFlinching) {
+					anim.SetBool("Flinching", false);
+
+					if (weapon != null) {
+						weapon.Flinch(false);
+					}
+				}
 
 				if (Mathf.Abs (rb2D.velocity.x) < 2f) { //if character isn't moving too fast
 					if (!sr.flipX) //facing right
@@ -376,6 +392,10 @@ public abstract class Character : MonoBehaviour {
 				}
 
 				anim.SetBool("Flinching", true);
+
+				if (weapon != null) {
+					weapon.Flinch(true);
+				}
 			}
 
 			float damage = 0;
@@ -643,6 +663,10 @@ public abstract class Character : MonoBehaviour {
 				flinchTimer -= Time.fixedDeltaTime;
 			} else if (isFlinching){
 				anim.SetBool("Flinching", false);
+
+				if (weapon != null) {
+					weapon.Flinch(false);
+				}
 			}
 		} else if (hpSlider.gameObject.activeSelf) { //flinching has just ended
 			if (hp > 0) {

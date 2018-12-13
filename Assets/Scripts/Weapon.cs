@@ -114,8 +114,6 @@ public class Weapon : MonoBehaviour {
 
 	public void Attack_Expire() {
 		anim.SetBool ("Attack_Expire", true);
-		anim.SetBool ("Run", false);
-		anim.SetBool ("Idle", true);
 		currAnim = 0;
 	}
 
@@ -173,6 +171,10 @@ public class Weapon : MonoBehaviour {
 	public void Fall() {
 		anim.SetBool ("Jump", false);
 		anim.SetBool ("Falling", true);
+	}
+
+	public void Flinch(bool state) {
+		anim.SetBool("Flinching", state);
 	}
 
 	public void Hitbox_Enable() {
