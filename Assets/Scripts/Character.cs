@@ -303,12 +303,11 @@ public abstract class Character : MonoBehaviour {
 
 	protected void Jump() {
 		if (!isAttacking && !isJumping) { //if character is able to jump
+			anim.SetBool("Jump", true); //set bool for jumping
 
 			if (isCrouching) { //if character is crouching
 				UnCrouch(); //force them to not crouch
 			}
-
-			anim.SetBool ("Jump", true); //set bool for jumping
 
 			if (weapon != null)
 				weapon.Jump (); //tell weapon to jump
@@ -577,13 +576,13 @@ public abstract class Character : MonoBehaviour {
 			if (weapon != null) //if character has weapon
 				weapon.Fall(); //tell weapon to play fall anim
 		} else if (!isOnGround) { //if the character is not marked as not on the ground
-			if (rb2D.velocity.y < 0.5f) { //already know character is not moving downward, need to know if moving slowly
-				Vector2 characterPosition = transform.position;
-				Vector2 endPosition = characterPosition + (Vector2.down * sr.sprite.bounds.extents.y);
-				RaycastHit2D hit = Physics2D.Linecast(characterPosition, endPosition);
+			if (isFalling) { //the character has been marked as falling
+				if (rb2D.velocity.y < 0.5f) { //make sure not launching upwards
+					RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, sr.sprite.bounds.extents.y + 0.01f);
 
-				if (hit) {
-					StartCoroutine(LandOnGround());
+					if (hit) { //if there is a hit
+						StartCoroutine(LandOnGround());
+					}
 				}
 			}
 		}
