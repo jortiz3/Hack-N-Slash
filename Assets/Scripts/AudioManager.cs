@@ -50,7 +50,11 @@ public class AudioManager : MonoBehaviour {
 		fadeInProgress = false; //let other coroutines this one has finished
 	}
 
-	public static void PlaySoundEffect(AudioClip effect, Vector3 sourcePosition, float volumeModifier) {
+	public void PlaySoundEffect(AudioClip effect) { //will mainly be used for menu sfx
+		AudioSource.PlayClipAtPoint(effect, Camera.main.transform.position, GameManager_SwordSwipe.SFXVolume); //plays sound effect
+	}
+
+	public static void PlaySoundEffect(AudioClip effect, Vector3 sourcePosition, float volumeModifier) { //will be used during gameplay
 		sourcePosition.z = Camera.main.transform.position.z; //ensure sound effect and camera are both on the same plane (2D)
 		float distance = Vector3.Distance(Camera.main.transform.position, sourcePosition); //current distance between camera and sound effect
 

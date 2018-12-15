@@ -252,7 +252,8 @@ MonoBehaviour:
   - Two-handed
   infiniteRespawn: 0
   numOfRespawnsRemaining: 0
-  unlockCost: 0
+  unlock_cost: 0
+  unlock_challenge: 
 --- !u!212 &212866810194931676
 SpriteRenderer:
   m_ObjectHideFlags: 1

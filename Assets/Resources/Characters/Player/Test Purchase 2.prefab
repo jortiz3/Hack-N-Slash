@@ -19,10 +19,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4928315947135410}
+  - component: {fileID: 114301917136869682}
   - component: {fileID: 212873319901503568}
   - component: {fileID: 95016944746478822}
   - component: {fileID: 50344658916407490}
-  - component: {fileID: 114301917136869682}
   - component: {fileID: 70424295315493298}
   - component: {fileID: 61531832395576656}
   - component: {fileID: 82939119325614780}
@@ -248,7 +248,8 @@ MonoBehaviour:
   - One-handed
   infiniteRespawn: 0
   numOfRespawnsRemaining: 0
-  unlockCost: 100
+  unlock_cost: 0
+  unlock_challenge: Ant Slayer
 --- !u!212 &212873319901503568
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -31,16 +31,19 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("Hitbox offset when the player is facing right.")]
 	private Vector2 hitboxOffsetRight;
 
-	[Space(),SerializeField]
-	private int unlockCost;
+	[Space(), SerializeField]
+	private int unlock_cost;
+	[SerializeField]
+	private string unlock_challenge;
 	[SerializeField]
 	private string specialization;
-	
+
 	[SerializeField]
 	private AudioClip soundEffect_attack;
 
 	public int Damage { get { return damage; } }
-	public int UnlockCost { get { return unlockCost; } }
+	public int Unlock_Cost { get { return unlock_cost; } }
+	public string Unlock_Challenge { get { return unlock_challenge; } }
 	public string Specialization { get { return specialization; } } // One-handed, Two-handed, Bow, Gun, Mixed
 	public Vector2 currentAttackDelay { get { return currAttackDelay; } }
 	public Vector2 currentHitboxEnableRange { get { return currhbEnableRange; } }

@@ -13,10 +13,13 @@ public class Player : Character {
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
 	[SerializeField]
-	private int unlockCost;
+	private int unlock_cost;
+	[SerializeField]
+	private string unlock_challenge;
 
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
-	public int UnlockCost { get { return unlockCost; } }
+	public int Unlock_Cost { get { return unlock_cost; } }
+	public string Unlock_Challenge { get { return unlock_challenge; } }
 	public string DefaultWeapon { get { return defaultWeapon; } }
 
 	void Awake() {
