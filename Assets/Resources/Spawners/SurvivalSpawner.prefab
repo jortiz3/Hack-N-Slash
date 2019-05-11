@@ -179,6 +179,14 @@ MonoBehaviour:
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
+    - character: {fileID: 114685793424318832, guid: ce9a0473f18d41a46b639a2f32a0f1b0,
+        type: 2}
+      animator: {fileID: 0}
+      quantity: 1
+      currqty: 0
+      spawnLocations:
+      - {fileID: 4142766065093100}
+      - {fileID: 4377525096065332}
   - waveWarningText: 
     spawnTimeRange: {x: 2, y: 5}
     spawnList:

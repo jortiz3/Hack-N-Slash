@@ -19,11 +19,11 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("The shortest time between swings (x) and the longest (y).\nOne array element per animation.")]
 	private Vector2[] attackDelayRanges;
 	private Vector2 currAttackDelay;
-	[SerializeField, Tooltip("The range in which the player would be considered to 'perfectly' time the attack.\nOne array element per animation")]
+	[SerializeField, Tooltip("When during the swing would the player have perfectly timed the attack? Keep the\nranges between [0, 1] (0.5f being the midpoint point of swing).")]
 	private Vector2[] critRanges;
 	private Vector2 currCritRange;
 	[Header("Hitbox Settings")]
-	[SerializeField, Tooltip("When to enable the hitbox. \nExample: (0, swingdelaymax) means hitbox enabled for entire swing\nOne array element per animation.")]
+	[SerializeField, Tooltip("When will the hitbox be enabled during the attack? Keep ranges between [0, 1] (0.5f being the midpoint of swing)")]
 	private Vector2[] hitboxEnableRanges;
 	private Vector2 currhbEnableRange;
 	[SerializeField, Tooltip("Hitbox offset when the player is facing left.")]
@@ -88,8 +88,11 @@ public class Weapon : MonoBehaviour {
 		if (currAnim < hitboxEnableRanges.Length)
 			currhbEnableRange = hitboxEnableRanges [currAnim];
 
-		if (currAnim < critRanges.Length)
-			currCritRange = critRanges [currAnim];
+		if (currAnim < critRanges.Length) {
+			currCritRange = critRanges[currAnim];
+			currCritRange.x = Mathf.Clamp(currCritRange.x, 0f, 1f);
+			currCritRange.y = Mathf.Clamp(currCritRange.y, 0f, 1f);
+		}
 
 		if (projectiles != null && projectiles.Length > 0) {
 			if (currAnim < 2) {

@@ -9,7 +9,7 @@ public class AudioManager : MonoBehaviour {
 	private AudioClip nextClip;
 	private bool fadeInProgress;
 
-	public string CurrentSong { get { return audioSource_BGM.clip.name; } }
+	public string CurrentSongName { get { return audioSource_BGM.clip.name; } }
 
 	void Awake() {
 		audioSource_BGM = transform.Find("AudioSource_Music").GetComponent<AudioSource>(); //get the component asap
@@ -21,7 +21,7 @@ public class AudioManager : MonoBehaviour {
 		}
 		fadeInProgress = true; //let other coroutines know a fade has begun
 
-		float fadeVelocity = 0.03f; //the speed at which the audio fades
+		float fadeVelocity = 0.01f; //the speed at which the audio fades
 
 		if (fadeIn) {
 			audioSource_BGM.Stop(); //stop playing previous clip
@@ -64,10 +64,6 @@ public class AudioManager : MonoBehaviour {
 		}
 	}
 
-	public void SetNextClip (AudioClip clip) {
-		nextClip = clip;
-	}
-
 	private void Start() {
 		audioSource_BGM.volume = GameManager_SwordSwipe.BGMVolume; //ensure the volume is correct at the start
 		fadeInProgress = false;
@@ -82,11 +78,11 @@ public class AudioManager : MonoBehaviour {
 	}
 
 	public void TransitionBackgroundMusic(AudioClip clip) {
-		if (clip == null) {
+		if (clip == null || CurrentSongName.Equals(clip.name)) {
 			return;
 		}
 		StartCoroutine(FadeBGM(false));
-		SetNextClip(clip);
+		nextClip = clip;
 		StartCoroutine(FadeBGM(true));
 	}
 

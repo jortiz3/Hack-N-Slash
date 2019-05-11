@@ -1,6 +1,31 @@
-## [1.21.0] - 2018-08-14
+## [1.22.0] - 2019-03-18
 ### Added
-- UDP module. Developers can refer to https://unitytech.github.io/udp/technical-integration-IAP/ for more details.
+- Added Unity Distribution Portal (UDP) module as an Android build target. Unity Distribution Portal streamlines your distribution process. UDP allows you to only build one version of your game, centralize the management of your marketing assets and metadata, and submit your content to multiple app stores, all in the same workflow. For more details, please refer to https://docs.unity3d.com/Packages/com.unity.purchasing.udp@1.0/manual/index.html.
+- Added extension function for Apple store to expose products' sku details
+- Added support for developer to include accountId in getBuyIntentExtraParams, this data helps Google analyze fraud attempts and prevent fraudulent transactions.
+- Added GooglePlay store extension function to support restore purchases.
+- Added GooglePlay store extension function to support consume(finish transaction) a purchase manually.
+
+### Fixed
+- Fixed UWP build errors.
+- Fixed errors when initializing with two purchasing modules on WebGL & Windows Standalone.
+- Fixed not "re-importing required assets" when switching build targets with IAP.
+- Re-enabled Facebook IAP implementation for non-Gameroom Canvas apps.
+- Fixed GooglePlay store consumable products already owned error due to network issues.
+- Fixed wrong product id when cancel a subscription product purchase.
+
+## [1.20.1] - 2018-10-5
+### Added
+- Added a callback function that allows developers to check the state of the upgrade/downgrade process of subscriptions on GooglePlay.
+
+### Fixed
+- Google Daydream - Correctly Displays IAP Prompt in 3d VR version instead of native 2D. 
+- Fixed issue where IAP catalog prevented deletion of Price under Google Configuration.
+- Amazon Store - Fixed bug where Amazon store could not correctly parse currencies for certain countries.
+- MacOS - Fixed bug that causes non-consumables to auto-restore on MacOS apps after re-install, instead of requiring the the Restore button to be clicked.
+- Updated Android Response Code to return correct message whenever an activity is cancelled.
+- Fixed Mono CIL linker error causing initialization failure in Unity 5.3 
+- Fixed inefficient Apple Receipt Parser that was slowing down when a large number of transactions were parsed on auto-restore.
 
 ## [1.20.0] - 2018-06-29
 ### Added

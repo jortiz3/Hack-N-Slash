@@ -82,6 +82,8 @@ public class Player : Character {
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
 		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
 		attackTimerSlider.gameObject.SetActive (false);
+
+		Initialize();
 	}
 
 	#if UNITY_EDITOR

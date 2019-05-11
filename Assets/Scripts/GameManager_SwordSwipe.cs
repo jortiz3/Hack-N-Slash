@@ -490,7 +490,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		bool backgroundIsMissing = bgParent.childCount > 0 ? !bgParent.GetChild (0).tag.Equals ("Level") : true;
 		bool bgNeedsToBeInstantiated = false;
 		string bgFilePath;
-		string survivalSongPath;
+		string bgmFilePath;
 		GameState nextGameState;
 
 		if (currGameMode == GameMode.Survival) {
@@ -501,9 +501,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				bgNeedsToBeInstantiated = true;
 			}
 
-			if (!audioManager.CurrentSong.Equals(bgFilePath)) { //if the desired survival song doesn't match
-				survivalSongPath = "Audio/Music/" + bgFilePath; //get the filepath for the next song
-				audioManager.TransitionBackgroundMusic(Resources.Load<AudioClip>(survivalSongPath));
+			if (!audioManager.CurrentSongName.Equals(bgFilePath)) { //if the desired survival song doesn't match
+				bgmFilePath = "Audio/Music/" + bgFilePath; //get the filepath for the next song
+				audioManager.TransitionBackgroundMusic(Resources.Load<AudioClip>(bgmFilePath));
 			}
 
 			bgFilePath = "Levels/" + bgFilePath;
@@ -827,7 +827,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void SetBGM(AudioClip music) {
-		audioManager.SetNextClip(music);
+		audioManager.TransitionBackgroundMusic(music);
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {

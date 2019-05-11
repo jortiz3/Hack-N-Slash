@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//keep chasing target a little longer depending on difficulty
 //create editor script to show/hide flyingHeight based on movementType
+//make fly swoop more of a curve
+//-make targetlocation other side of player?
+//-target location and transform.position not same coordinates??
 
 public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depending on game difficulty
 
@@ -14,6 +16,7 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	protected List<Character> minions;
 	[SerializeField]
 	protected MovementType movementType = MovementType.Run;
+	[SerializeField]
 	protected Behaviour behaviour = Behaviour.Aggressive;
 	private int remainingSpawns;
 	private float spawnTimer;
@@ -24,17 +27,19 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	private float currAttackTimer;
 	[SerializeField, Tooltip("What is the cruising altitude for this flying enemy?")]
 	protected float flyingHeight; //somehow make this the height above current platform
+	private bool flyingAttackLocationSet;
+	private Vector3 initialAttackDistance;
 	[SerializeField, Tooltip("Plays when this enemy dies. (Can be left null)")]
 	private Cutscene cutsceneToPlayOnDeath; //in case this enemy is the objective of the level, the final cutscene will play
 
 	public enum MovementType { Run, FlySwoop, FlyBomber, Jumper }
-	public enum Behaviour { Aggressive, StandGround, Evasive }
+	public enum Behaviour { Aggressive, StandGround, Evasive, Neutral }
 
 	public override void Die () {
 		if (minions != null) {
 			foreach (Character c in minions) {
 				if (c != null) {
-					c.Die ();
+					c.ReceiveDamage (999, true);
 				}
 			}
 		}
@@ -45,12 +50,11 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 	}
 
 	protected override Vector3 IdentifyTargetLocation () {
-		if (GameManager_SwordSwipe.currGameMode == GameMode.Survival) {
-			if (player != null) {
+		if (GameManager_SwordSwipe.currGameMode == GameMode.Survival && player != null) {
+				targetCharacter = player;
 				return player.transform.position;
-			}
 		} else {
-			if (targetCharacter != null) {
+			if (behaviour != Behaviour.Neutral && targetCharacter != null) {
 				return targetCharacter.transform.position;
 			}
 
@@ -71,6 +75,11 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 				Jump (); //jump before moving
 			}
 
+			if (HasFallenOver) { //enemy has fallen over
+				KipUp(); //attempt to reorientate z axis
+				return; //reorientation is all it can do while upside down
+			}
+
 			if (behaviour == Behaviour.Aggressive) { //if the enemy is aggressive
 				base.Move (); //move towards the player just as a simple enemy
 			} else if (behaviour == Behaviour.Evasive) { //if the enemy is evasive
@@ -83,25 +92,53 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 				}
 			}
 		} else if (movementType == MovementType.FlySwoop || movementType == MovementType.FlyBomber) {
+			if (HasFallenOver) { //if enemy fallen over
+				KipUp(); //reorientate z axis
+			} //keep flying
+			
+			if (isAttacking) { //character attacked
+				if (!flyingAttackLocationSet && targetCharacter != null) { //if the attack location isn't set
+					initialAttackDistance = targetCharacter.transform.position - transform.position;
+					targetLocation.x = targetCharacter.transform.position.x + initialAttackDistance.x;//set attack location to point opposite target
+					targetLocation.y = transform.position.y; //keep the current height for the end of the flight path
+					FreezeTargetLocation(true); //ensure the target location doesn't change for now
+					flyingAttackLocationSet = true; //show this process has been performed
+				}
+			} else if (FreezeTargetLocationEnabled) { //no longer attacking
+				FreezeTargetLocation(false); //return to normal
+				flyingAttackLocationSet = false;
+			}
+
 			moveDirection = targetLocation - transform.position;//direction of target
-			moveDirection.y = flyingHeight; //stay at cruise altitude
-			Fly (moveDirection); //fly towards target at cruise altitude
+			if (movementType == MovementType.FlyBomber || !isAttacking) { //bombers always stay at flying height, swoopers only stay there when too far away to attack
+				moveDirection.y = flyingHeight - transform.position.y; //go towards cruise altitude
+			} else {
+				//swoop motion -- (amplitude; scale vertical) * cosine((scale horizontal) * (x + (shift horizontal))) + (shift vertical),
+				moveDirection.y = Mathf.Abs(initialAttackDistance.y) * (Mathf.Cos(moveDirection.x / initialAttackDistance.x)) + initialAttackDistance.y;
+				Debug.Log("currTargetLoc: " + targetLocation + "  currDistance: " + moveDirection.ToString() + "  initialDistance: " + initialAttackDistance.ToString());
+			}
+			Fly (moveDirection); //fly towards target
 		} else {
 			base.Move ();
 		}
-			
-		if (Vector3.Distance (transform.position, targetLocation) < attackDistance) { //if close enough
-			if (targetCharacter != null) { //player is in range
+
+		if (targetCharacter != null) { //chasing a character
+			if (Vector3.Distance(transform.position, targetCharacter.transform.position) < attackDistance) { //if close enough to attack
 				if (currAttackTimer <= 0) { //attack delay is over
-					Attack ("Attack_Forward"); //attack
-					PauseMovement (); //stop moving
+					Attack("Attack_Forward"); //attack
+					if (movementType != MovementType.FlyBomber && movementType != MovementType.FlySwoop) //if this character doesn't fly
+						PauseMovement(); //stop moving
 					currAttackTimer = attackDelay; //reset delay
-				} else {
-					currAttackTimer -= Time.deltaTime; //decrease delay
 				}
-			} else { //no target to attack, enemy is just moving to point of interest
-				PauseMovement();
 			}
+		} else {//moving to point of interest
+			if (Vector3.Distance(transform.position, targetLocation) < 0.8f) { //close enough
+				PauseMovement(); //stop moving
+			}
+		}
+
+		if (currAttackTimer > 0) { //always update attack delay
+			currAttackTimer -= Time.deltaTime; //decrease delay
 		}
 	}
 
@@ -142,11 +179,13 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 			}
 		}
 
-		//	if target is too far away
-		//		if too long
-		//			get new target -- point of interest || player if survival game mode
-		//		end if too long
-		//	end if target too far away
+		if (behaviour == Behaviour.Neutral) { //if neutral
+			if (CurrentHP < MaxHP) { //enemy was damaged
+				behaviour = Behaviour.Aggressive; //become aggressive
+				PauseMovement();
+			}
+		}
+
 		base.UpdateEnemy();
 	}
 }

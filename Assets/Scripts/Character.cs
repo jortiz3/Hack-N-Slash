@@ -18,7 +18,7 @@ public abstract class Character : MonoBehaviour {
 	[SerializeField]
 	private Collider2D collider_lowerbody;
 	[SerializeField]
-	private float moveSpeed;
+	protected float moveSpeed;
 	private Rigidbody2D rb2D;
 	private Animator anim;
 	private SpriteRenderer sr;
@@ -31,18 +31,20 @@ public abstract class Character : MonoBehaviour {
 	protected bool hpSliderAlwaysActive;
 	private float sliderOffset;
 	private float attackTimer; //used to delay attacks and as the time until the attack expires
-	private float flinchTimer; //'air-time' after being hit
+	protected float flinchTimer; //'air-time' after being hit
 	private float invulnTimer; //timespan of invulnerability
 	[SerializeField]
 	private float baseAttackDamage = 3;
 	[SerializeField, Tooltip("How much will this enemy move/slide on their own when they attack?")]
 	protected float baseAttackForce = 25f;
 	protected Slider attackTimerSlider; //used to visually display the timer to the player
+	private RectTransform criticalHitBox;
 	[SerializeField]
 	private Color sliderColor_default = Color.white;
 	[SerializeField]
 	private Color sliderColor_critical = Color.white;
-	private bool critAvailable;
+	private bool criticalHitDisplayed;
+	private bool criticalHitActivated;
 	private Text statText;
 	private List<Item> inventory;
 	private Door doorInRange;
@@ -61,6 +63,7 @@ public abstract class Character : MonoBehaviour {
 
 
 	public static int numOfEnemies { get { return characterParent.childCount - 1; } }
+	public int CurrentHP { get { return hp; } }
 	public int MaxHP { get { return maxhp; } }
 	public float MovementSpeed { get { return moveSpeed; } }
 	public Vector2 Velocity { get { return rb2D.velocity; } }
@@ -112,16 +115,19 @@ public abstract class Character : MonoBehaviour {
 						weapon.FaceToggle (); //flip the weapon sprite
 					}
 
-					if (attackTimer < weapon.currentCritRange.y && weapon.currentCritRange.x < attackTimer) { //if the player timed the attack correctly
-						critAvailable = true; //they get a critical hit
+					if (criticalHitDisplayed) { //if the player timed the attack correctly
+						criticalHitActivated = true; //they get a critical hit
 					} else {
-						critAvailable = false;
+						criticalHitActivated = false;
 					}
 
 					attackTimer = weapon.currentAttackDelay.y;
 
-					if (attackTimerSlider != null)
+					if (attackTimerSlider != null) {
 						attackTimerSlider.maxValue = attackTimer;
+						criticalHitBox.anchorMin = new Vector2(weapon.currentCritRange.x, 0.1f);
+						criticalHitBox.anchorMax = new Vector2(weapon.currentCritRange.y, 0.9f);
+					}
 				}
 			} else {
 				anim.SetTrigger ("Attack");
@@ -153,6 +159,8 @@ public abstract class Character : MonoBehaviour {
 			weapon.Attack_Expire ();
 
 		if (attackTimerSlider != null) {
+			attackTimerSlider.fillRect.GetComponent<Image>().color = sliderColor_default;
+			criticalHitDisplayed = false;
 			attackTimerSlider.gameObject.SetActive (false);
 		}
 
@@ -196,7 +204,8 @@ public abstract class Character : MonoBehaviour {
 			rb2D.gravityScale = 0;
 
 		if (!isAttacking) {
-			direction.Normalize ();
+			if (direction.magnitude != 1)
+				direction.Normalize ();
 
 			if (direction.x < 0) {//if moving left
 				sr.flipX = true;
@@ -261,7 +270,7 @@ public abstract class Character : MonoBehaviour {
 		return false; //went through whole list, and didn't have enough
 	}
 
-	protected void Initialize () {
+	protected virtual void Initialize () {
 		if (cameraCanvas == null)
 			cameraCanvas = GameObject.FindGameObjectWithTag ("Camera Canvas").transform;
 		if (characterParent == null)
@@ -296,6 +305,7 @@ public abstract class Character : MonoBehaviour {
 			if (weapon != null)
 				attackTimerSlider.maxValue = weapon.currentAttackDelay.y;
 			attackTimerSlider.gameObject.SetActive (false);
+			criticalHitBox = attackTimerSlider.transform.Find("Fill Area").Find("Critical Hit Box").GetComponent<RectTransform>();
 		}
 
 		inventory = new List<Item> ();
@@ -378,7 +388,7 @@ public abstract class Character : MonoBehaviour {
 		}
 	}
 
-	private void ReceiveDamage(float srcDmgVal, bool criticalHit) {
+	protected internal void ReceiveDamage(float srcDmgVal, bool criticalHit) {
 		if (GameManager_SwordSwipe.currGameState != GameState.Active)
 			return;
 
@@ -387,7 +397,7 @@ public abstract class Character : MonoBehaviour {
 				if (gameObject.tag.Equals ("Player")) {
 					flinchTimer = defaultFlinchTime / 2f;
 				} else {
-					flinchTimer = defaultFlinchTime;
+					flinchTimer = defaultFlinchTime / (int)GameManager_SwordSwipe.currDifficulty;
 				}
 
 				anim.SetBool("Flinching", true);
@@ -398,32 +408,18 @@ public abstract class Character : MonoBehaviour {
 			}
 
 			float damage = 0;
-			float difficultyDamageModifier = 1f;
 
 			if (gameObject.tag.Equals ("Player")) { //player takes more damage based on difficulty
-				switch (GameManager_SwordSwipe.currDifficulty) {
-				case GameDifficulty.Easiest:
-					difficultyDamageModifier = 0.5f;
-					break;
-				case GameDifficulty.Easy:
-					difficultyDamageModifier = 0.8f;
-					break;
-				case GameDifficulty.Normal:
-					difficultyDamageModifier = 1f;
-					break;
-				case GameDifficulty.Masochist:
-					damage = maxhp;
-					break;
+				if (GameManager_SwordSwipe.currDifficulty == GameDifficulty.Masochist) {
+					damage = maxhp; //instakill player
+				} else {
+					damage = srcDmgVal * 0.5f * ((int)GameManager_SwordSwipe.currDifficulty + 1); //do more damage based on difficulty -- 0.5x, 1x, 1.5x damage
 				}
 
 				invulnTimer = 1f; //player receives temporary invulnerability when damaged
+			} else {
+				damage = srcDmgVal;
 			}
-
-			if (damage == 0) {
-				damage += srcDmgVal;
-			}
-
-			damage *= difficultyDamageModifier;
 
 			if (criticalHit) {
 				damage *= 1.25f;
@@ -454,7 +450,7 @@ public abstract class Character : MonoBehaviour {
 
 	public void ReceiveDamageFrom(Weapon w) {
 		ReceiveKnockback (w.Wielder);
-		ReceiveDamage (w.Damage, w.Wielder.critAvailable); //handle damage + possibility of critical hit
+		ReceiveDamage (w.Damage, w.Wielder.criticalHitActivated); //handle damage + possibility of critical hit
 		LookAt(w.Wielder.transform);
 	}
 
@@ -596,39 +592,34 @@ public abstract class Character : MonoBehaviour {
 				weapon.Attack_Available ();
 		}
 
-		if (attackTimer > 0) {
-			attackTimer -= Time.fixedDeltaTime;
-
-
-			if (attackTimer < weapon.currentAttackDelay.y - weapon.currentHitboxEnableRange.x
-				&& attackTimer > weapon.currentAttackDelay.y - weapon.currentHitboxEnableRange.y)
+		if (attackTimer > 0 && !isFlinching) {
+			if (weapon.currentHitboxEnableRange.x * weapon.currentAttackDelay.y < attackTimer &&
+				attackTimer < weapon.currentHitboxEnableRange.y * weapon.currentAttackDelay.y) //if attack time is at right % of delay for hitbox
 				weapon.Hitbox_Enable ();
 			else
 				weapon.Hitbox_Disable();
 
 			if (attackTimerSlider != null) {
-				attackTimerSlider.value = attackTimer;
+				attackTimerSlider.value = attackTimer; //update slider value
 
-				if (attackTimer < weapon.currentAttackDelay.y - weapon.currentCritRange.x
-					&& attackTimer > weapon.currentAttackDelay.y - weapon.currentCritRange.y) {
-					if (!critAvailable) {
-						attackTimerSlider.fillRect.GetComponent<Image> ().color = sliderColor_critical;
-						critAvailable = true;
-					}
+				if (weapon.currentCritRange.x * weapon.currentAttackDelay.y < attackTimer &&
+					attackTimer < weapon.currentCritRange.y * weapon.currentAttackDelay.y) { //if attack time is at right % of delay for crit
+					attackTimerSlider.fillRect.GetComponent<Image>().color = sliderColor_critical;//change slider color to show when player should attack again
+					criticalHitDisplayed = true; //ensure character gets crit if they attack at right time
 				} else {
-					if (critAvailable) {
-						attackTimerSlider.fillRect.GetComponent<Image> ().color = sliderColor_default;
-						critAvailable = false;
-					}
+					attackTimerSlider.fillRect.GetComponent<Image>().color = sliderColor_default;//reset slider color
+					criticalHitDisplayed = false; //reset crit availability
 				}
 
-				attackTimerSlider.transform.position = transform.position + (Vector3.down * sliderOffset);
+				attackTimerSlider.transform.position = transform.position + (Vector3.down * sliderOffset); //keep the slider below the character
 
-				if (!attackTimerSlider.gameObject.activeSelf)
-					attackTimerSlider.gameObject.SetActive (true);
+				if (!attackTimerSlider.gameObject.activeSelf) //if not already enabled
+					attackTimerSlider.gameObject.SetActive (true); //enable slider
 			}
-		} else if (isAttacking) {
-			AttackExpire ();
+
+			attackTimer -= Time.fixedDeltaTime; //update attack timer
+		} else if (isAttacking) { //last frame of attacking
+			AttackExpire (); //stop attacking
 		}
 		
 		if (isFlinching) {
@@ -655,6 +646,7 @@ public abstract class Character : MonoBehaviour {
 					collider_upperbody.enabled = false;
 				}
 				rb2D.gravityScale /= 4f;
+				rb2D.constraints = RigidbodyConstraints2D.None;
 			}
 
 			

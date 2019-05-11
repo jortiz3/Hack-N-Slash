@@ -282,33 +282,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collider_upperbody: {fileID: 0}
   collider_lowerbody: {fileID: 70678980786217724}
-  moveSpeed: 0.8
+  moveSpeed: 1.2
   maxhp: 20
-  baseAttackDamage: 6
+  baseAttackDamage: 0
   baseAttackForce: 25
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
   sliderColor_critical: {r: 1, g: 1, b: 1, a: 1}
   soundEffectDelay_movement: 1
-  soundEffect_movement: []
+  soundEffectVolumeMod_movement: 0.8
+  soundEffect_movement:
+  - {fileID: 8300000, guid: ba235836c3da48c419fec94267edca2f, type: 3}
   soundEffect_jump: {fileID: 0}
-  soundEffect_impact: {fileID: 0}
-  attentionSpanRange: {x: 3, y: 6}
-  targetIdentifyRate: {x: 4, y: 8}
-  isAbleToJump: 1
+  soundEffect_impact: {fileID: 8300000, guid: c7c381fc210658a4483312005ce1bc7c, type: 3}
+  attentionSpanRange: {x: 3, y: 9}
+  targetIdentifyRate: {x: 0.01, y: 0.5}
+  isAbleToJump: 0
   challengeEnemy: 0
   pointsOfInterest: []
-  spawns:
-  - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-      type: 2}
-    animator: {fileID: 0}
-    quantity: 5
-    currqty: 0
-    spawnLocations:
-    - {fileID: 4570810315589822}
+  spawns: []
   movementType: 1
-  attackDistance: 4.5
+  behaviour: 0
+  attackDistance: 5
   attackDelay: 1
-  flyingHeight: -0.5
+  flyingHeight: -10
   cutsceneToPlayOnDeath: {fileID: 0}
 --- !u!114 &114710960782961228
 MonoBehaviour:
@@ -321,21 +317,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc177ed757fb5434bb604dedd930d2b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 8
+  damage: 0
   projectiles: []
-  attackForce: 2000
+  attackForce: 0
   attackDelayRanges:
-  - {x: 0.5, y: 1}
-  - {x: 0.5, y: 1}
-  - {x: 0.5, y: 1}
+  - {x: 0.5, y: 3}
+  - {x: 0.5, y: 3}
+  - {x: 0.5, y: 3}
   critRanges: []
   hitboxEnableRanges:
-  - {x: 0, y: 2}
-  - {x: 0, y: 2}
-  - {x: 0, y: 2}
+  - {x: 0, y: 3}
+  - {x: 0, y: 3}
+  - {x: 0, y: 3}
   hitboxOffsetLeft: {x: -1.3, y: 0}
   hitboxOffsetRight: {x: 1.3, y: 0}
-  unlockCost: 0
+  unlock_cost: 0
+  unlock_challenge: 
   specialization: 
   soundEffect_attack: {fileID: 0}
 --- !u!212 &212934817051884802
