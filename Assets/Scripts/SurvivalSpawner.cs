@@ -13,11 +13,15 @@ public class SurvivalSpawner : MonoBehaviour {
 	private int currSpawnLoc;
 	private float spawnTimer;
 	private int remainingSpawns;
+	private int numWavesCompleted;
+	private bool continuousWavesEnabled;
 
 	public bool Depleted { get { return remainingSpawns <= 0 ? true : false; } }
+	public bool ContinuousWavesEnabled { get { return continuousWavesEnabled; } set { continuousWavesEnabled = value; } }
 	public int CurrentWave { get { return currentWave + 1; } }
 	public int PreviousWave { get { return previousWave + 1; } }
 	public int NumberOfWaves { get { return waveList.Length; } }
+	public int NumberOfWavesCompleted { get { return numWavesCompleted; } }
 
 	void Awake () {
 		if (GameManager_SwordSwipe.currSurvivalSpawner == null) {
@@ -28,13 +32,8 @@ public class SurvivalSpawner : MonoBehaviour {
 		}
 	}
 
-	public string GetWaveWarning (int waveNumber) {
-		waveNumber -= 1;
-		if (waveNumber < waveList.Length) { //ensure the number is within the bounds of the array
-			if (waveList [waveNumber].waveWarningText != null && waveList [waveNumber].waveWarningText.Length > 0) //ensure the text isn't null and has text in it
-				return waveList [waveNumber].waveWarningText;
-		}
-		return "No warnings for this wave. Good luck!";
+	public void Initialize() {
+		numWavesCompleted = 0;
 	}
 
 	private void InstantiateSpawn() {
@@ -53,9 +52,15 @@ public class SurvivalSpawner : MonoBehaviour {
 		remainingSpawns = 0;
 		Character.player.NumberOfRespawnsRemaining = 0;
 
-		for (int i = 0; i < waveList[currentWave].spawnList.Length; i++) {//for all of our spawns
-			remainingSpawns += waveList[currentWave].spawnList [i].quantity;//add this quantity to our total remaining spawns
-			waveList[currentWave].spawnList[i].currqty = waveList[currentWave].spawnList[i].quantity;//ensure the currqty matches how many should appear this wave
+		int waveToSpawn = currentWave;
+
+		if (currentWave >= waveList.Length) { //if the current wave is higher than what is implemented
+			waveToSpawn = waveList.Length - 1; //spawn the last implemented wave once again
+		}
+
+		for (int i = 0; i < waveList[waveToSpawn].spawnList.Length; i++) {//for all of our spawns
+			remainingSpawns += waveList[waveToSpawn].spawnList [i].quantity;//add this quantity to our total remaining spawns
+			waveList[waveToSpawn].spawnList[i].currqty = waveList[waveToSpawn].spawnList[i].quantity;//ensure the currqty matches how many should appear this wave
 		}
 	}
 
@@ -70,14 +75,18 @@ public class SurvivalSpawner : MonoBehaviour {
 					spawnTimer = Random.Range (waveList[currentWave].spawnTimeRange.x, waveList[currentWave].spawnTimeRange.y); //randomize the spawn timer
 				}
 			} else if (Character.numOfEnemies < 1) { //if the user has slain all the enemies
-				GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("survived");
+				if (continuousWavesEnabled) {
+					StartWave(currentWave + 2); //+2 because the number is decremented in startwave()
+					numWavesCompleted++;
+				} else {
+					GameManager_SwordSwipe.currGameManager.EndSurvivalWave("survived");
+				}
 			}
 		}
 	}
 
 	[System.Serializable]
 	private struct Wave {
-		public string waveWarningText;
 		[SerializeField, Tooltip("Range of time between spawns (Random).")]
 		public Vector2 spawnTimeRange;
 		public Spawn[] spawnList;

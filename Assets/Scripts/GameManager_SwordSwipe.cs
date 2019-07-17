@@ -64,6 +64,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private static MenuScript menu;
 	private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
 	private static Toggle soundToggle;
+	private static Toggle continuousWaveToggle;
 	private static Slider bgmSlider;
 	private static Slider sfxSlider;
 	private static Dropdown difficultyDropdown;
@@ -93,7 +94,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private Transform challengesParent;
 	private InputField displayedSurvivalWaveNumber;
 	private Text displayedSurvivalWaveInfo;
-	private Text displayedSurvivalWaveWarning;
 	private int selectedSurvivalWave;
 	private int highestSurvivalWave;
 	private int currSurvivalStreak;
@@ -910,6 +910,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			cutsceneParent = menu.transform.Find ("Cutscene");
 
 			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
+			continuousWaveToggle = GameObject.Find("Continuous Wave Toggle").GetComponent<Toggle>();
 			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
 			bgmSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.07f, 0); //keep the handles somewhat circular
 			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
@@ -979,7 +980,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
 			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
-			displayedSurvivalWaveWarning = GameObject.Find ("Wave Warnings Text").GetComponent<Text> ();
 			displayedSelectedOutfitInfo = GameObject.Find ("Selected Outfit Text").GetComponent<Text> ();
 
 			purchaseConfirmationText = GameObject.Find ("Purchase Confirmation Text").GetComponent<Text>();
@@ -1027,6 +1027,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		SpawnSurvivalSpawner();
 
+		currSurvivalSpawner.ContinuousWavesEnabled = continuousWaveToggle.isOn;
 		currGameMode = GameMode.Survival;
 		currGameState = GameState.Menu;
 		UpdateSurvivalWaveText ();
@@ -1055,6 +1056,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 	public void ToggleSoundEnabled(Toggle UIToggle) {
 		SoundEnabled = UIToggle.isOn; //enable/disable the sound using the toggle on the screen
+	}
+
+	public void ToggleSurvivalContinuousMode(Toggle UIToggle) {
+		currSurvivalSpawner.ContinuousWavesEnabled = UIToggle.isOn; //enable/disable continuous wave mode using the toggle on the screen
 	}
 
 	public void UnlockItem(string itemName, bool colorGrabNeeded) {
@@ -1111,9 +1116,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 	private void UpdateSurvivalWaveText() {
 		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
-		displayedSurvivalWaveWarning.text = currSurvivalSpawner.GetWaveWarning (selectedSurvivalWave); //update the wave warning text
-
-		
 	}
 	
 	private void UpdateSurvivalCompleteText() {
