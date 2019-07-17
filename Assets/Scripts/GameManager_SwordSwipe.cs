@@ -36,14 +36,6 @@ public enum GameState { Menu, Cutscene, Active, Loading, Paused };
 //		--hp bar displayed at the bottom/top? GetHPSliderPos(), GetHPSliderSizeDelta()
 //		--Script delegates so behavior can be set in the inspector?
 //--Player Mechanics
-//	--multiple control schemes
-//		--Option 1: joystick + buttons -- complete
-//		--Option 2: tilt to move, tap to jump, swipe to attack
-//		--Option 3: buttonless -- complete
-//			-recode buttonless controls to be neater/simpler
-//				--touch.x far enough to side to move
-//				--swipe from character x to attack
-//				--tap near character to jump
 //	--ranged weapons: swipe hold to continue to fire??
 //-create unity account for common silk studios so apk can be >> com.CommonSilkStudios.SwordSwipe instead of containing my name
 
@@ -191,9 +183,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		int currMissionIndex = currMissionTransform.GetSiblingIndex(); //get sibling index -- 0
 
 		if ((currMissionIndex + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
+			//check to see if mission prefab exists
 			currChapterTransform.GetChild(currMissionIndex + 1).Find("Lock").gameObject.SetActive(false); //remove lock from next mission
 		} else { //there is no other mission in the current chapter, check for next chapter
-			int chapter = int.Parse((missionInfo[0].Split(' '))[1]); //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
+			int chapter = int.Parse((missionInfo[0].Split(' '))[1]) + 1; //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
 
 			if (chapter < campaignTabsParent.childCount) { //if there is a next chapter {
 				Toggle tab = campaignTabsParent.GetChild(chapter).GetComponent<Toggle>(); //get tab for next chapter (desired chapter - 1)
