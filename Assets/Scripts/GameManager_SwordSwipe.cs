@@ -452,7 +452,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			
 			FinalizeCurrencyEarned();
 		} else { //player did not complete a single wave
-			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
+			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Survival streak reset to 0";
 			currSurvivalStreak = 0; //reset survival streak
 		}
 
@@ -460,10 +460,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		Time.timeScale = 0f; //freeze game
 		DataPersistence.Save (); //save the game no matter what
 		IncrementAdRoundCounter(); //display ad when necessary
-	}
-
-	public void ExitToDesktop () {
-		Application.Quit ();
 	}
 
 	public void FailCurrentCampaignMission() {
@@ -671,6 +667,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		} else { //item type will equal the weapon specialization
 			SelectWeapon (purchase_selectedItemName);
 		}
+	}
+
+	public void QuitApplication() {
+		Application.Quit();
 	}
 
 	private void RecordItemsObtainedByPlayer(ref List<string> list, bool onlySingleAcquirance, bool rewardCurrency) {
@@ -1185,7 +1185,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 	
 	private void UpdateSurvivalCompleteText() {
-		displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + CurrencyEarnedText() + "\n+1 survival streak (" + currSurvivalStreak + ")"; //inform the player how much they earned
+		if (currSurvivalSpawner.ContinuousWavesEnabled)
+			displayedSurvivalWaveInfo.text = currSurvivalSpawner.NumberOfWavesCompleted + " waves completed!\n\n+" + CurrencyEarnedText();
+		else
+			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + CurrencyEarnedText() + "\n+1 survival streak (" + currSurvivalStreak + ")"; //inform the player how much they earned
 
 		if (numOfRoundsSinceLastAd == 0 && !ad_rewards_given) {
 			displayedSurvivalWaveInfo.text += "\n\nWatch an ad using the button below to earn +25% more rewards!";

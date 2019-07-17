@@ -38061,8 +38061,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Defeat all of the enemies that spawn to clear a wave. Clear multiple waves
-    in a row to receive greater rewards. Different enemies will appear as you progress.
+  m_Text: Survive waves of enemies as long as possible. Survive consecutive waves
+    for greater rewards.
 --- !u!222 &1530888735
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -39368,7 +39368,7 @@ CanvasGroup:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1572685104}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 1
   m_Interactable: 0
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
