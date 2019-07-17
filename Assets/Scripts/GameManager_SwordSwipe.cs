@@ -114,6 +114,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private List<string> selectedOutfit_weaponSpecializations;
 	private Text currencyText_Survival;
 	private Text currencyText_Unlocks;
+	private string selectedCampaignMissionObjective;
+	private TextFade objectiveText;
 	private bool getDefaultPlayerSpawnLocation;
 	private float playTime;
 	private float numOfRoundsSinceLastAd; //tracks how many missions/survival waves a player has played since the last 'forced' ad
@@ -320,6 +322,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		missionReportParent.gameObject.SetActive (true);
 	}
 
+	public void DisplayObjective (string Title, string Body) {
+		objectiveText.Display(Title, Body);
+	}
+
 	public void EndSurvivalWave(string waveInfo) {
 		currGameState = GameState.Menu; //change the state
 
@@ -353,30 +359,30 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			}
 
 			if (currSurvivalSpawner.CurrentWave < 25) //easier waves only give +1
-				currencyEarned++;
-			else if (currSurvivalSpawner.CurrentWave < 50) //harder +2
 				currencyEarned += 2;
-			else if (currSurvivalSpawner.CurrentWave < 75) //even harder +3
-				currencyEarned += 3;
-			else if (currSurvivalSpawner.CurrentWave < 100) //just mean +4
+			else if (currSurvivalSpawner.CurrentWave < 50) //harder +2
 				currencyEarned += 4;
+			else if (currSurvivalSpawner.CurrentWave < 75) //even harder +3
+				currencyEarned += 8;
+			else if (currSurvivalSpawner.CurrentWave < 100) //just mean +4
+				currencyEarned += 16;
 			else //ludicrous +5
-				currencyEarned += 5;
+				currencyEarned += 32;
 
 			currSurvivalStreak++; //increase their survival streak
 
 			if (currSurvivalStreak > 5) //bonuses for surviving multiple waves in a row
-				currencyEarned += 10;
+				currencyEarned += 20;
 			else if (currSurvivalStreak > 10)
-				currencyEarned += 25;
+				currencyEarned += 40;
 			else if (currSurvivalStreak > 20)
-				currencyEarned += 50;
+				currencyEarned += 80;
 			else if (currSurvivalStreak > 30)
-				currencyEarned += 100;
+				currencyEarned += 160;
 			else if (currSurvivalStreak > 40)
-				currencyEarned += 200;
+				currencyEarned += 240;
 			else if (currSurvivalStreak > 50)
-				currencyEarned += 400;
+				currencyEarned += 320;
 
 			
 
@@ -569,6 +575,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		loadingScreen.raycastTarget = false;
 
 		currGameState = nextGameState;
+
+		if (currGameMode == GameMode.Survival) {
+			DisplayObjective("Survival Wave " + currSurvivalSpawner.CurrentWave.ToString(), "Defeat all enemies to advance!");
+		}
 	}
 
 	public void PauseGame() {
@@ -727,15 +737,16 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		DataPersistence.SavePlayerPrefs ();
 	}
 
-	public void SelectCampaignMission(Transform buttonWithLockAsChild) {
-		Transform lockChild = buttonWithLockAsChild.Find("Lock"); //get the lock
+	public void SelectCampaignMission(Transform CampaignMissionButton) {
+		Transform lockChild = CampaignMissionButton.Find("Lock"); //get the lock
 
 		if (lockChild.gameObject.activeSelf) { //if the lock is active
 			//player is unable to play the level -- inform them they cannot play?
 			return;
 		}
 		getDefaultPlayerSpawnLocation = true; //ensure we get the default spawn location for the level
-		selectedCampaignMission = buttonWithLockAsChild.name; //set this as the selected mission
+		selectedCampaignMission = CampaignMissionButton.name; //set this as the selected mission
+		selectedCampaignMissionObjective = CampaignMissionButton.Find("Campaign Mission Objective").GetComponent<Text>().text;
 		StartCoroutine (LoadLevel ()); //load the level
 	}
 
@@ -996,6 +1007,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			currencyText_Survival = GameObject.Find("Survival Currency Text").GetComponent<Text>();
 			currencyText_Unlocks = GameObject.Find("Unlocks Currency Text").GetComponent<Text>();
 
+			objectiveText = GameObject.Find("Objective Text").GetComponent<TextFade>();
+
 			FinalizeCurrencyEarned();
 
 			currGameState = GameState.Menu;
@@ -1051,6 +1064,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		if (completeMission) {
 			CompleteCurrentCampaignMission (); //mark mission as complete
+		} else if (c.gameObject.name.ToLower().Contains("start")) {
+			DisplayObjective(selectedCampaignMission.Replace("_", ": "), selectedCampaignMissionObjective);
 		}
 	}
 

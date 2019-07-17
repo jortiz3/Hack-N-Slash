@@ -76,8 +76,9 @@ public class SurvivalSpawner : MonoBehaviour {
 				}
 			} else if (Character.numOfEnemies < 1) { //if the user has slain all the enemies
 				if (continuousWavesEnabled) {
-					StartWave(currentWave + 2); //+2 because the number is decremented in startwave()
+					StartWave(CurrentWave + 1);
 					numWavesCompleted++;
+					GameManager_SwordSwipe.currGameManager.DisplayObjective("Survival Wave " + CurrentWave, " ");
 				} else {
 					GameManager_SwordSwipe.currGameManager.EndSurvivalWave("survived");
 				}
