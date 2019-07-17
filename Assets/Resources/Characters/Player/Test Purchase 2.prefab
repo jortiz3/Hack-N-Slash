@@ -248,8 +248,8 @@ MonoBehaviour:
   - One-handed
   infiniteRespawn: 0
   numOfRespawnsRemaining: 0
-  unlock_cost: 0
-  unlock_challenge: Ant Slayer
+  unlock_cost: 5
+  unlock_challenge: 
 --- !u!212 &212873319901503568
 SpriteRenderer:
   m_ObjectHideFlags: 1

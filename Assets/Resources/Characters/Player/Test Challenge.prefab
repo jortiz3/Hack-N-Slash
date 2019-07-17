@@ -9,49 +9,50 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1395579659105034}
+  m_RootGameObject: {fileID: 1759543962787958}
   m_IsPrefabAsset: 1
---- !u!1 &1395579659105034
+--- !u!1 &1759543962787958
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4540334396353096}
-  - component: {fileID: 212493211043145594}
-  - component: {fileID: 95850728304223392}
-  - component: {fileID: 61390389161451976}
-  - component: {fileID: 50559100408388104}
-  - component: {fileID: 114074031054987582}
-  - component: {fileID: 82926358681136404}
+  - component: {fileID: 4928315947135410}
+  - component: {fileID: 114301917136869682}
+  - component: {fileID: 212873319901503568}
+  - component: {fileID: 95016944746478822}
+  - component: {fileID: 50344658916407490}
+  - component: {fileID: 70424295315493298}
+  - component: {fileID: 61531832395576656}
+  - component: {fileID: 82939119325614780}
   m_Layer: 8
-  m_Name: Ball Slinger
+  m_Name: Test Challenge
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4540334396353096
+--- !u!4 &4928315947135410
 Transform:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.11, y: 0.42, z: 91.313934}
-  m_LocalScale: {x: 0.72996455, y: 0.72996455, z: 0.014599292}
+  m_LocalScale: {x: 0.73, y: 0.73, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &50559100408388104
+--- !u!50 &50344658916407490
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -65,19 +66,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!61 &61390389161451976
+--- !u!61 &61531832395576656
 BoxCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -88,14 +89,29 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.5, y: 1}
+  m_Size: {x: 0.5, y: 0.75}
   m_EdgeRadius: 0
---- !u!82 &82926358681136404
+--- !u!70 &70424295315493298
+CapsuleCollider2D:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1759543962787958}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.25}
+  m_Size: {x: 0.5, y: 0.5}
+  m_Direction: 0
+--- !u!82 &82939119325614780
 AudioSource:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
@@ -185,13 +201,13 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!95 &95850728304223392
+--- !u!95 &95016944746478822
 Animator:
   serializedVersion: 3
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: cce605709c203f147b707eb4e671967d, type: 2}
@@ -203,12 +219,12 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &114074031054987582
+--- !u!114 &114301917136869682
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 612cef41e8727a149841720a35afd517, type: 3}
@@ -216,8 +232,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   collider_upperbody: {fileID: 0}
   collider_lowerbody: {fileID: 0}
-  moveSpeed: 3
-  maxhp: 25
+  moveSpeed: 2.2
+  maxhp: 15
   baseAttackDamage: 5
   baseAttackForce: 25
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
@@ -227,19 +243,19 @@ MonoBehaviour:
   soundEffect_movement: []
   soundEffect_jump: {fileID: 0}
   soundEffect_impact: {fileID: 0}
-  defaultWeapon: Ball Sword
+  defaultWeapon: Test Dagger
   weaponSpecialization:
-  - Unique_Ball Sword
+  - One-handed
   infiniteRespawn: 0
-  numOfRespawnsRemaining: 3
+  numOfRespawnsRemaining: 0
   unlock_cost: 0
-  unlock_challenge: 
---- !u!212 &212493211043145594
+  unlock_challenge: Ant Slayer
+--- !u!212 &212873319901503568
 SpriteRenderer:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1395579659105034}
+  m_GameObject: {fileID: 1759543962787958}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -270,7 +286,7 @@ SpriteRenderer:
   m_SortingLayer: 2
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300010, guid: dc30c2f99e17bb041be48e4aac6e3ace, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9810008, g: 0.3215686, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

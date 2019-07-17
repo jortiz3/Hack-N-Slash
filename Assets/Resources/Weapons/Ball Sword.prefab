@@ -469,8 +469,9 @@ MonoBehaviour:
   hitboxEnableRanges: []
   hitboxOffsetLeft: {x: 0, y: 0}
   hitboxOffsetRight: {x: 0, y: 0}
-  unlockCost: 0
-  specialization: Mixed
+  unlock_cost: 0
+  unlock_challenge: 
+  specialization: Unique
   soundEffect_attack: {fileID: 8300000, guid: 41528a7f4be6af746b486cb4b22b8777, type: 3}
 --- !u!114 &114489502292599336
 MonoBehaviour:
@@ -598,7 +599,7 @@ SpriteRenderer:
   m_SortingLayer: 2
   m_SortingOrder: 50
   m_Sprite: {fileID: 21300004, guid: 705c4efe92e05044f863e973ba0c492c, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.16827083, g: 1, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

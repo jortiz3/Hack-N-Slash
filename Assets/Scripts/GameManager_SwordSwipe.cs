@@ -434,11 +434,14 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void HideNonRelevantWeaponUnlocks() {
-		foreach (Transform WeaponSpecialization in unlocks_weaponsParent) {
-			if (selectedOutfit_weaponSpecializations.Contains(WeaponSpecialization.name)) {
-				WeaponSpecialization.gameObject.SetActive(true);
-			} else {
-				WeaponSpecialization.gameObject.SetActive(false);
+		foreach (Transform unlocks_weaponSpec in unlocks_weaponsParent) {
+			foreach (string weaponSpec in selectedOutfit_weaponSpecializations) {
+				if (weaponSpec.Contains(unlocks_weaponSpec.name)) {
+					unlocks_weaponSpec.gameObject.SetActive(true);
+				}
+				else {
+					unlocks_weaponSpec.gameObject.SetActive(false);
+				}
 			}
 		}
 		ResizeHorizontalLayoutGroup(unlocks_weaponsParent.GetComponent<RectTransform>());
@@ -596,13 +599,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		}
 	}
 
-	public void PurchaseSelectedItem() {
-		if (currency < purchase_selectedItemCost) { //if the player does not have enough money, return
-			return;
-		}
-		
+	public void PurchaseSelectedItem() { //change to return string feedback at some point
 		UnlockItem (purchase_selectedItemName, false); //unlock the item
-		currency -= purchase_selectedItemCost; //update money
+		if (purchase_selectedItemCost > 0)
+			currency -= purchase_selectedItemCost; //update money
 		DataPersistence.Save (); //save the changes
 
 		if (purchase_selectedItemType.Equals ("Outfit")) {
@@ -765,19 +765,25 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			purchase_selectedItemChallenge = p.Unlock_Challenge;
 			purchase_selectedItemColor = p.SpriteColor;
 
-			if (purchase_selectedItemCost > 0) { //if the outfit is for sale
-				textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
-				displayPurchaseConfirmationButton_Outfit.gameObject.SetActive(true); //display the unlock button
+			bool interactable = true;
 
-				if (currency < purchase_selectedItemCost) {
-					displayPurchaseConfirmationButton_Outfit.interactable = false;
-				} else {
-					displayPurchaseConfirmationButton_Outfit.interactable = true;
-				}
-			} else { //outfit is only available after completing a challenge
+			if (purchase_selectedItemChallenge.Length > 0) {//outfit is only available after completing a challenge
 				textToDisplay += "\nChallenge: " + purchase_selectedItemChallenge; //display which challenge must be completed
+
+				if (!challenges.Contains(purchase_selectedItemChallenge)) {
+					interactable = false;
+				}
+			}
+			if (purchase_selectedItemCost > -1) { //if the outfit is for sale
+				textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
+				
+				if (currency < purchase_selectedItemCost) {
+					interactable = false;
+				}
 			}
 			
+			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive(true); //display the unlock button
+			displayPurchaseConfirmationButton_Outfit.interactable = interactable; //set whether it is interactable or not
 		}
 		p.Die (); //destroy the player we created temporarily
 
@@ -789,16 +795,19 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		displayedSelectedWeaponInfo.text = WeaponName + "\nDamage: " + w.Damage + "\nType: " + w.Specialization; //update info
 
 		if (unlocks.Contains (WeaponName)) { // if the weapon is unlocked
-			if (selectedOutfit_weaponSpecializations.Contains (w.Specialization)) { //if the weapon can be used with the current outfit
-				displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
-				displayPurchaseConfirmationButton_Weapon.gameObject.SetActive (false); //hide purchase/unlock button
+			for (int i = 0; i < selectedOutfit_weaponSpecializations.Count; i++) { //go thru all weapon specs
+				if (selectedOutfit_weaponSpecializations[i].Contains(w.Specialization)) { //if the weapon can be used with the current outfit
+					displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
+					displayPurchaseConfirmationButton_Weapon.gameObject.SetActive(false); //hide purchase/unlock button
 
-				unlocks_weaponsParent.Find (selectedWeaponSpecialization).Find (selectedWeapon).Find ("Checkmark").gameObject.SetActive (false); //hide checkmark from previously selected weapon
-				unlocks_weaponsParent.Find (w.Specialization).Find (WeaponName).Find ("Checkmark").gameObject.SetActive (true); //show the checkmark for currently selected weapon
-				selectedWeapon = WeaponName; //update the selected weapon
-				selectedWeaponSpecialization = w.Specialization;
-			} else {
-				displayedSelectedWeaponInfo.text += "\nWeapon cannot be used with the current outfit.";
+					unlocks_weaponsParent.Find(selectedWeaponSpecialization).Find(selectedWeapon).Find("Checkmark").gameObject.SetActive(false); //hide checkmark from previously selected weapon
+					unlocks_weaponsParent.Find(w.Specialization).Find(WeaponName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected weapon
+					selectedWeapon = WeaponName; //update the selected weapon
+					selectedWeaponSpecialization = w.Specialization;
+				}
+				else {
+					displayedSelectedWeaponInfo.text += "\nThis weapon cannot be used with the current outfit.";
+				}
 			}
 		} else { //weapon not unlocked
 			purchase_selectedItemName = WeaponName;
@@ -807,7 +816,11 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			purchase_selectedItemChallenge = w.Unlock_Challenge;
 			purchase_selectedItemColor = w.SpriteColor;
 
-			if (purchase_selectedItemCost > 0) {
+
+			if (purchase_selectedItemChallenge.Length > 0) {
+				displayedSelectedWeaponInfo.text += "\nChallenge needed:" + purchase_selectedItemChallenge;
+			}
+			if (purchase_selectedItemCost > -1) {
 				//displayedSelectedWeaponInfo.color = Color.red; //inform the player visually the item is locked
 				displayedSelectedWeaponInfo.text += "\nCost: " + purchase_selectedItemCost;
 				displayPurchaseConfirmationButton_Weapon.gameObject.SetActive(true); //display purchase/unlock button
@@ -817,8 +830,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				} else {
 					displayPurchaseConfirmationButton_Weapon.interactable = true;
 				}
-			} else {
-				displayedSelectedWeaponInfo.text += "\nChallenge to unlock:" + purchase_selectedItemChallenge;
 			}
 			
 		}
@@ -1046,7 +1057,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		SoundEnabled = UIToggle.isOn; //enable/disable the sound using the toggle on the screen
 	}
 
-	public void UnlockItem(string itemName, bool unlockedByChallenge) {
+	public void UnlockItem(string itemName, bool colorGrabNeeded) {
 		Transform temp = unlocks_outfitsParent.Find (itemName); //find the outfit
 		bool unlockedAnOutfit = true;
 		if (temp == null) { //if it wasn't found, it was a weapon
@@ -1066,16 +1077,21 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		}
 
 		Color tempColor = purchase_selectedItemColor; //by default, player will be making purchases more often
-		if (unlockedByChallenge) { //if player completed challenge to unlock item, we will have more work to do
-			if (unlockedAnOutfit) { //for outfits
-				Player p = (Instantiate(Resources.Load("Characters/Player/" + itemName)) as GameObject).GetComponent<Player>(); //load the player
+		if (unlockedAnOutfit) { //for outfits
+			Player p = (Instantiate(Resources.Load("Characters/Player/" + itemName)) as GameObject).GetComponent<Player>(); //load the player
+
+			if (colorGrabNeeded)
 				tempColor = p.SpriteColor; //get the color from player
-				Destroy(p.gameObject); //destroy the clone
-			} else {
-				Weapon w = (Instantiate(Resources.Load("Weapons/" + itemName)) as GameObject).GetComponent<Weapon>(); //load the weapon
-				tempColor = w.SpriteColor; //get the color from weapon
-				Destroy(w.gameObject); //destroy the clone
+
+			if (!unlocks.Contains(p.DefaultWeapon.ToString())) { //check to see if the default weapon is unlocked already
+				UnlockItem(p.DefaultWeapon.ToString(), true); //automatically unlock the default weapon if it isn't already
 			}
+			
+			Destroy(p.gameObject); //destroy the clone
+		} else if (colorGrabNeeded) { //for weapons if unlocked via challenge -- color not automatically found
+			Weapon w = (Instantiate(Resources.Load("Weapons/" + itemName)) as GameObject).GetComponent<Weapon>(); //load the weapon
+			tempColor = w.SpriteColor; //get the color from weapon
+			Destroy(w.gameObject); //destroy the clone
 		}
 
 		temp.Find("Sprite").GetComponent<Image>().color = tempColor;
