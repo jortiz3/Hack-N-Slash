@@ -80,7 +80,7 @@ public class SurvivalSpawner : MonoBehaviour {
 					numWavesCompleted++;
 					GameManager_SwordSwipe.currGameManager.DisplayObjective("Survival Wave " + CurrentWave, " ");
 				} else {
-					GameManager_SwordSwipe.currGameManager.EndSurvivalWave("survived");
+					GameManager_SwordSwipe.currGameManager.EndSurvivalWave("Intermittent");
 				}
 			}
 		}

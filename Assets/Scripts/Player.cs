@@ -43,7 +43,7 @@ public class Player : Character {
 					GameManager_SwordSwipe.currGameManager.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("died"); //fail survival
+					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("Player Death");
 					break;
 				}
 			}

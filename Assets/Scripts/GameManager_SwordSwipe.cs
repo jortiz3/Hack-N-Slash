@@ -326,73 +326,124 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		objectiveText.Display(Title, Body);
 	}
 
-	public void EndSurvivalWave(string waveInfo) {
+	public void EndSurvivalWave(string endReason) {
 		currGameState = GameState.Menu; //change the state
 
-		if (waveInfo.Equals ("survived")) {
-			if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
-				selectedSurvivalWave++; //encourage them to play the next one
+		int currentWave = currSurvivalSpawner.CurrentWave; //if player survived -- intermittent mode
+		if (endReason.Equals("Player Death")) { //player died, so previous wave was last completed wave
+			currentWave = currSurvivalSpawner.PreviousWave;
+		}
+
+		if (currSurvivalSpawner.NumberOfWavesCompleted > 0) {
+			if (selectedSurvivalWave + currSurvivalSpawner.NumberOfWavesCompleted < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
+				selectedSurvivalWave += currSurvivalSpawner.NumberOfWavesCompleted; //encourage them to play the next wave
+			else //already surpassed max wave
+				selectedSurvivalWave = currSurvivalSpawner.NumberOfWaves - 1; //set to last wave
 
 			currencyEarned = 0; //track how much currency we earned
-			if (highestSurvivalWave == currSurvivalSpawner.CurrentWave) { //player completed the next available wave
-				currencyEarned++; //1 currency for completing for the first time
 
-				if (currSurvivalSpawner.CurrentWave != 0) {
-					if (currSurvivalSpawner.CurrentWave % 25 == 0) //first clear of boss wave
+			if (highestSurvivalWave <= currentWave) { //player completed the next available wave
+				if (currentWave != 0) {
+					if (currentWave % 25 == 0) //first clear of boss wave
 						currencyEarned += 25;
-					if (currSurvivalSpawner.CurrentWave % 100 == 0) //first clear of megaboss wave
+					if (currentWave % 100 == 0) //first clear of megaboss wave
 						currencyEarned += 75;
 				}
 
 				if (!difficultyChanged) { //if the player didn't alter the difficulty
 					switch (currDifficulty) {
 					case GameDifficulty.Normal://remained on normal entire wave
-						currencyEarned += 2;
+						currencyEarned += 5;
 						break;
 					case GameDifficulty.Masochist://remained on masochist entire wave
-						currencyEarned += 5;
+						currencyEarned += 10;
 						break;
 					}
 				}
 
-				highestSurvivalWave = currSurvivalSpawner.CurrentWave + 1; //update highest survival wave completed
+				highestSurvivalWave = currentWave + 1; //update highest survival wave completed
+			}
+			
+			int mod_completedWaves = currSurvivalSpawner.NumberOfWavesCompleted; //stores how many waves completed in current bracket -- always 1 if intermittent mode
+
+			if (currSurvivalSpawner.NumberOfWavesCompleted > 25) { //if more than 25 waves were completed
+				currencyEarned += 50; //give max num of rewards for 0-25
+				mod_completedWaves -= 25; //reduce the base -- a.k.a. how many in next bracket (50)
+			}
+			if (currSurvivalSpawner.NumberOfWavesCompleted > 50) {
+				currencyEarned += 100; //give max num of rewards for 25-50
+				mod_completedWaves -= 25;
+			}
+			if (currSurvivalSpawner.NumberOfWavesCompleted > 75) {
+				currencyEarned += 200; //give max num of rewards for 50-75
+				mod_completedWaves -= 25;
+			}
+			if (currSurvivalSpawner.NumberOfWavesCompleted > 100) {
+				currencyEarned += 400; //give max num of rewards for 75-100
+				mod_completedWaves -= 25;
 			}
 
-			if (currSurvivalSpawner.CurrentWave < 25) //easier waves only give +1
-				currencyEarned += 2;
-			else if (currSurvivalSpawner.CurrentWave < 50) //harder +2
-				currencyEarned += 4;
-			else if (currSurvivalSpawner.CurrentWave < 75) //even harder +3
-				currencyEarned += 8;
-			else if (currSurvivalSpawner.CurrentWave < 100) //just mean +4
-				currencyEarned += 16;
-			else //ludicrous +5
-				currencyEarned += 32;
+			if (currentWave < 25) { //give standard rewards based on waves completed
+				currencyEarned += 2 * mod_completedWaves;
+			} else if (currentWave < 50) {
+				currencyEarned += 4 * mod_completedWaves;
+			} else if (currentWave < 75) {
+				currencyEarned += 8 * mod_completedWaves;
+			} else if (currentWave < 100) {
+				currencyEarned += 16 * mod_completedWaves;
+			} else {
+				currencyEarned += 32 * mod_completedWaves;
+			}
 
-			currSurvivalStreak++; //increase their survival streak
+			//give bonuses if the player survived multiple waves in a row
+			if (!currSurvivalSpawner.ContinuousWavesEnabled) { //intermittent mode
+				currSurvivalStreak++; //increase their survival streak
 
-			if (currSurvivalStreak > 5) //bonuses for surviving multiple waves in a row
-				currencyEarned += 20;
-			else if (currSurvivalStreak > 10)
-				currencyEarned += 40;
-			else if (currSurvivalStreak > 20)
-				currencyEarned += 80;
-			else if (currSurvivalStreak > 30)
-				currencyEarned += 160;
-			else if (currSurvivalStreak > 40)
-				currencyEarned += 240;
-			else if (currSurvivalStreak > 50)
-				currencyEarned += 320;
+				if (currSurvivalStreak > 5) //bonuses for surviving multiple waves in a row -- given 1 at a time
+					currencyEarned += 20;
+				else if (currSurvivalStreak > 10)
+					currencyEarned += 40;
+				else if (currSurvivalStreak > 25)
+					currencyEarned += 80;
+				else if (currSurvivalStreak > 50)
+					currencyEarned += 160;
+				else if (currSurvivalStreak > 75)
+					currencyEarned += 240;
+				else if (currSurvivalStreak > 100)
+					currencyEarned += 320;
+			} else { //continuous mode
+				int streak_completedwaves = currSurvivalSpawner.NumberOfWavesCompleted;
 
-			
+				if (streak_completedwaves > 100) { //bonuses given all at once
+					currencyEarned += 320 * (streak_completedwaves - 100);
+					streak_completedwaves -= 25;
+				}
+				if (streak_completedwaves > 75) {
+					currencyEarned += 240 * (streak_completedwaves - 75);
+					streak_completedwaves -= 25;
+				}
+				if (streak_completedwaves > 50) {
+					currencyEarned += 160 * (streak_completedwaves - 50);
+					streak_completedwaves -= 25;
+				}
+				if (streak_completedwaves > 25) {
+					currencyEarned += 80 * (streak_completedwaves - 25);
+					streak_completedwaves -= 15;
+				}
+				if (streak_completedwaves > 10) {
+					currencyEarned += 40 * (streak_completedwaves - 10);
+					streak_completedwaves -= 5;
+				}
+			}
+
 
 			//challenge actions for surviving
 			challengeManager.ClearAllNotifications();
 
 			if (!difficultyChanged)
-				ChallengeActionComplete("Survival_" + currSurvivalSpawner.CurrentWave + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit action with difficulty
+				ChallengeActionComplete("Survival_" + currentWave + "_difficulty:" + (int)currDifficulty + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit action with difficulty
 			else
-				ChallengeActionComplete("Survival_" + currSurvivalSpawner.CurrentWave + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit without difficulty
+				ChallengeActionComplete("Survival_" + currentWave + "_time:" + playTime.ToString() + "_outfit:" + SelectedOutfit + "_weapon:" + SelectedWeapon + "_winstreak:" + currSurvivalStreak); //submit without difficulty
 
 			CompleteAllTemporaryChallenges();
 
@@ -400,7 +451,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			UpdateSurvivalCompleteText(); //show player info from last
 			
 			FinalizeCurrencyEarned();
-		} else if (waveInfo.Equals ("died")) {
+		} else { //player did not complete a single wave
 			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Win streak reset to 0";
 			currSurvivalStreak = 0; //reset survival streak
 		}
