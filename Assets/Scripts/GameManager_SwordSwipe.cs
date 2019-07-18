@@ -114,13 +114,13 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	private bool ad_rewards_given;
 	private bool iap_rewards_given;
 
-	public static string[] Unlocks { get { return unlocks.ToArray (); } }
-	public static string[] Missions { get { return missions.ToArray (); } }
-	public static string[] Items { get { return items.ToArray (); } }
+	public static string[] Unlocks { get { return unlocks.ToArray(); } }
+	public static string[] Missions { get { return missions.ToArray(); } }
+	public static string[] Items { get { return items.ToArray(); } }
 	public static string[] Challenges { get { return challenges.ToArray(); } }
 	public static string[] Extra01 { get { return extra01.ToArray(); } }
 	public static string[] Extra02 { get { return extra02.ToArray(); } }
-	public static string SelectedOutfit { get { return selectedOutfit; }  set { selectedOutfit = value; } }
+	public static string SelectedOutfit { get { return selectedOutfit; } set { selectedOutfit = value; } }
 	public static string SelectedWeapon { get { return selectedWeapon; } set { selectedWeapon = value; } }
 	public static string SelectedWeaponSpecialization { get { return selectedWeaponSpecialization; } set { selectedWeaponSpecialization = value; } }
 	public static string SelectedCampaignMission { get { return selectedCampaignMission; } }
@@ -162,7 +162,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	private void ClearAllCharacters() {
-		Transform temp = GameObject.FindGameObjectWithTag ("Character Parent").transform;
+		Transform temp = GameObject.FindGameObjectWithTag("Character Parent").transform;
 		foreach (Transform child in temp) {
 			child.GetComponent<Character>().Die();
 		}
@@ -183,7 +183,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		int currMissionIndex = currMissionTransform.GetSiblingIndex(); //get sibling index -- 0
 
 		if ((currMissionIndex + 1) < currChapterTransform.childCount) { //if there is another mission within this chapter
-			//check to see if mission prefab exists
+																		//check to see if mission prefab exists
 			currChapterTransform.GetChild(currMissionIndex + 1).Find("Lock").gameObject.SetActive(false); //remove lock from next mission
 		} else { //there is no other mission in the current chapter, check for next chapter
 			int chapter = int.Parse((missionInfo[0].Split(' '))[1]) + 1; //split chapter portion further and put into int -- example: {"Chapter 1", "Mission 1"} -> {"Chapter", "1"} -> 1
@@ -209,7 +209,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		}
 	}
 
-	private void CompleteChallenge (Challenge challenge) {
+	private void CompleteChallenge(Challenge challenge) {
 		challenges.Add(challenge.Name); //store challenge as complete
 		challenge.MarkComplete(); //mark challenge complete
 		challengeManager.DisplayNotification(challenge.Name, challenge.NotificationSprite, challenge.NotificationColor);
@@ -240,10 +240,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		CompleteAllTemporaryChallenges();
 
 		int missionCompleteBonus = 200; //add completion bonus for currency
-		if (missions.Contains (selectedCampaignMission)) { //mission previously completed
+		if (missions.Contains(selectedCampaignMission)) { //mission previously completed
 			missionCompleteBonus = (int)(missionCompleteBonus * 0.05f); //reduce completion bonus
 		} else { //not previously completed
-			CompleteCampaignMission (selectedCampaignMission, true); //record mission as complete
+			CompleteCampaignMission(selectedCampaignMission, true); //record mission as complete
 		}
 		currencyEarned += missionCompleteBonus; //add mission complete bonus
 
@@ -252,12 +252,12 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		StartCampaign(); //display campaign screen
 		IncrementAdRoundCounter(); //display ad button when necessary
-		DisplayMissionReportScreen (true); //show the mission report
+		DisplayMissionReportScreen(true); //show the mission report
 		DataPersistence.Save(); //save the game
-		Time.timeScale = 0f; //pause the game
+								//Time.timeScale = 0f; //pause the game
 	}
 
-	public void CurrencyEarned (int amount) { //to be used by objects within missions -- once player obtains the object for the first time
+	public void CurrencyEarned(int amount) { //to be used by objects within missions -- once player obtains the object for the first time
 		currencyEarned += amount; //add the amount the object is worth
 
 		if (currGameState != GameState.Active) {
@@ -288,13 +288,13 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			selectedSurvivalWave = 1; //reset
 		}
 
-		UpdateSurvivalWaveText (); //update display text
+		UpdateSurvivalWaveText(); //update display text
 	}
 
 	private void DisplayMissionReportScreen(bool missionSuccessful) {
-		Text result = missionReportParent.Find ("Result").GetComponent<Text> ();
-		Text info = missionReportParent.Find ("Info").GetComponent<Text> ();
-		missionReportParent.Find ("Mission Report Retry Button").gameObject.SetActive (!missionSuccessful);
+		Text result = missionReportParent.Find("Result").GetComponent<Text>();
+		Text info = missionReportParent.Find("Info").GetComponent<Text>();
+		missionReportParent.Find("Mission Report Retry Button").gameObject.SetActive(!missionSuccessful);
 
 		if (missionSuccessful) {
 			result.text = "Mission Complete!";
@@ -312,10 +312,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			info.text = "Mission Rating: F\nCurrency Earned: " + CurrencyEarnedText() + "\nTotal currency: " + currency;
 		}
 
-		missionReportParent.gameObject.SetActive (true);
+		missionReportParent.gameObject.SetActive(true);
 	}
 
-	public void DisplayObjective (string Title, string Body) {
+	public void DisplayObjective(string Title, string Body) {
 		objectiveText.Display(Title, Body);
 	}
 
@@ -345,18 +345,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 				if (!difficultyChanged) { //if the player didn't alter the difficulty
 					switch (currDifficulty) {
-					case GameDifficulty.Normal://remained on normal entire wave
-						currencyEarned += 5;
-						break;
-					case GameDifficulty.Masochist://remained on masochist entire wave
-						currencyEarned += 10;
-						break;
+						case GameDifficulty.Normal://remained on normal entire wave
+							currencyEarned += 5;
+							break;
+						case GameDifficulty.Masochist://remained on masochist entire wave
+							currencyEarned += 10;
+							break;
 					}
 				}
 
 				highestSurvivalWave = currentWave + 1; //update highest survival wave completed
 			}
-			
+
 			int mod_completedWaves = currSurvivalSpawner.NumberOfWavesCompleted; //stores how many waves completed in current bracket -- always 1 if intermittent mode
 
 			if (currSurvivalSpawner.NumberOfWavesCompleted > 25) { //if more than 25 waves were completed
@@ -440,18 +440,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			CompleteAllTemporaryChallenges();
 
-			UpdateSurvivalWaveText (); //update current wave and warning
+			UpdateSurvivalWaveText(); //update current wave and warning
 			UpdateSurvivalCompleteText(); //show player info from last
-			
+
 			FinalizeCurrencyEarned();
 		} else { //player did not complete a single wave
 			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Survival streak reset to 0";
 			currSurvivalStreak = 0; //reset survival streak
 		}
 
-		menu.ChangeState ("Survival");
-		Time.timeScale = 0f; //freeze game
-		DataPersistence.Save (); //save the game no matter what
+		menu.ChangeState("Survival");
+		//Time.timeScale = 0f; //freeze game
+		DataPersistence.Save(); //save the game no matter what
 		IncrementAdRoundCounter(); //display ad when necessary
 	}
 
@@ -459,8 +459,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		temporaryChallenges.Clear(); //clear challenges completed prior to reaching a checkpoint
 		currencyEarned = 0;
 		StartCampaign(); //display campaign screen
-		DisplayMissionReportScreen (false); //show the mission report
-		Time.timeScale = 0f;
+		DisplayMissionReportScreen(false); //show the mission report
+										   //Time.timeScale = 0f;
 		IncrementAdRoundCounter(); //display an ad when necessary
 	}
 
@@ -484,8 +484,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			foreach (string weaponSpec in selectedOutfit_weaponSpecializations) {
 				if (weaponSpec.Contains(unlocks_weaponSpec.name)) {
 					unlocks_weaponSpec.gameObject.SetActive(true);
-				}
-				else {
+				} else {
 					unlocks_weaponSpec.gameObject.SetActive(false);
 				}
 			}
@@ -502,7 +501,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			}
 
 			if (numOfRoundsSinceLastAd >= 3) { //if player played enough rounds
-				//show opt-in button for ads/extra rewards
+											   //show opt-in button for ads/extra rewards
 				if (currGameMode == GameMode.Campaign) {
 					adManager.ShowButton(true);
 				} else {
@@ -520,11 +519,11 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			selectedSurvivalWave++;
 		}
 
-		UpdateSurvivalWaveText ();
+		UpdateSurvivalWaveText();
 	}
 
-	private IEnumerator LoadLevel () {
-		menu.ChangeState ("");
+	private IEnumerator LoadLevel() {
+		menu.ChangeState("");
 		loadingScreen.color = Color.white; //display load screen
 		loadingScreen.raycastTarget = true;
 		currGameState = GameState.Loading;
@@ -534,9 +533,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		iap_rewards_given = false;
 		ad_rewards_given = false;
 
-		ClearAllCharacters (); //clear all remaining enemies
+		ClearAllCharacters(); //clear all remaining enemies
 
-		bool backgroundIsMissing = bgParent.childCount > 0 ? !bgParent.GetChild (0).tag.Equals ("Level") : true;
+		bool backgroundIsMissing = bgParent.childCount > 0 ? !bgParent.GetChild(0).tag.Equals("Level") : true;
 		bool bgNeedsToBeInstantiated = false;
 		string bgFilePath;
 		string bgmFilePath;
@@ -544,9 +543,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		if (currGameMode == GameMode.Survival) {
 			bgFilePath = "Survival_" + ((selectedSurvivalWave - 1) / 25);
-				
-			if (backgroundIsMissing || !bgParent.GetChild (0).name.Contains (bgFilePath) || //background is not what it needs to be
-				(selectedSurvivalWave - 1) / 25 !=  currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
+
+			if (backgroundIsMissing || !bgParent.GetChild(0).name.Contains(bgFilePath) || //background is not what it needs to be
+				(selectedSurvivalWave - 1) / 25 != currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
 				bgNeedsToBeInstantiated = true;
 			}
 
@@ -557,7 +556,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			bgFilePath = "Levels/" + bgFilePath;
 
-			currSurvivalSpawner.StartWave (selectedSurvivalWave);
+			currSurvivalSpawner.StartWave(selectedSurvivalWave);
 			nextGameState = GameState.Active;
 		} else {
 			bgFilePath = "Levels/" + selectedCampaignMission;
@@ -568,24 +567,24 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		if (bgNeedsToBeInstantiated) {
 			if (!backgroundIsMissing) {
-				Destroy (bgParent.GetChild (0).gameObject); //destroy current background
+				Destroy(bgParent.GetChild(0).gameObject); //destroy current background
 			}
 
-			GameObject.Instantiate (Resources.Load (bgFilePath), bgParent);//instantiate background
-			bgParent.GetChild (bgParent.childCount - 1).SetAsFirstSibling (); //set the background as the first child
+			GameObject.Instantiate(Resources.Load(bgFilePath), bgParent);//instantiate background
+			bgParent.GetChild(bgParent.childCount - 1).SetAsFirstSibling(); //set the background as the first child
 		}
 
 		bool loadItems = false;
 		if (getDefaultPlayerSpawnLocation) { //player is starting a new level or is starting a level over -- we need to get the original start position for level
-			currPlayerSpawnLocation = bgParent.GetChild (0).Find ("Player_Spawn_Loc").position; //get the location from the level
-			checkpointItems.Clear (); //reset the items the player has collected since the last checkpoint
+			currPlayerSpawnLocation = bgParent.GetChild(0).Find("Player_Spawn_Loc").position; //get the location from the level
+			checkpointItems.Clear(); //reset the items the player has collected since the last checkpoint
 			checkpointChallenges.Clear();
 		} else {
 			loadItems = true;
 		}
 
 		if (nextGameState == GameState.Cutscene) { //if a mission if being loaded
-			PlayCutscene (bgParent.GetChild(0).Find("Cutscenes").Find("Start").GetComponent<Cutscene>()); //play opening cutscene
+			PlayCutscene(bgParent.GetChild(0).Find("Cutscenes").Find("Start").GetComponent<Cutscene>()); //play opening cutscene
 		}
 
 		SpawnPlayer(); //spawn player after we get the location and after the cutscene
@@ -594,12 +593,12 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		if (loadItems) { //player reached a checkpoint and is retrying the level
 			if (checkpointItems.Count > 0) { //see if player previously attained any items
-				Transform itemsParent = bgParent.GetChild (0).Find ("Items"); //get items parent
+				Transform itemsParent = bgParent.GetChild(0).Find("Items"); //get items parent
 				Transform currItem;
 				foreach (string itemName in checkpointItems) { //go through items collected prior to checkpoint
 					currItem = itemsParent.Find((itemName.Split('_'))[2]); //search for transform -- "Chapter [n]_Mission [n]_Item Name"
 					if (currItem != null) { //verify item is in the level after it was loaded
-						currItem.GetComponent<Item>().PickedUpBy (Character.player, false); //add item to current player inventory
+						currItem.GetComponent<Item>().PickedUpBy(Character.player, false); //add item to current player inventory
 					}
 				}
 			}
@@ -608,9 +607,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		playTime = 0f; //reset playtime;
 		Time.timeScale = 1f; //return time to normal -- needs to be normal to wait for seconds
 
-		yield return new WaitForSeconds (1); //timescale needs to be >0 to work
+		yield return new WaitForSeconds(1); //timescale needs to be >0 to work
 
-		loadingScreen.transform.SetAsLastSibling (); //ensure load screen is still the last child (covers everything)
+		loadingScreen.transform.SetAsLastSibling(); //ensure load screen is still the last child (covers everything)
 		loadingScreen.color = Color.clear; //hide load screen
 		loadingScreen.raycastTarget = false;
 
@@ -630,7 +629,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public void PlayCutscene(Cutscene c) {
 		cutsceneParent.gameObject.SetActive(true); //show cutscene parent -- image, subtitles, etc.
 		currCutscene = c;
-		currCutscene.gameObject.SetActive (true); //ensure the cutscene object can update
+		currCutscene.gameObject.SetActive(true); //ensure the cutscene object can update
 		currGameState = GameState.Cutscene; //change gamestate
 		audioManager.StopBackgroundMusic(); //stop bgm
 	}
@@ -650,15 +649,15 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void PurchaseSelectedItem() { //change to return string feedback at some point
-		UnlockItem (purchase_selectedItemName, false); //unlock the item
+		UnlockItem(purchase_selectedItemName, false); //unlock the item
 		if (purchase_selectedItemCost > 0)
 			currency -= purchase_selectedItemCost; //update money
-		DataPersistence.Save (); //save the changes
+		DataPersistence.Save(); //save the changes
 
-		if (purchase_selectedItemType.Equals ("Outfit")) {
-			SelectOutfit (purchase_selectedItemName);
+		if (purchase_selectedItemType.Equals("Outfit")) {
+			SelectOutfit(purchase_selectedItemName);
 		} else { //item type will equal the weapon specialization
-			SelectWeapon (purchase_selectedItemName);
+			SelectWeapon(purchase_selectedItemName);
 		}
 	}
 
@@ -671,8 +670,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		foreach (Item i in Character.player.Inventory) {
 			if (!onlySingleAcquirance || onlySingleAcquirance && i.SingleAcquirance) {
 				itemName = i.ToString();
-				if (!list.Contains (itemName)) {
-					list.Add (itemName);
+				if (!list.Contains(itemName)) {
+					list.Add(itemName);
 
 					if (rewardCurrency && itemName.Contains("Currency")) {
 						currencyEarned += 50;
@@ -683,45 +682,43 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void ReselectBothOutfitAndWeapon() {
-		SelectOutfit (selectedOutfit);
-		SelectWeapon (selectedWeapon);
+		SelectOutfit(selectedOutfit);
+		SelectWeapon(selectedWeapon);
 	}
 
 	public IEnumerator ResizeAllUIElements() {
-		yield return new WaitForEndOfFrame ();
+		yield return new WaitForEndOfFrame();
 
 		//outfits
 		foreach (RectTransform outfit in unlocks_outfitsParent) { //check each child
-			if (unlocks.Contains (outfit.name)) { //see if it has been unlocked
-				outfit.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+			if (unlocks.Contains(outfit.name)) { //see if it has been unlocked
+				outfit.Find("Lock").gameObject.SetActive(false); //hide the lock image
 
-				if (outfit.name.Equals (selectedOutfit)) { //if the child is the selected outfit (and unlocked)
-					outfit.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
-
-					//get weapon specialization
+				if (outfit.name.Equals(selectedOutfit)) { //if the child is the selected outfit (and unlocked)
+					outfit.Find("Checkmark").gameObject.SetActive(true); //show selected checkmark
 				}
 			} else { //outfit not unlocked
-				outfit.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show outfit in black
+				outfit.Find("Sprite").GetComponent<Image>().color = Color.black; //show outfit in black
 			}
-			outfit.sizeDelta = new Vector2 (outfit.rect.height, outfit.rect.height);
+			outfit.sizeDelta = new Vector2(outfit.rect.height, outfit.rect.height);
 		}
-		ResizeHorizontalLayoutGroup (unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
+		ResizeHorizontalLayoutGroup(unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
 
 		//weapons
 		foreach (RectTransform weaponSpecialization in unlocks_weaponsParent) {
 			foreach (RectTransform weapon in weaponSpecialization) {
-				if (unlocks.Contains (weapon.name)) { //see if it has been unlocked
-					weapon.Find ("Lock").gameObject.SetActive (false); //hide the lock image
+				if (unlocks.Contains(weapon.name)) { //see if it has been unlocked
+					weapon.Find("Lock").gameObject.SetActive(false); //hide the lock image
 
-					if (weapon.name.Equals (selectedWeapon)) { //if the child is the selected weapon (and unlocked)
-						weapon.Find ("Checkmark").gameObject.SetActive (true); //show selected checkmark
+					if (weapon.name.Equals(selectedWeapon)) { //if the child is the selected weapon (and unlocked)
+						weapon.Find("Checkmark").gameObject.SetActive(true); //show selected checkmark
 					}
 				} else { //weapon not unlocked
-					weapon.Find ("Sprite").GetComponent<Image> ().color = Color.black; //show weapon in black
+					weapon.Find("Sprite").GetComponent<Image>().color = Color.black; //show weapon in black
 				}
-				weapon.sizeDelta = new Vector2 (weapon.rect.height, weapon.rect.height);
+				weapon.sizeDelta = new Vector2(weapon.rect.height, weapon.rect.height);
 			}
-			ResizeHorizontalLayoutGroup (weaponSpecialization); //ensure each weaponspec has enough space
+			ResizeHorizontalLayoutGroup(weaponSpecialization); //ensure each weaponspec has enough space
 		}
 		HideNonRelevantWeaponUnlocks(); //only show the relevant weapons
 
@@ -738,12 +735,12 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		//campaign missions
 		foreach (Transform chapter in campaignMissionsParent) {
-			ResizeHorizontalLayoutGroup (chapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
+			ResizeHorizontalLayoutGroup(chapter.GetComponent<RectTransform>()); //make sure each chapter has enough scroll space
 		}
-		ResizeHorizontalLayoutGroup (campaignMissionsParent.GetComponent<RectTransform>()); //make sure the viewport has enough scroll space
+		ResizeHorizontalLayoutGroup(campaignMissionsParent.GetComponent<RectTransform>()); //make sure the viewport has enough scroll space
 	}
 
-	public void ResizeHorizontalLayoutGroup (RectTransform parent) {
+	public void ResizeHorizontalLayoutGroup(RectTransform parent) {
 		Vector2 newSizeDelta = Vector2.zero; //start with value of 0
 		float spacing = parent.GetComponent<HorizontalLayoutGroup>().spacing;
 		foreach (RectTransform child in parent) { //go through all children of rect transform
@@ -755,7 +752,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		parent.sizeDelta = newSizeDelta;
 	}
 
-	public void ResizeVerticalLayoutGroup (RectTransform parent) {
+	public void ResizeVerticalLayoutGroup(RectTransform parent) {
 		Vector2 newSizeDelta = Vector2.zero; //start with value of 0
 		float spacing = parent.GetComponent<VerticalLayoutGroup>().spacing;
 		foreach (RectTransform child in parent) { //go through all children of rect transform
@@ -769,39 +766,39 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 	public void RetryCampaignMission() { //player just failed a mission
 		getDefaultPlayerSpawnLocation = false; //if a checkpoint was triggered, then we will start from there
-		StartCoroutine (LoadLevel ());
+		StartCoroutine(LoadLevel());
 	}
 
 	public void ReturnToMainMenu() {
 		currGameState = GameState.Menu;
-		menu.ChangeState ("Main");
+		menu.ChangeState("Main");
 	}
 
 	public void SaveSettings() {
-		DataPersistence.SavePlayerPrefs ();
+		DataPersistence.SavePlayerPrefs();
 	}
 
 	public void SelectCampaignMission(Transform CampaignMissionButton) {
 		Transform lockChild = CampaignMissionButton.Find("Lock"); //get the lock
 
 		if (lockChild.gameObject.activeSelf) { //if the lock is active
-			//player is unable to play the level -- inform them they cannot play?
+											   //player is unable to play the level -- inform them they cannot play?
 			return;
 		}
 		getDefaultPlayerSpawnLocation = true; //ensure we get the default spawn location for the level
 		selectedCampaignMission = CampaignMissionButton.name; //set this as the selected mission
 		selectedCampaignMissionObjective = CampaignMissionButton.Find("Campaign Mission Objective").GetComponent<Text>().text;
-		StartCoroutine (LoadLevel ()); //load the level
+		StartCoroutine(LoadLevel()); //load the level
 	}
 
-	public void SelectOutfit (string OutfitName) {
+	public void SelectOutfit(string OutfitName) {
 		string textToDisplay;
 
-		Player p = (Instantiate (Resources.Load ("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player> (); //spawn prefab to get the info from script
+		Player p = (Instantiate(Resources.Load("Characters/Player/" + OutfitName)) as GameObject).GetComponent<Player>(); //spawn prefab to get the info from script
 		textToDisplay = OutfitName + "\nHP: " + p.MaxHP + "     Move Speed: " + p.MovementSpeed + " m/s"; //set outfit info text
 
-		if (unlocks.Contains (OutfitName)) { //outfit is unlocked
-			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive (false); //hide unlock button
+		if (unlocks.Contains(OutfitName)) { //outfit is unlocked
+			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive(false); //hide unlock button
 
 			if (selectedOutfit_weaponSpecializations == null ||
 				!selectedOutfit_weaponSpecializations.Equals(p.weaponSpecialization)) { //if a different weapon spec
@@ -831,25 +828,25 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			}
 			if (purchase_selectedItemCost > -1) { //if the outfit is for sale
 				textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
-				
+
 				if (currency < purchase_selectedItemCost) {
 					interactable = false;
 				}
 			}
-			
+
 			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive(true); //display the unlock button
 			displayPurchaseConfirmationButton_Outfit.interactable = interactable; //set whether it is interactable or not
 		}
-		p.Die (); //destroy the player we created temporarily
+		p.Die(); //destroy the player we created temporarily
 
 		displayedSelectedOutfitInfo.text = textToDisplay; //update the displayed text
 	}
 
 	public void SelectWeapon(string WeaponName) {
-		Weapon w = (Instantiate (Resources.Load ("Weapons/" + WeaponName)) as GameObject).GetComponent<Weapon> (); //spawn prefab to get the info from script
+		Weapon w = (Instantiate(Resources.Load("Weapons/" + WeaponName)) as GameObject).GetComponent<Weapon>(); //spawn prefab to get the info from script
 		displayedSelectedWeaponInfo.text = WeaponName + "\nDamage: " + w.Damage + "\nType: " + w.Specialization; //update info
 
-		if (unlocks.Contains (WeaponName)) { // if the weapon is unlocked
+		if (unlocks.Contains(WeaponName)) { // if the weapon is unlocked
 			for (int i = 0; i < selectedOutfit_weaponSpecializations.Count; i++) { //go thru all weapon specs
 				if (selectedOutfit_weaponSpecializations[i].Contains(w.Specialization)) { //if the weapon can be used with the current outfit
 					displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
@@ -859,8 +856,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 					unlocks_weaponsParent.Find(w.Specialization).Find(WeaponName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected weapon
 					selectedWeapon = WeaponName; //update the selected weapon
 					selectedWeaponSpecialization = w.Specialization;
-				}
-				else {
+				} else {
 					displayedSelectedWeaponInfo.text += "\nThis weapon cannot be used with the current outfit.";
 				}
 			}
@@ -886,10 +882,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 					displayPurchaseConfirmationButton_Weapon.interactable = true;
 				}
 			}
-			
+
 		}
 
-		Destroy (w.gameObject);
+		Destroy(w.gameObject);
 	}
 
 	public void SetBGM(AudioClip music) {
@@ -897,10 +893,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
-		SetDifficulty (difficulty.value);
+		SetDifficulty(difficulty.value);
 	}
 
-	public void SetDifficulty (int value) {
+	public void SetDifficulty(int value) {
 		currDifficulty = (GameDifficulty)value;
 		difficultyDropdown.value = value;
 		difficultyChanged = true;
@@ -913,78 +909,78 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		} else {
 			selectedSurvivalWave = 1; //if not valid, set to wave 1
 		}
-		
+
 		if (selectedSurvivalWave > highestSurvivalWave + 1)
 			selectedSurvivalWave = highestSurvivalWave + 1;
 		else if (selectedSurvivalWave <= 0)
 			selectedSurvivalWave = 1;
 
-		inputField.text = selectedSurvivalWave.ToString ();
+		inputField.text = selectedSurvivalWave.ToString();
 	}
 
 	public void ShowAllWeaponUnlocks() {
 		foreach (Transform WeaponSpecialization in unlocks_weaponsParent) {
 			if (!WeaponSpecialization.gameObject.activeSelf) {
-				WeaponSpecialization.gameObject.SetActive (true);
+				WeaponSpecialization.gameObject.SetActive(true);
 			}
 		}
-		ResizeHorizontalLayoutGroup (unlocks_weaponsParent.GetComponent<RectTransform> ());
+		ResizeHorizontalLayoutGroup(unlocks_weaponsParent.GetComponent<RectTransform>());
 	}
 
 	public void SkipCurrentCutscene() {
 		if (missions.Contains(selectedCampaignMission) || //if the player has already beaten the current mission
 			(currCutscene.gameObject.name.ToLower().Contains("start") && !getDefaultPlayerSpawnLocation) || //or the player is continuing from a checkpoint and the current cutscene is the start cutscene
 			currCutscene.AlwaysSkippable) { //or the cutscene is always skippable
-			currCutscene.EndCutscene (); //allow them to skip the cutscene
+			currCutscene.EndCutscene(); //allow them to skip the cutscene
 		}
 	}
 
 	private void SpawnPlayer() {
 		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit), currPlayerSpawnLocation, Quaternion.Euler(Vector3.zero));
-		Weapon w = (Instantiate (Resources.Load ("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon> (); //spawn selected weapon
+		Weapon w = (Instantiate(Resources.Load("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon>(); //spawn selected weapon
 		Character.player.Wield(w);
 		currCameraManager.Follow(Character.player.transform);
 	}
 
 	private void SpawnSurvivalSpawner() {
 		if (currSurvivalSpawner != null) {
-			currSurvivalSpawner.gameObject.SetActive (true);
+			currSurvivalSpawner.gameObject.SetActive(true);
 		} else {
-			Instantiate (Resources.Load ("Spawners/SurvivalSpawner"));
+			Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
 		}
 	}
 
-	void Start () {
+	void Start() {
 		if (currGameManager == null) {
 			currGameManager = this;
-			DontDestroyOnLoad (gameObject);
+			DontDestroyOnLoad(gameObject);
 
-			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript> ();
-			bgParent = GameObject.Find ("Level").transform;
-			loadingScreen = menu.transform.GetChild (menu.transform.childCount - 1).GetComponent<Image> ();
-			cutsceneParent = menu.transform.Find ("Cutscene");
+			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript>();
+			bgParent = GameObject.Find("Level").transform;
+			loadingScreen = menu.transform.GetChild(menu.transform.childCount - 1).GetComponent<Image>();
+			cutsceneParent = menu.transform.Find("Cutscene");
 
-			soundToggle = GameObject.Find ("Sound Toggle").GetComponent<Toggle>();
+			soundToggle = GameObject.Find("Sound Toggle").GetComponent<Toggle>();
 			continuousWaveToggle = GameObject.Find("Continuous Wave Toggle").GetComponent<Toggle>();
-			bgmSlider = GameObject.Find ("BGM Slider").GetComponent<Slider> ();
-			bgmSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.07f, 0); //keep the handles somewhat circular
-			sfxSlider = GameObject.Find ("SFX Slider").GetComponent<Slider> ();
-			sfxSlider.handleRect.sizeDelta = new Vector2 (Screen.width * 0.07f, 0);
-			difficultyDropdown = GameObject.Find ("Difficulty Dropdown").GetComponent<Dropdown> ();
+			bgmSlider = GameObject.Find("BGM Slider").GetComponent<Slider>();
+			bgmSlider.handleRect.sizeDelta = new Vector2(Screen.width * 0.07f, 0); //keep the handles somewhat circular
+			sfxSlider = GameObject.Find("SFX Slider").GetComponent<Slider>();
+			sfxSlider.handleRect.sizeDelta = new Vector2(Screen.width * 0.07f, 0);
+			difficultyDropdown = GameObject.Find("Difficulty Dropdown").GetComponent<Dropdown>();
 
-			Vector2 contentSize = new Vector2 (0, Screen.height * 0.1f);
+			Vector2 contentSize = new Vector2(0, Screen.height * 0.1f);
 			difficultyDropdown.template.sizeDelta = contentSize * difficultyDropdown.options.Count;
-			difficultyDropdown.template.GetComponent<ScrollRect> ().content.sizeDelta = contentSize;
-			difficultyDropdown.template.GetComponent<ScrollRect> ().content.GetChild (0).GetComponent<RectTransform> ().sizeDelta = contentSize;
+			difficultyDropdown.template.GetComponent<ScrollRect>().content.sizeDelta = contentSize;
+			difficultyDropdown.template.GetComponent<ScrollRect>().content.GetChild(0).GetComponent<RectTransform>().sizeDelta = contentSize;
 
-			PlayerData loadedData = DataPersistence.Load (); //load player save data
+			PlayerData loadedData = DataPersistence.Load(); //load player save data
 			unlocks = new List<string>();
 			challenges = new List<string>();
 			checkpointChallenges = new List<string>();
 			temporaryChallenges = new List<string>();
-			missions = new List<string> ();
-			items = new List<string> ();
-			checkpointItems = new List<string> ();
+			missions = new List<string>();
+			items = new List<string>();
+			checkpointItems = new List<string>();
 			extra01 = new List<string>();
 			extra02 = new List<string>();
 
@@ -992,21 +988,21 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				currency = loadedData.currency;
 				highestSurvivalWave = loadedData.highestSurvivalWave;
 				currSurvivalStreak = loadedData.survivalStreak;
-				unlocks.AddRange (loadedData.unlocks);
+				unlocks.AddRange(loadedData.unlocks);
 				challenges.AddRange(loadedData.challenges);//challenges
-				missions.AddRange (loadedData.missions);
-				items.AddRange (loadedData.items);
+				missions.AddRange(loadedData.missions);
+				items.AddRange(loadedData.items);
 				extra01.AddRange(loadedData.extra01);
 				extra02.AddRange(loadedData.extra02);
 			} else {
 				highestSurvivalWave = 0;
 				currSurvivalStreak = 0;
 				currency = 0;
-				unlocks.Add ("Stick it to 'em"); //default player
-				unlocks.Add ("Iron Longsword"); //default weapon
+				unlocks.Add("Stick it to 'em"); //default player
+				unlocks.Add("Iron Longsword"); //default weapon
 			}
 
-			SetDifficulty ((int)currDifficulty); //set the current difficulty to loaded/preset value
+			SetDifficulty((int)currDifficulty); //set the current difficulty to loaded/preset value
 			sfxSlider.value = SFXVolume; //adjust sfx bar to loaded/preset value
 			bgmSlider.value = BGMVolume; //adjust bgm bar to loaded/preset value
 			soundToggle.isOn = SoundEnabled; //set soundtoggle
@@ -1021,27 +1017,27 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			challengesParent = GameObject.Find("Challenges Layout Group").transform; //get the transform parent
 			challengesParent.parent.parent.parent.gameObject.SetActive(false);
 
-			displayedSelectedWeaponInfo = GameObject.Find ("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
+			displayedSelectedWeaponInfo = GameObject.Find("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
-			displayPurchaseConfirmationButton_Weapon = GameObject.Find ("Purchase Weapon Button").GetComponent<Button>();
-			displayPurchaseConfirmationButton_Weapon.gameObject.SetActive (false);
+			displayPurchaseConfirmationButton_Weapon = GameObject.Find("Purchase Weapon Button").GetComponent<Button>();
+			displayPurchaseConfirmationButton_Weapon.gameObject.SetActive(false);
 
-			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive (false);
+			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive(false);
 
-			campaignMissionsParent = GameObject.Find ("Missions Layout Group").transform;
-			campaignTabsParent = GameObject.Find ("Campaign Tab Container").transform;
-			missionReportParent = GameObject.Find ("Mission Report").transform;
-			missionReportParent.gameObject.SetActive (false);
+			campaignMissionsParent = GameObject.Find("Missions Layout Group").transform;
+			campaignTabsParent = GameObject.Find("Campaign Tab Container").transform;
+			missionReportParent = GameObject.Find("Mission Report").transform;
+			missionReportParent.gameObject.SetActive(false);
 
-			displayedSurvivalWaveNumber = GameObject.Find ("Selected Wave Number Input Field").GetComponent<InputField> ();
-			displayedSurvivalWaveInfo = GameObject.Find ("Survival Description Text").GetComponent<Text> ();
-			displayedSelectedOutfitInfo = GameObject.Find ("Selected Outfit Text").GetComponent<Text> ();
+			displayedSurvivalWaveNumber = GameObject.Find("Selected Wave Number Input Field").GetComponent<InputField>();
+			displayedSurvivalWaveInfo = GameObject.Find("Survival Description Text").GetComponent<Text>();
+			displayedSelectedOutfitInfo = GameObject.Find("Selected Outfit Text").GetComponent<Text>();
 
-			purchaseConfirmationText = GameObject.Find ("Purchase Confirmation Text").GetComponent<Text>();
-			purchaseConfirmationText.transform.parent.gameObject.SetActive (false);
+			purchaseConfirmationText = GameObject.Find("Purchase Confirmation Text").GetComponent<Text>();
+			purchaseConfirmationText.transform.parent.gameObject.SetActive(false);
 
-			displayPurchaseConfirmationButton_Outfit = GameObject.Find ("Purchase Outfit Button").GetComponent<Button>();
-			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive (false);
+			displayPurchaseConfirmationButton_Outfit = GameObject.Find("Purchase Outfit Button").GetComponent<Button>();
+			displayPurchaseConfirmationButton_Outfit.gameObject.SetActive(false);
 
 			challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
 			adManager = GetComponent<AdvertisementManager>();
@@ -1057,14 +1053,14 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			currGameState = GameState.Menu;
 
-			ReselectBothOutfitAndWeapon ();
-			StartCoroutine (ResizeAllUIElements ());
+			ReselectBothOutfitAndWeapon();
+			StartCoroutine(ResizeAllUIElements());
 
 			foreach (string mission in missions) { //for each loaded mission
-				CompleteCampaignMission (mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
+				CompleteCampaignMission(mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
 			}
 		} else {
-			Destroy (gameObject);
+			Destroy(gameObject);
 		}
 	}
 
@@ -1075,20 +1071,20 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		currGameMode = GameMode.Campaign;
 		currGameState = GameState.Menu;
-		menu.ChangeState ("Campaign");
+		menu.ChangeState("Campaign");
 	}
 
 	public void StartSurvival() {
-		if (SceneManager.GetActiveScene ().name != "Main")
-			SceneManager.LoadScene ("Main");
+		if (SceneManager.GetActiveScene().name != "Main")
+			SceneManager.LoadScene("Main");
 
 		SpawnSurvivalSpawner();
 
 		currSurvivalSpawner.ContinuousWavesEnabled = continuousWaveToggle.isOn;
 		currGameMode = GameMode.Survival;
 		currGameState = GameState.Menu;
-		UpdateSurvivalWaveText ();
-		menu.ChangeState ("Survival");
+		UpdateSurvivalWaveText();
+		menu.ChangeState("Survival");
 	}
 
 	public void StartSurvivalWave() {
@@ -1097,17 +1093,17 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void StopCutscene(Cutscene c) {
-		cutsceneParent.gameObject.SetActive (false); //hide pictures, subtitles, etc.
-		c.gameObject.SetActive (false); //prevent cutscene from updating further
+		cutsceneParent.gameObject.SetActive(false); //hide pictures, subtitles, etc.
+		c.gameObject.SetActive(false); //prevent cutscene from updating further
 		currGameState = GameState.Active; //change gamestate
 		audioManager.StartBackgroundMusic(); // play bgm
 	}
 
-	public void StopCutscene (Cutscene c, bool completeMission) {
-		StopCutscene (c);
+	public void StopCutscene(Cutscene c, bool completeMission) {
+		StopCutscene(c);
 
 		if (completeMission) {
-			CompleteCurrentCampaignMission (); //mark mission as complete
+			CompleteCurrentCampaignMission(); //mark mission as complete
 		} else if (c.gameObject.name.ToLower().Contains("start")) {
 			DisplayObjective(selectedCampaignMission.Replace("_", ": "), selectedCampaignMissionObjective);
 		}
@@ -1122,7 +1118,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void UnlockItem(string itemName, bool colorGrabNeeded) {
-		Transform temp = unlocks_outfitsParent.Find (itemName); //find the outfit
+		Transform temp = unlocks_outfitsParent.Find(itemName); //find the outfit
 		bool unlockedAnOutfit = true;
 		if (temp == null) { //if it wasn't found, it was a weapon
 			for (int i = 0; i < unlocks_weaponsParent.childCount; i++) { //go through all weapon specs
@@ -1150,7 +1146,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			if (!unlocks.Contains(p.DefaultWeapon.ToString())) { //check to see if the default weapon is unlocked already
 				UnlockItem(p.DefaultWeapon.ToString(), true); //automatically unlock the default weapon if it isn't already
 			}
-			
+
 			Destroy(p.gameObject); //destroy the clone
 		} else if (colorGrabNeeded) { //for weapons if unlocked via challenge -- color not automatically found
 			Weapon w = (Instantiate(Resources.Load("Weapons/" + itemName)) as GameObject).GetComponent<Weapon>(); //load the weapon
@@ -1160,7 +1156,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		temp.Find("Sprite").GetComponent<Image>().color = tempColor;
 		temp.Find("Lock").gameObject.SetActive(false);
-		unlocks.Add (itemName);
+		unlocks.Add(itemName);
 	}
 
 	public void UnPauseGame() {
@@ -1174,9 +1170,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	private void UpdateSurvivalWaveText() {
-		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString ();
+		displayedSurvivalWaveNumber.text = selectedSurvivalWave.ToString();
 	}
-	
+
 	private void UpdateSurvivalCompleteText() {
 		if (currSurvivalSpawner.ContinuousWavesEnabled)
 			displayedSurvivalWaveInfo.text = currSurvivalSpawner.NumberOfWavesCompleted + " waves completed!\n\n+" + CurrencyEarnedText();
