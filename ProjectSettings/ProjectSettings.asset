@@ -119,7 +119,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.01
+  bundleVersion: 0.00
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -160,7 +160,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.justinwortiz.SwordSwipe
+    Android: com.commonsilkstudios.SwordSwipe
     Standalone: unity.DefaultCompany.Hack 'N Slash
     Tizen: com.Company.ProductName
     iPhone: com.Company.ProductName
