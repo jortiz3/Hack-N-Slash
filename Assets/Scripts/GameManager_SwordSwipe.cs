@@ -687,8 +687,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public IEnumerator ResizeAllUIElements() {
-		yield return new WaitForEndOfFrame();
-
 		//outfits
 		foreach (RectTransform outfit in unlocks_outfitsParent) { //check each child
 			if (unlocks.Contains(outfit.name)) { //see if it has been unlocked
@@ -700,7 +698,11 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			} else { //outfit not unlocked
 				outfit.Find("Sprite").GetComponent<Image>().color = Color.black; //show outfit in black
 			}
-			outfit.sizeDelta = new Vector2(outfit.rect.height, outfit.rect.height);
+
+			while (outfit.rect.height == 0) { //if the size hasn't been updated yet
+				yield return new WaitForEndOfFrame(); //wait until it does
+			}
+			outfit.sizeDelta = new Vector2(outfit.rect.height, outfit.rect.height); //resize the unlock once ready
 		}
 		ResizeHorizontalLayoutGroup(unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
 
@@ -716,7 +718,12 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				} else { //weapon not unlocked
 					weapon.Find("Sprite").GetComponent<Image>().color = Color.black; //show weapon in black
 				}
-				weapon.sizeDelta = new Vector2(weapon.rect.height, weapon.rect.height);
+
+				/*while (weapon.rect.height == 0) { //doesn't update unless gameobject is active??
+					Debug.Log(weapon.name);
+					yield return new WaitForEndOfFrame(); //wait until it does
+				}*/
+				weapon.sizeDelta = new Vector2(weapon.rect.height, weapon.rect.height); //resize the unlock once ready
 			}
 			ResizeHorizontalLayoutGroup(weaponSpecialization); //ensure each weaponspec has enough space
 		}
@@ -728,6 +735,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			challenge = challengeRectTransform.GetComponent<Challenge>();
 			if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
 				challenge.MarkComplete(); //mark it as complete
+			}
+			while (challengeRectTransform.rect.width == 0) { //if the size hasn't been updated yet
+				yield return new WaitForEndOfFrame(); //wait until it does
 			}
 			challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, Screen.height * 0.4f); //keep same width, adjust height to scale with screen dimensions
 		}
@@ -757,7 +767,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		float spacing = parent.GetComponent<VerticalLayoutGroup>().spacing;
 		foreach (RectTransform child in parent) { //go through all children of rect transform
 			if (child.gameObject.activeSelf) { //if the child is active/shown
-				newSizeDelta.y += child.sizeDelta.y + spacing; //add to the width
+				newSizeDelta.y += child.sizeDelta.y + spacing; //add to the height
 			}
 		}
 
