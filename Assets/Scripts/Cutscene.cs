@@ -9,9 +9,10 @@ public class Cutscene : MonoBehaviour {
 
 	private static Image image; //pointer to the image on the cutscene object we will change -- attached to the cutscene object
 	private static AudioSource narrationAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
-	private static AudioSource soundEffectAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
 	private static Text subtitleText; //pointer to the text on the cutscene we will change -- attached to child of the cutscene object
 
+	[SerializeField, Tooltip("Allows the player to skip the cutscene even if they have never seen it.")]
+	private bool alwaysSkippable;
 	[SerializeField, Tooltip("If true, will complete the mission once the cutscene is complete.")]
 	private bool endMissionOnFinish = false;
 	[SerializeField, Tooltip("If left null, will not spawn anything.")]
@@ -28,6 +29,8 @@ public class Cutscene : MonoBehaviour {
 	private int currNarration; //current narration
 	private float currDisplayTime; //how much time is left for current narration
 	private bool ended;
+
+	public bool AlwaysSkippable { get { return alwaysSkippable; } }
 
 	private void ClearNarrationText() {
 		subtitleText.text = "";
@@ -85,23 +88,27 @@ public class Cutscene : MonoBehaviour {
 
 		if (currNarration < scenes [currScene].SceneNarration.Length) { //if there is another narration for the current scene
 			SetNarrationText();
-			PlayAudio (narrationAudioSource, scenes [currScene].SceneNarration [currNarration].NarrationAudioClip, GameManager_SwordSwipe.BGMVolume);
-			PlayAudio (soundEffectAudioSource, scenes [currScene].SceneNarration [currNarration].SoundEffect, GameManager_SwordSwipe.SFXVolume);
+			PlayNarration (scenes[currScene].SceneNarration[currNarration].NarrationAudioClip);
+			PlaySoundEffect (scenes [currScene].SceneNarration [currNarration].SoundEffect);
 		} else {
 			NextScene (); //go to the next scene
 		}
 	}
 
-	private void PlayAudio (AudioSource aSource, AudioClip aClip, float volume) {
-		if (GameManager_SwordSwipe.SoundEnabled) {
-			if (aClip != null) { //ensure there is a clip
-				if (aSource.isPlaying) //is the narrator currently speaking?
-					aSource.Stop (); //stop the narrator
-				aSource.volume = volume; //ensure the volume is correct
-				aSource.clip = aClip; //change it to the correct clip
-				aSource.Play (); //play the clip
-			}
-		}
+	private void PlayNarration(AudioClip aClip) {
+		if (aClip == null)
+			return;
+		if (narrationAudioSource.isPlaying)
+			narrationAudioSource.Stop();
+		narrationAudioSource.clip = aClip;
+		narrationAudioSource.volume = GameManager_SwordSwipe.BGMVolume;
+		narrationAudioSource.Play();
+	}
+
+	private void PlaySoundEffect (AudioClip aClip) {
+		if(aClip == null)
+			return;
+		AudioManager.PlaySoundEffect(aClip, transform.position, 1f);
 	}
 
 	private void SetNarrationText() {
@@ -116,7 +123,6 @@ public class Cutscene : MonoBehaviour {
 	void Start() {
 		if (narrationAudioSource == null) {
 			narrationAudioSource = GameManager_SwordSwipe.cutsceneParent.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
-			soundEffectAudioSource = GameManager_SwordSwipe.cutsceneParent.Find("Sound Effects").GetComponent<AudioSource>(); //get the narration audio source
 			image = GameManager_SwordSwipe.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
 			subtitleText = GameManager_SwordSwipe.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
@@ -132,6 +138,5 @@ public class Cutscene : MonoBehaviour {
 
 	private void StopAllAudio() {
 		narrationAudioSource.Stop ();
-		soundEffectAudioSource.Stop ();
 	}
 }

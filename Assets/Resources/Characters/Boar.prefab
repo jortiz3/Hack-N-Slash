@@ -248,6 +248,10 @@ MonoBehaviour:
   baseAttackForce: 25
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
   sliderColor_critical: {r: 1, g: 1, b: 1, a: 1}
+  soundEffectDelay_movement: 0.5
+  soundEffect_movement: []
+  soundEffect_jump: {fileID: 0}
+  soundEffect_impact: {fileID: 0}
   attentionSpanRange: {x: 4, y: 5}
   targetIdentifyRate: {x: 3, y: 5}
   isAbleToJump: 0
@@ -280,6 +284,7 @@ MonoBehaviour:
   hitboxOffsetRight: {x: -0.75, y: 0}
   unlockCost: 0
   specialization: 
+  soundEffect_attack: {fileID: 0}
 --- !u!114 &114757687040662220
 MonoBehaviour:
   m_ObjectHideFlags: 1

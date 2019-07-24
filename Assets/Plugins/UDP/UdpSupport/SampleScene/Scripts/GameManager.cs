@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using UDPEditor;
 using UnityEngine.UDP;
 
 public class GameManager : MonoBehaviour
@@ -91,12 +90,12 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            string prodcutId = _dropdown.options[_dropdown.value].text;
+            string productId = _dropdown.options[_dropdown.value].text;
             Debug.Log("Buy button is clicked.");
-            Show("Buying Product: " + prodcutId);
+            Show("Buying Product: " + productId);
             m_consumeOnPurchase = false;
             Debug.Log(_dropdown.options[_dropdown.value].text + " will be bought");
-            StoreService.Purchase(prodcutId, null, "{\"AnyKeyYouWant:\" : \"AnyValueYouWant\"}", purchaseListener);
+            StoreService.Purchase(productId, null, "{\"AnyKeyYouWant:\" : \"AnyValueYouWant\"}", purchaseListener);
         });
 
         GetButton("BuyConsumeButton").onClick.AddListener(() =>
@@ -107,11 +106,11 @@ public class GameManager : MonoBehaviour
                 return;
             }
 
-            string prodcutId = _dropdown.options[_dropdown.value].text;
-            Show("Buying Product: " + prodcutId);
+            string productId = _dropdown.options[_dropdown.value].text;
+            Show("Buying Product: " + productId);
             Debug.Log("Buy&Consume button is clicked.");
             m_consumeOnPurchase = true;
-            StoreService.Purchase(prodcutId, null, "buy and consume developer payload", purchaseListener);
+            StoreService.Purchase(productId, null, "buy and consume developer payload", purchaseListener);
         });
 
         List<string> productIds = new List<string> {Product1, Product2};

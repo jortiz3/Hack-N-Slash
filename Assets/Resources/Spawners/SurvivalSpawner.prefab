@@ -1,21 +1,11 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &100100000
-Prefab:
-  m_ObjectHideFlags: 1
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications: []
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 1955129708521132}
-  m_IsPrefabAsset: 1
 --- !u!1 &1026544167009072
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4377525096065332}
@@ -26,11 +16,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &4377525096065332
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1026544167009072}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 18.5, y: -3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4082128445286486}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1028509556345146
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4163328537133890}
@@ -41,11 +46,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &4163328537133890
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028509556345146}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 14.47, y: -9.06, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4082128445286486}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1361159542425108
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4475004325754442}
@@ -56,11 +76,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &4475004325754442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1361159542425108}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -14.48, y: -9.09, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4082128445286486}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1426113627594736
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4142766065093100}
@@ -71,11 +106,26 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!4 &4142766065093100
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1426113627594736}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -18.5, y: -3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 4082128445286486}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1955129708521132
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4082128445286486}
@@ -89,9 +139,10 @@ GameObject:
   m_IsActive: 1
 --- !u!4 &4082128445286486
 Transform:
-  m_ObjectHideFlags: 1
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1955129708521132}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -104,63 +155,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4142766065093100
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1426113627594736}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -18.5, y: -3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4082128445286486}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4163328537133890
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1028509556345146}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.47, y: -9.06, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4082128445286486}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4377525096065332
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1026544167009072}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 18.5, y: -3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4082128445286486}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &4475004325754442
-Transform:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1361159542425108}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.48, y: -9.09, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4082128445286486}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &114282288934750924
 MonoBehaviour:
-  m_ObjectHideFlags: 1
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1955129708521132}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -168,55 +168,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveList:
-  - waveWarningText: 
-    spawnTimeRange: {x: 2, y: 5}
+  - spawnTimeRange: {x: 2, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 3
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 2, y: 5}
+    - character: {fileID: -8868041024517605845, guid: 15efa2d2756d5504c883cba0f246aada,
+        type: 3}
+      animator: {fileID: 0}
+      quantity: 1
+      currqty: 0
+      spawnLocations:
+      - {fileID: 4142766065093100}
+      - {fileID: 4377525096065332}
+  - spawnTimeRange: {x: 2, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 2, y: 5}
+  - spawnTimeRange: {x: 2, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 7
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: Enemies will spawn rapidly..
-    spawnTimeRange: {x: 2, y: 3}
+  - spawnTimeRange: {x: 2, y: 3}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: A new enemy will appear! Beware!
-    spawnTimeRange: {x: 3, y: 6}
+  - spawnTimeRange: {x: 3, y: 6}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 7
       currqty: 0
@@ -224,19 +227,18 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 3
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
-  - waveWarningText: 
-    spawnTimeRange: {x: 3, y: 5}
+  - spawnTimeRange: {x: 3, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -244,19 +246,18 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 3
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
-  - waveWarningText: 
-    spawnTimeRange: {x: 3, y: 6}
+  - spawnTimeRange: {x: 3, y: 6}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 12
       currqty: 0
@@ -264,19 +265,18 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 6
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
-  - waveWarningText: 
-    spawnTimeRange: {x: 3, y: 5}
+  - spawnTimeRange: {x: 3, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 15
       currqty: 0
@@ -284,19 +284,18 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
-  - waveWarningText: Enemies will spawn rapidly..
-    spawnTimeRange: {x: 3, y: 4}
+  - spawnTimeRange: {x: 3, y: 4}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 15
       currqty: 0
@@ -304,19 +303,18 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
-  - waveWarningText: A new enemy will appear! Beware!
-    spawnTimeRange: {x: 4, y: 7}
+  - spawnTimeRange: {x: 4, y: 7}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -324,27 +322,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -352,87 +349,83 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 15
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: Enemies will spawn rapidly..
-    spawnTimeRange: {x: 3, y: 6}
+  - spawnTimeRange: {x: 3, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: What does the fox say?
-    spawnTimeRange: {x: 3, y: 6}
+  - spawnTimeRange: {x: 3, y: 6}
     spawnList:
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 16
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: A new enemy will appear! Beware!
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 4
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 4
       currqty: 0
@@ -440,27 +433,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 2
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 6
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 6
       currqty: 0
@@ -468,27 +460,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
@@ -496,27 +487,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 7
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 6
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 6
       currqty: 0
@@ -524,29 +514,27 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: Rolling Thunder!
-    spawnTimeRange: {x: 3, y: 6}
+  - spawnTimeRange: {x: 3, y: 6}
     spawnList:
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 25
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: A new enemy will appear! Beware!
-    spawnTimeRange: {x: 5, y: 8}
+  - spawnTimeRange: {x: 5, y: 8}
     spawnList:
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
@@ -554,7 +542,7 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 3
       currqty: 0
@@ -562,7 +550,7 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 2
       currqty: 0
@@ -570,18 +558,17 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 4, y: 6}
+  - spawnTimeRange: {x: 4, y: 6}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -589,27 +576,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 5
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 1, y: 3}
+  - spawnTimeRange: {x: 1, y: 3}
     spawnList:
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 3
       currqty: 0
@@ -617,27 +603,26 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: Enemies will spawn rapidly..
-    spawnTimeRange: {x: 0.8, y: 2}
+  - spawnTimeRange: {x: 0.8, y: 2}
     spawnList:
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
@@ -645,18 +630,17 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: 
-    spawnTimeRange: {x: 0.8, y: 4}
+  - spawnTimeRange: {x: 0.8, y: 4}
     spawnList:
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -664,7 +648,7 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 8
       currqty: 0
@@ -672,18 +656,17 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
-  - waveWarningText: Boss Wave
-    spawnTimeRange: {x: 2, y: 5}
+  - spawnTimeRange: {x: 2, y: 5}
     spawnList:
     - character: {fileID: 114384512591515218, guid: aa909aeedf87a554f8ef160ba698e5cf,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -691,16 +674,16 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114585619514535002, guid: 13fde6032b4fdf448b99cdfb4f4576aa,
-        type: 2}
+        type: 3}
       animator: {fileID: 95217210279639292, guid: 8c8a82117d669e949870e39dddec4df5,
-        type: 2}
+        type: 3}
       quantity: 10
       currqty: 0
       spawnLocations:
       - {fileID: 4475004325754442}
       - {fileID: 4163328537133890}
     - character: {fileID: 114144958338361788, guid: 93af5b317454d8d4a9d3a2a3de67a8cd,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -708,7 +691,7 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114883659211939854, guid: ddfb3c53353a6404c88bba58912bebc6,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0
@@ -716,7 +699,7 @@ MonoBehaviour:
       - {fileID: 4142766065093100}
       - {fileID: 4377525096065332}
     - character: {fileID: 114444696462029458, guid: 046bb375e688d3d488abb16cb6515441,
-        type: 2}
+        type: 3}
       animator: {fileID: 0}
       quantity: 10
       currqty: 0

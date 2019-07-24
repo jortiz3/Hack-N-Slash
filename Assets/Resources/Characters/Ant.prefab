@@ -36,8 +36,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4026001857268000}
-  - component: {fileID: 212315847304976446}
   - component: {fileID: 114384512591515218}
+  - component: {fileID: 212315847304976446}
   - component: {fileID: 95714171887735112}
   - component: {fileID: 50319275721454050}
   - component: {fileID: 70144713583390188}
@@ -168,10 +168,16 @@ MonoBehaviour:
   collider_lowerbody: {fileID: 70144713583390188}
   moveSpeed: 0.8
   maxhp: 10
-  baseAttackDamage: 3
+  baseAttackDamage: 1
   baseAttackForce: 25
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
   sliderColor_critical: {r: 1, g: 1, b: 1, a: 1}
+  soundEffectDelay_movement: 0.1
+  soundEffectVolumeMod_movement: 1
+  soundEffect_movement:
+  - {fileID: 8300000, guid: dc947d629c1c0f845945bac377f1972f, type: 3}
+  soundEffect_jump: {fileID: 0}
+  soundEffect_impact: {fileID: 8300000, guid: c7c381fc210658a4483312005ce1bc7c, type: 3}
   attentionSpanRange: {x: 2, y: 5}
   targetIdentifyRate: {x: 2.5, y: 2.5}
   isAbleToJump: 0

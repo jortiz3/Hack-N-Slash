@@ -172,6 +172,11 @@ MonoBehaviour:
   baseAttackForce: 150
   sliderColor_default: {r: 1, g: 1, b: 1, a: 1}
   sliderColor_critical: {r: 1, g: 1, b: 1, a: 1}
+  soundEffectDelay_movement: 1
+  soundEffectVolumeMod_movement: 0.8
+  soundEffect_movement: []
+  soundEffect_jump: {fileID: 0}
+  soundEffect_impact: {fileID: 8300000, guid: c7c381fc210658a4483312005ce1bc7c, type: 3}
   attentionSpanRange: {x: 2, y: 5}
   targetIdentifyRate: {x: 1, y: 2}
   isAbleToJump: 1

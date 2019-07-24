@@ -13,10 +13,13 @@ public class Player : Character {
 	[SerializeField]
 	private int numOfRespawnsRemaining = 3;
 	[SerializeField]
-	private int unlockCost;
+	private int unlock_cost;
+	[SerializeField]
+	private string unlock_challenge;
 
 	public int NumberOfRespawnsRemaining { get { return numOfRespawnsRemaining; } set { numOfRespawnsRemaining = value; } }
-	public int UnlockCost { get { return unlockCost; } }
+	public int Unlock_Cost { get { return unlock_cost; } }
+	public string Unlock_Challenge { get { return unlock_challenge; } }
 	public string DefaultWeapon { get { return defaultWeapon; } }
 
 	void Awake() {
@@ -40,7 +43,7 @@ public class Player : Character {
 					GameManager_SwordSwipe.currGameManager.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("died"); //fail survival
+					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("Player Death");
 					break;
 				}
 			}
@@ -79,12 +82,13 @@ public class Player : Character {
 		attackTimerSlider.gameObject.name = gameObject.name + "'s attack timer slider";
 		attackTimerSlider.GetComponent<RectTransform> ().sizeDelta = new Vector2 (Screen.width / 15f, Screen.height / 15f);
 		attackTimerSlider.gameObject.SetActive (false);
+
+		Initialize();
 	}
 
 	#if UNITY_EDITOR
 	void Update () {
-		/*
-		if (GameManager.currGameState == GameState.Active) {
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) {
 			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
 				Run ((int)Input.GetAxisRaw ("Horizontal"));
 			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
@@ -113,7 +117,6 @@ public class Player : Character {
 			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
 				Jump ();	
 		}
-		*/
 	}
 	#endif
 }

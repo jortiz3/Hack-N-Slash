@@ -19,11 +19,11 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("The shortest time between swings (x) and the longest (y).\nOne array element per animation.")]
 	private Vector2[] attackDelayRanges;
 	private Vector2 currAttackDelay;
-	[SerializeField, Tooltip("The range in which the player would be considered to 'perfectly' time the attack.\nOne array element per animation")]
+	[SerializeField, Tooltip("When during the swing would the player have perfectly timed the attack? Keep the\nranges between [0, 1] (0.5f being the midpoint point of swing).")]
 	private Vector2[] critRanges;
 	private Vector2 currCritRange;
 	[Header("Hitbox Settings")]
-	[SerializeField, Tooltip("When to enable the hitbox. \nExample: (0, swingdelaymax) means hitbox enabled for entire swing\nOne array element per animation.")]
+	[SerializeField, Tooltip("When will the hitbox be enabled during the attack? Keep ranges between [0, 1] (0.5f being the midpoint of swing)")]
 	private Vector2[] hitboxEnableRanges;
 	private Vector2 currhbEnableRange;
 	[SerializeField, Tooltip("Hitbox offset when the player is facing left.")]
@@ -31,13 +31,19 @@ public class Weapon : MonoBehaviour {
 	[SerializeField, Tooltip("Hitbox offset when the player is facing right.")]
 	private Vector2 hitboxOffsetRight;
 
-	[Space(),SerializeField]
-	private int unlockCost;
+	[Space(), SerializeField]
+	private int unlock_cost;
+	[SerializeField]
+	private string unlock_challenge;
 	[SerializeField]
 	private string specialization;
 
+	[SerializeField]
+	private AudioClip soundEffect_attack;
+
 	public int Damage { get { return damage; } }
-	public int UnlockCost { get { return unlockCost; } }
+	public int Unlock_Cost { get { return unlock_cost; } }
+	public string Unlock_Challenge { get { return unlock_challenge; } }
 	public string Specialization { get { return specialization; } } // One-handed, Two-handed, Bow, Gun, Mixed
 	public Vector2 currentAttackDelay { get { return currAttackDelay; } }
 	public Vector2 currentHitboxEnableRange { get { return currhbEnableRange; } }
@@ -82,8 +88,11 @@ public class Weapon : MonoBehaviour {
 		if (currAnim < hitboxEnableRanges.Length)
 			currhbEnableRange = hitboxEnableRanges [currAnim];
 
-		if (currAnim < critRanges.Length)
-			currCritRange = critRanges [currAnim];
+		if (currAnim < critRanges.Length) {
+			currCritRange = critRanges[currAnim];
+			currCritRange.x = Mathf.Clamp(currCritRange.x, 0f, 1f);
+			currCritRange.y = Mathf.Clamp(currCritRange.y, 0f, 1f);
+		}
 
 		if (projectiles != null && projectiles.Length > 0) {
 			if (currAnim < 2) {
@@ -100,6 +109,9 @@ public class Weapon : MonoBehaviour {
 			if (currProjectile >= projectiles.Length)
 				currProjectile = 0;
 		}
+
+		if (soundEffect_attack != null && GameManager_SwordSwipe.SoundEnabled)
+			AudioManager.PlaySoundEffect(soundEffect_attack, transform.position, 1f);
 	}
 
 	public void Attack_Available() {
@@ -108,9 +120,46 @@ public class Weapon : MonoBehaviour {
 
 	public void Attack_Expire() {
 		anim.SetBool ("Attack_Expire", true);
-		anim.SetBool ("Run", false);
-		anim.SetBool ("Idle", true);
 		currAnim = 0;
+	}
+
+	void Awake() {
+		if (transform.parent != null) {
+			wielder = transform.parent.GetComponent<Character>();
+		}
+
+		sr = gameObject.GetComponent<SpriteRenderer>();
+		anim = gameObject.GetComponent<Animator>();
+		bc2D = gameObject.GetComponent<BoxCollider2D>();
+
+		if (!bc2D.isTrigger)
+			bc2D.isTrigger = true;
+		if (bc2D.enabled)
+			bc2D.enabled = false;
+
+		currAnim = 0;
+
+		if (attackDelayRanges.Length >= 1)
+			currAttackDelay = attackDelayRanges[currAnim];
+		else
+			currAttackDelay = new Vector2(0.1f, 0.7f);
+
+		if (critRanges.Length >= 1)
+			currCritRange = critRanges[currAnim];
+		else
+			currCritRange = new Vector2(0.3f, 0.5f);
+
+		if (hitboxEnableRanges.Length >= 1)
+			currhbEnableRange = hitboxEnableRanges[currAnim];
+		else
+			currhbEnableRange = new Vector2(0f, 0.3f);
+
+
+		currProjectile = 0;
+		for (int i = 0; i < projectiles.Length; i++) {
+			if (projectiles[i] != null)
+				projectiles[i].SetOwner(this);
+		}
 	}
 
 	public void FaceLeft() {
@@ -128,6 +177,10 @@ public class Weapon : MonoBehaviour {
 	public void Fall() {
 		anim.SetBool ("Jump", false);
 		anim.SetBool ("Falling", true);
+	}
+
+	public void Flinch(bool state) {
+		anim.SetBool("Flinching", state);
 	}
 
 	public void Hitbox_Enable() {
@@ -165,45 +218,6 @@ public class Weapon : MonoBehaviour {
 			Character otherCharacter = otherObj.GetComponent<Character> ();
 			if (otherCharacter != null) //if it is actually a character
 				otherCharacter.ReceiveDamageFrom (this);
-		}
-	}
-
-	void Awake() {
-		if (transform.parent != null) {
-			wielder = transform.parent.GetComponent<Character>();
-		}
-
-		sr = gameObject.GetComponent<SpriteRenderer> ();
-		anim = gameObject.GetComponent<Animator> ();
-		bc2D = gameObject.GetComponent<BoxCollider2D> ();
-
-		if (!bc2D.isTrigger)
-			bc2D.isTrigger = true;
-		if (bc2D.enabled)
-			bc2D.enabled = false;
-
-		currAnim = 0;
-
-		if (attackDelayRanges.Length >= 1)
-			currAttackDelay = attackDelayRanges [currAnim];
-		else
-			currAttackDelay = new Vector2 (0.1f, 0.7f);
-
-		if (critRanges.Length >= 1)
-			currCritRange = critRanges [currAnim];
-		else
-			currCritRange = new Vector2 (0.3f, 0.5f);
-
-		if (hitboxEnableRanges.Length >= 1)
-			currhbEnableRange = hitboxEnableRanges [currAnim];
-		else
-			currhbEnableRange = new Vector2 (0f, 0.3f);
-
-
-		currProjectile = 0;
-		for (int i = 0; i < projectiles.Length; i++) {
-			if (projectiles[i] != null)
-				projectiles[i].SetOwner (this);
 		}
 	}
 }
