@@ -88,8 +88,7 @@ public class Player : Character {
 
 	#if UNITY_EDITOR
 	void Update () {
-		/*
-		if (GameManager.currGameState == GameState.Active) {
+		if (GameManager_SwordSwipe.currGameState == GameState.Active) {
 			if (Input.GetAxisRaw ("Horizontal") != 0) //horizontal button(s) held down; can be multiple frames
 				Run ((int)Input.GetAxisRaw ("Horizontal"));
 			else if (Input.GetButtonUp ("Horizontal") == true) //first frame horizontal buttons released
@@ -118,7 +117,6 @@ public class Player : Character {
 			if (Input.GetAxis ("Vertical") > 0) //button is held down; can be multiple frames
 				Jump ();	
 		}
-		*/
 	}
 	#endif
 }

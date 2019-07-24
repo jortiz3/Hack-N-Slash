@@ -50,9 +50,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public static SurvivalSpawner currSurvivalSpawner;
 	public static Vector3 currPlayerSpawnLocation;
 	public static Transform cutsceneParent;
+	public static PersistentStatus bossStatus;
+
 	private static ChallengeNotificationManager challengeManager;
 	private static AudioManager audioManager;
-
 	private static MenuScript menu;
 	private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
 	private static Toggle soundToggle;
@@ -1053,6 +1054,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			adManager = GetComponent<AdvertisementManager>();
 
 			audioManager = GetComponent<AudioManager>();
+
+			bossStatus = GameObject.Find("Boss Status").GetComponent<PersistentStatus>();
 
 			currencyText_Survival = GameObject.Find("Survival Currency Text").GetComponent<Text>();
 			currencyText_Unlocks = GameObject.Find("Unlocks Currency Text").GetComponent<Text>();
