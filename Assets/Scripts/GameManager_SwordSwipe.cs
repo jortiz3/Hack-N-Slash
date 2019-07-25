@@ -688,6 +688,9 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public IEnumerator ResizeAllUIElements() {
+		Canvas.ForceUpdateCanvases(); //force all layout groups and canvases to update immediately
+		yield return new WaitForEndOfFrame();
+
 		//outfits
 		foreach (RectTransform outfit in unlocks_outfitsParent) { //check each child
 			if (unlocks.Contains(outfit.name)) { //see if it has been unlocked
@@ -699,11 +702,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			} else { //outfit not unlocked
 				outfit.Find("Sprite").GetComponent<Image>().color = Color.black; //show outfit in black
 			}
-
-			while (outfit.rect.height == 0) { //if the size hasn't been updated yet
-				yield return new WaitForEndOfFrame(); //wait until it does
-			}
-			outfit.sizeDelta = new Vector2(outfit.rect.height, outfit.rect.height); //resize the unlock once ready
+			outfit.sizeDelta = new Vector2(outfit.rect.height, outfit.rect.height); //resize the outfit
 		}
 		ResizeHorizontalLayoutGroup(unlocks_outfitsParent.GetComponent<RectTransform>()); //ensure outfit area has enough space to scroll
 
@@ -719,12 +718,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				} else { //weapon not unlocked
 					weapon.Find("Sprite").GetComponent<Image>().color = Color.black; //show weapon in black
 				}
-
-				/*while (weapon.rect.height == 0) { //doesn't update unless gameobject is active??
-					Debug.Log(weapon.name);
-					yield return new WaitForEndOfFrame(); //wait until it does
-				}*/
-				weapon.sizeDelta = new Vector2(weapon.rect.height, weapon.rect.height); //resize the unlock once ready
+				weapon.sizeDelta = new Vector2(weapon.rect.height, weapon.rect.height); //resize the weapon
 			}
 			ResizeHorizontalLayoutGroup(weaponSpecialization); //ensure each weaponspec has enough space
 		}
@@ -736,9 +730,6 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			challenge = challengeRectTransform.GetComponent<Challenge>();
 			if (challenges.Contains(challenge.Name)) { //see if the challenge has been completed already
 				challenge.MarkComplete(); //mark it as complete
-			}
-			while (challengeRectTransform.rect.width == 0) { //if the size hasn't been updated yet
-				yield return new WaitForEndOfFrame(); //wait until it does
 			}
 			challengeRectTransform.sizeDelta = new Vector2(challengeRectTransform.rect.width, Screen.height * 0.4f); //keep same width, adjust height to scale with screen dimensions
 		}
@@ -1026,14 +1017,11 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			unlocks_weaponsParent = GameObject.Find("Weapon Layout Group").transform; //get the transform parent
 
 			challengesParent = GameObject.Find("Challenges Layout Group").transform; //get the transform parent
-			challengesParent.parent.parent.parent.gameObject.SetActive(false);
 
 			displayedSelectedWeaponInfo = GameObject.Find("Selected Weapon Text").GetComponent<Text>(); //get the text object for weapon info
 
 			displayPurchaseConfirmationButton_Weapon = GameObject.Find("Purchase Weapon Button").GetComponent<Button>();
 			displayPurchaseConfirmationButton_Weapon.gameObject.SetActive(false);
-
-			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive(false);
 
 			campaignMissionsParent = GameObject.Find("Missions Layout Group").transform;
 			campaignTabsParent = GameObject.Find("Campaign Tab Container").transform;
@@ -1066,12 +1054,15 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			currGameState = GameState.Menu;
 
-			ReselectBothOutfitAndWeapon();
 			StartCoroutine(ResizeAllUIElements());
+			ReselectBothOutfitAndWeapon();
 
 			foreach (string mission in missions) { //for each loaded mission
 				CompleteCampaignMission(mission, false); //make sure each mission is shown as complete without adding extra strings in the save file
 			}
+
+			unlocks_weaponsParent.parent.parent.parent.gameObject.SetActive(false); //hide object after elements resized
+			challengesParent.parent.parent.parent.gameObject.SetActive(false);
 		} else {
 			Destroy(gameObject);
 		}
