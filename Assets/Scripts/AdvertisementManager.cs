@@ -26,13 +26,13 @@ public class AdvertisementManager : MonoBehaviour {
 	private void HandleAdvertisementCallback(ShowResult result) {
 		if (!postMissionAd) {
 			if (result == ShowResult.Finished) { //the ad was completely watched
-				GameManager_SwordSwipe.currGameManager.CurrencyEarned(optInCurrencyAmount_finished);
+				GameManager_SwordSwipe.instance.CurrencyEarned(optInCurrencyAmount_finished);
 			} else if (result == ShowResult.Skipped && IAPManager.IAP_Rewards_Purchased) { //the ad was skipped and the user has premium
-				GameManager_SwordSwipe.currGameManager.CurrencyEarned(optInCurrencyAmount_skipped);
+				GameManager_SwordSwipe.instance.CurrencyEarned(optInCurrencyAmount_skipped);
 			}
 		} else {
 			if (result == ShowResult.Finished) {
-				GameManager_SwordSwipe.currGameManager.PostMissionAdComplete(true); //let the game manager know the ad is complete and reward the player
+				GameManager_SwordSwipe.instance.PostMissionAdComplete(true); //let the game manager know the ad is complete and reward the player
 			}
 			
 		}

@@ -478,7 +478,7 @@ public abstract class Character : MonoBehaviour {
 			}
 		}
 		if (i.ChallengeItem) {
-			GameManager_SwordSwipe.currGameManager.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
+			GameManager_SwordSwipe.instance.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_item:" + i.gameObject.name + "_item:" + total);
 		}
 		return total; //return total
 	}

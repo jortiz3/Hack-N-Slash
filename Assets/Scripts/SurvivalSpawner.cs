@@ -24,8 +24,8 @@ public class SurvivalSpawner : MonoBehaviour {
 	public int NumberOfWavesCompleted { get { return numWavesCompleted; } }
 
 	void Awake () {
-		if (GameManager_SwordSwipe.currSurvivalSpawner == null) {
-			GameManager_SwordSwipe.currSurvivalSpawner = this;
+		if (GameManager_SwordSwipe.instance_SurvivalSpawner == null) {
+			GameManager_SwordSwipe.instance_SurvivalSpawner = this;
 			transform.SetParent (GameObject.Find("Spawners").transform);
 		} else {
 			Destroy (gameObject);
@@ -78,9 +78,9 @@ public class SurvivalSpawner : MonoBehaviour {
 				if (continuousWavesEnabled) {
 					StartWave(CurrentWave + 1);
 					numWavesCompleted++;
-					GameManager_SwordSwipe.currGameManager.DisplayObjective("Survival Wave " + CurrentWave, " ");
+					GameManager_SwordSwipe.instance.DisplayObjective("Survival Wave " + CurrentWave, " ");
 				} else {
-					GameManager_SwordSwipe.currGameManager.EndSurvivalWave("Intermittent");
+					GameManager_SwordSwipe.instance.EndSurvivalWave("Intermittent");
 				}
 			}
 		}

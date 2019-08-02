@@ -46,7 +46,7 @@ public class AdvancedEnemy : SimpleEnemy {//Capable of a variety of things depen
 			}
 		}
 		if (cutsceneToPlayOnDeath != null) {
-			GameManager_SwordSwipe.currGameManager.PlayCutscene (cutsceneToPlayOnDeath);
+			GameManager_SwordSwipe.instance.PlayCutscene (cutsceneToPlayOnDeath);
 		}
 		base.Die ();
 	}

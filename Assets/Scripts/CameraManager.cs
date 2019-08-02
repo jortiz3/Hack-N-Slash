@@ -7,7 +7,7 @@ public class CameraManager : MonoBehaviour {
 
     void Awake() {
         virtualCamera = GetComponent<CinemachineVirtualCamera>();
-        GameManager_SwordSwipe.currCameraManager = this;
+        GameManager_SwordSwipe.instance_CameraManager = this;
     }
 
     public void Follow(Transform objectToFollow) {

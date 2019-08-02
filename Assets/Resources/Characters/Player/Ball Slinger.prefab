@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 2
   m_SortingOrder: 100
   m_Sprite: {fileID: 21300010, guid: dc30c2f99e17bb041be48e4aac6e3ace, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.014597764, g: 0.99264705, b: 0.18322699, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -179,7 +179,7 @@ MonoBehaviour:
   weaponSpecialization:
   - Unique_Ball Sword
   infiniteRespawn: 0
-  numOfRespawnsRemaining: 3
+  numOfRespawnsRemaining: 0
   unlock_cost: 0
   unlock_challenge: 
 --- !u!82 &82926358681136404

@@ -16,7 +16,7 @@ public class Checkpoint : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other) {
 		if (Time.time - previousCheckpointTime > 5f || GameManager_SwordSwipe.currPlayerSpawnLocation == Vector3.zero) { //if it has been a reasonable amount of time since the last checkpoint was used, we can use this checkpoint again
 			GameManager_SwordSwipe.currPlayerSpawnLocation = transform.position; //set this checkpoint as spawn location
-			GameManager_SwordSwipe.currGameManager.CheckpointReached();
+			GameManager_SwordSwipe.instance.CheckpointReached();
 
 			if (GameManager_SwordSwipe.SoundEnabled && aSource.clip != null) { //if there is a sound effect & sound is enabled
 				aSource.volume = GameManager_SwordSwipe.SFXVolume; //set the volume
@@ -24,7 +24,7 @@ public class Checkpoint : MonoBehaviour {
 			}
 
 			if (cutsceneToTrigger != null) { //if there is a cutscene
-				GameManager_SwordSwipe.currGameManager.PlayCutscene (cutsceneToTrigger); //play cutscene
+				GameManager_SwordSwipe.instance.PlayCutscene (cutsceneToTrigger); //play cutscene
 			}
 		}
 	}

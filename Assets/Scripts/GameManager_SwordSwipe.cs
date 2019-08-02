@@ -44,18 +44,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public static GameMode currGameMode;
 	public static GameDifficulty currDifficulty;
 	public static GameState currGameState;
-	private static GameState prevGameState; //for return buttons
-	public static GameManager_SwordSwipe currGameManager;
-	public static CameraManager currCameraManager;
-	public static SurvivalSpawner currSurvivalSpawner;
+	public static GameManager_SwordSwipe instance;
+	public static CameraManager instance_CameraManager;
+	public static SurvivalSpawner instance_SurvivalSpawner;
 	public static Vector3 currPlayerSpawnLocation;
 	public static Transform cutsceneParent;
 	public static PersistentStatus bossStatus;
 
+	private static GameState prevGameState; //for return buttons
 	private static ChallengeNotificationManager challengeManager;
-	private static AudioManager audioManager;
 	private static MenuScript menu;
 	private static AdvertisementManager adManager; //Script to display ads and track whether the ad was completed or not
+	private static AudioManager instance_AudioManager;
 	private static Toggle soundToggle;
 	private static Toggle continuousWaveToggle;
 	private static Slider bgmSlider;
@@ -131,6 +131,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public int Currency { get { return currency; } }
 	public int HighestSurvivalWave { get { return highestSurvivalWave; } }
 	public int CurrentSurvivalStreak { get { return currSurvivalStreak; } }
+	public AudioClip CurrentBGM { get { return instance_AudioManager.CurrentSong; } }
 
 	public void ChallengeActionComplete(string actionPerformed) { //will be called by other classes to notify GameManager when a challenge might be complete
 		Challenge challenge;
@@ -323,16 +324,16 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public void EndSurvivalWave(string endReason) {
 		currGameState = GameState.Menu; //change the state
 
-		int currentWave = currSurvivalSpawner.CurrentWave; //if player survived -- intermittent mode
+		int currentWave = instance_SurvivalSpawner.CurrentWave; //if player survived -- intermittent mode
 		if (endReason.Equals("Player Death")) { //player died, so previous wave was last completed wave
-			currentWave = currSurvivalSpawner.PreviousWave;
+			currentWave = instance_SurvivalSpawner.PreviousWave;
 		}
 
-		if (currSurvivalSpawner.NumberOfWavesCompleted > 0) {
-			if (selectedSurvivalWave + currSurvivalSpawner.NumberOfWavesCompleted < currSurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
-				selectedSurvivalWave += currSurvivalSpawner.NumberOfWavesCompleted; //encourage them to play the next wave
+		if (instance_SurvivalSpawner.NumberOfWavesCompleted > 0) {
+			if (selectedSurvivalWave + instance_SurvivalSpawner.NumberOfWavesCompleted < instance_SurvivalSpawner.NumberOfWaves) //if the selected wave is less than we have developed/created for the players
+				selectedSurvivalWave += instance_SurvivalSpawner.NumberOfWavesCompleted; //encourage them to play the next wave
 			else //already surpassed max wave
-				selectedSurvivalWave = currSurvivalSpawner.NumberOfWaves - 1; //set to last wave
+				selectedSurvivalWave = instance_SurvivalSpawner.NumberOfWaves - 1; //set to last wave
 
 			currencyEarned = 0; //track how much currency we earned
 
@@ -358,21 +359,21 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				highestSurvivalWave = currentWave + 1; //update highest survival wave completed
 			}
 
-			int mod_completedWaves = currSurvivalSpawner.NumberOfWavesCompleted; //stores how many waves completed in current bracket -- always 1 if intermittent mode
+			int mod_completedWaves = instance_SurvivalSpawner.NumberOfWavesCompleted; //stores how many waves completed in current bracket -- always 1 if intermittent mode
 
-			if (currSurvivalSpawner.NumberOfWavesCompleted > 25) { //if more than 25 waves were completed
+			if (instance_SurvivalSpawner.NumberOfWavesCompleted > 25) { //if more than 25 waves were completed
 				currencyEarned += 50; //give max num of rewards for 0-25
 				mod_completedWaves -= 25; //reduce the base -- a.k.a. how many in next bracket (50)
 			}
-			if (currSurvivalSpawner.NumberOfWavesCompleted > 50) {
+			if (instance_SurvivalSpawner.NumberOfWavesCompleted > 50) {
 				currencyEarned += 100; //give max num of rewards for 25-50
 				mod_completedWaves -= 25;
 			}
-			if (currSurvivalSpawner.NumberOfWavesCompleted > 75) {
+			if (instance_SurvivalSpawner.NumberOfWavesCompleted > 75) {
 				currencyEarned += 200; //give max num of rewards for 50-75
 				mod_completedWaves -= 25;
 			}
-			if (currSurvivalSpawner.NumberOfWavesCompleted > 100) {
+			if (instance_SurvivalSpawner.NumberOfWavesCompleted > 100) {
 				currencyEarned += 400; //give max num of rewards for 75-100
 				mod_completedWaves -= 25;
 			}
@@ -390,7 +391,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			}
 
 			//give bonuses if the player survived multiple waves in a row
-			if (!currSurvivalSpawner.ContinuousWavesEnabled) { //intermittent mode
+			if (!instance_SurvivalSpawner.ContinuousWavesEnabled) { //intermittent mode
 				currSurvivalStreak++; //increase their survival streak
 
 				if (currSurvivalStreak > 5) //bonuses for surviving multiple waves in a row -- given 1 at a time
@@ -406,7 +407,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				else if (currSurvivalStreak > 100)
 					currencyEarned += 320;
 			} else { //continuous mode
-				int streak_completedwaves = currSurvivalSpawner.NumberOfWavesCompleted;
+				int streak_completedwaves = instance_SurvivalSpawner.NumberOfWavesCompleted;
 
 				if (streak_completedwaves > 100) { //bonuses given all at once
 					currencyEarned += 320 * (streak_completedwaves - 100);
@@ -446,7 +447,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 			FinalizeCurrencyEarned();
 		} else { //player did not complete a single wave
-			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Survival streak reset to 0";
+			displayedSurvivalWaveInfo.text = "Wave " + instance_SurvivalSpawner.CurrentWave + " lost!\n\n-No currency gained\n-Survival streak reset to 0";
 			currSurvivalStreak = 0; //reset survival streak
 		}
 
@@ -516,7 +517,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	public void IncrementSelectedSurvivalWave() {
 		if (selectedSurvivalWave > highestSurvivalWave) { //if the selected wave is higher than possible
 			selectedSurvivalWave = highestSurvivalWave + 1; //set it to the next available wave
-		} else if (selectedSurvivalWave < currSurvivalSpawner.NumberOfWaves) { //prevent from incrementing past the amount of waves in survival spawner
+		} else if (selectedSurvivalWave < instance_SurvivalSpawner.NumberOfWaves) { //prevent from incrementing past the amount of waves in survival spawner
 			selectedSurvivalWave++;
 		}
 
@@ -546,18 +547,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			bgFilePath = "Survival_" + ((selectedSurvivalWave - 1) / 25);
 
 			if (backgroundIsMissing || !bgParent.GetChild(0).name.Contains(bgFilePath) || //background is not what it needs to be
-				(selectedSurvivalWave - 1) / 25 != currSurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
+				(selectedSurvivalWave - 1) / 25 != instance_SurvivalSpawner.PreviousWave / 25) {//player just started next set of 25 waves
 				bgNeedsToBeInstantiated = true;
 			}
 
-			if (!audioManager.CurrentSongName.Equals(bgFilePath)) { //if the desired survival song doesn't match
+			if (!instance_AudioManager.CurrentSongName.Equals(bgFilePath)) { //if the desired survival song doesn't match
 				bgmFilePath = "Audio/Music/" + bgFilePath; //get the filepath for the next song
-				audioManager.TransitionBackgroundMusic(Resources.Load<AudioClip>(bgmFilePath));
+				instance_AudioManager.TransitionBackgroundMusic(Resources.Load<AudioClip>(bgmFilePath));
 			}
 
 			bgFilePath = "Levels/" + bgFilePath;
 
-			currSurvivalSpawner.StartWave(selectedSurvivalWave);
+			instance_SurvivalSpawner.StartWave(selectedSurvivalWave);
 			nextGameState = GameState.Active;
 		} else {
 			bgFilePath = "Levels/" + selectedCampaignMission;
@@ -585,7 +586,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		}
 
 		if (nextGameState == GameState.Cutscene) { //if a mission if being loaded
-			PlayCutscene(bgParent.GetChild(0).Find("Cutscenes").Find("Start").GetComponent<Cutscene>()); //play opening cutscene
+			Transform temp;
+			try {
+				temp = bgParent.GetChild(0).Find("Cutscenes").Find("Start"); //try to get the start cutscene
+			} catch {
+				temp = null;
+			}
+
+			if (temp != null) { //if there is a start cutscene
+				PlayCutscene(temp.GetComponent<Cutscene>()); //play the cutscene
+			} else {
+				nextGameState = GameState.Active; //start gameplay
+			}
 		}
 
 		SpawnPlayer(); //spawn player after we get the location and after the cutscene
@@ -617,7 +629,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		currGameState = nextGameState;
 
 		if (currGameMode == GameMode.Survival) {
-			DisplayObjective("Survival Wave " + currSurvivalSpawner.CurrentWave.ToString(), "Defeat all enemies to advance!");
+			DisplayObjective("Survival Wave " + instance_SurvivalSpawner.CurrentWave.ToString(), "Defeat all enemies to advance!");
 		}
 	}
 
@@ -632,7 +644,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		currCutscene = c;
 		currCutscene.gameObject.SetActive(true); //ensure the cutscene object can update
 		currGameState = GameState.Cutscene; //change gamestate
-		audioManager.StopBackgroundMusic(); //stop bgm
+		instance_AudioManager.StopBackgroundMusic(); //stop bgm
 	}
 
 	public void PostMissionAdComplete(bool finished) {
@@ -829,7 +841,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				}
 			}
 			if (purchase_selectedItemCost > -1) { //if the outfit is for sale
-				textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
+				if (purchase_selectedItemCost == 0)
+					textToDisplay += "\nCost: Free";
+				else
+					textToDisplay += "\nCost: " + purchase_selectedItemCost; //display the cost
 
 				if (currency < purchase_selectedItemCost) {
 					interactable = false;
@@ -891,7 +906,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void SetBGM(AudioClip music) {
-		audioManager.TransitionBackgroundMusic(music);
+		instance_AudioManager.TransitionBackgroundMusic(music);
 	}
 
 	public void SetDifficulty(Dropdown difficulty) {
@@ -941,20 +956,20 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		Instantiate(Resources.Load("Characters/Player/" + selectedOutfit), currPlayerSpawnLocation, Quaternion.Euler(Vector3.zero));
 		Weapon w = (Instantiate(Resources.Load("Weapons/" + selectedWeapon)) as GameObject).GetComponent<Weapon>(); //spawn selected weapon
 		Character.player.Wield(w);
-		currCameraManager.Follow(Character.player.transform);
+		instance_CameraManager.Follow(Character.player.transform);
 	}
 
 	private void SpawnSurvivalSpawner() {
-		if (currSurvivalSpawner != null) {
-			currSurvivalSpawner.gameObject.SetActive(true);
+		if (instance_SurvivalSpawner != null) {
+			instance_SurvivalSpawner.gameObject.SetActive(true);
 		} else {
 			Instantiate(Resources.Load("Spawners/SurvivalSpawner"));
 		}
 	}
 
 	void Start() {
-		if (currGameManager == null) {
-			currGameManager = this;
+		if (instance == null) {
+			instance = this;
 			DontDestroyOnLoad(gameObject);
 
 			menu = transform.Find("Canvas (Overlay)").GetComponent<MenuScript>();
@@ -1041,7 +1056,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 			challengeManager = GameObject.Find("Challenge Notification Panel").GetComponent<ChallengeNotificationManager>();
 			adManager = GetComponent<AdvertisementManager>();
 
-			audioManager = GetComponent<AudioManager>();
+			instance_AudioManager = GetComponent<AudioManager>();
 
 			bossStatus = GameObject.Find("Boss Status").GetComponent<PersistentStatus>();
 
@@ -1069,8 +1084,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void StartCampaign() {
-		if (currSurvivalSpawner != null) {
-			currSurvivalSpawner.gameObject.SetActive(false);
+		if (instance_SurvivalSpawner != null) {
+			instance_SurvivalSpawner.gameObject.SetActive(false);
 		}
 
 		currGameMode = GameMode.Campaign;
@@ -1084,7 +1099,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 
 		SpawnSurvivalSpawner();
 
-		currSurvivalSpawner.ContinuousWavesEnabled = continuousWaveToggle.isOn;
+		instance_SurvivalSpawner.ContinuousWavesEnabled = continuousWaveToggle.isOn;
 		currGameMode = GameMode.Survival;
 		currGameState = GameState.Menu;
 		UpdateSurvivalWaveText();
@@ -1100,7 +1115,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		cutsceneParent.gameObject.SetActive(false); //hide pictures, subtitles, etc.
 		c.gameObject.SetActive(false); //prevent cutscene from updating further
 		currGameState = GameState.Active; //change gamestate
-		audioManager.StartBackgroundMusic(); // play bgm
+		instance_AudioManager.StartBackgroundMusic(); // play bgm
 	}
 
 	public void StopCutscene(Cutscene c, bool completeMission) {
@@ -1118,7 +1133,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	public void ToggleSurvivalContinuousMode(Toggle UIToggle) {
-		currSurvivalSpawner.ContinuousWavesEnabled = UIToggle.isOn; //enable/disable continuous wave mode using the toggle on the screen
+		instance_SurvivalSpawner.ContinuousWavesEnabled = UIToggle.isOn; //enable/disable continuous wave mode using the toggle on the screen
 	}
 
 	public void UnlockItem(string itemName, bool colorGrabNeeded) {
@@ -1178,10 +1193,10 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 	}
 
 	private void UpdateSurvivalCompleteText() {
-		if (currSurvivalSpawner.ContinuousWavesEnabled)
-			displayedSurvivalWaveInfo.text = currSurvivalSpawner.NumberOfWavesCompleted + " waves completed!\n\n+" + CurrencyEarnedText();
+		if (instance_SurvivalSpawner.ContinuousWavesEnabled)
+			displayedSurvivalWaveInfo.text = instance_SurvivalSpawner.NumberOfWavesCompleted + " waves completed!\n\n+" + CurrencyEarnedText();
 		else
-			displayedSurvivalWaveInfo.text = "Wave " + currSurvivalSpawner.CurrentWave + " complete!\n\n+" + CurrencyEarnedText() + "\n+1 survival streak (" + currSurvivalStreak + ")"; //inform the player how much they earned
+			displayedSurvivalWaveInfo.text = "Wave " + instance_SurvivalSpawner.CurrentWave + " complete!\n\n+" + CurrencyEarnedText() + "\n+1 survival streak (" + currSurvivalStreak + ")"; //inform the player how much they earned
 
 		if (numOfRoundsSinceLastAd == 0 && !ad_rewards_given) {
 			displayedSurvivalWaveInfo.text += "\n\nWatch an ad using the button below to earn +25% more rewards!";

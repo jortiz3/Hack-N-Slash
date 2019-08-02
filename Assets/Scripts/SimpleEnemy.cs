@@ -49,9 +49,9 @@ public class SimpleEnemy : Character { //simple enemy that walks towards the pla
 		if (GameManager_SwordSwipe.currGameState == GameState.Active) {
 			if (challengeEnemy) {
 				if (GameManager_SwordSwipe.currGameMode == GameMode.Campaign) {
-					GameManager_SwordSwipe.currGameManager.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_Enemy:" + this.ToString());
+					GameManager_SwordSwipe.instance.ChallengeActionComplete(GameManager_SwordSwipe.SelectedCampaignMission + "_Enemy:" + this.ToString());
 				} else {
-					GameManager_SwordSwipe.currGameManager.ChallengeActionComplete("Survival_" + GameManager_SwordSwipe.currSurvivalSpawner.CurrentWave + "_enemy:" + this.ToString());
+					GameManager_SwordSwipe.instance.ChallengeActionComplete("Survival_" + GameManager_SwordSwipe.instance_SurvivalSpawner.CurrentWave + "_enemy:" + this.ToString());
 				}
 			}
 		}

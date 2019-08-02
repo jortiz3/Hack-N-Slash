@@ -57,7 +57,7 @@ public class Cutscene : MonoBehaviour {
 		}
 
 		StopAllAudio(); //may not be necessary
-		GameManager_SwordSwipe.currGameManager.StopCutscene (this, endMissionOnFinish); //inform game manager cutscene is complete
+		GameManager_SwordSwipe.instance.StopCutscene (this, endMissionOnFinish); //inform game manager cutscene is complete
 		ended = true; //ensure we don't spawn multiple bosses
 	}
 

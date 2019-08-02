@@ -72,7 +72,7 @@ public class Item : MonoBehaviour {
 
         if (c.ReceiveItem(this) >= quantityRequiredForCutscene) { //give the item to the character && see if enough of item obtained
             if (cutsceneToPlayOnPickup != null) { //if there is a cutscene to play
-                GameManager_SwordSwipe.currGameManager.PlayCutscene(cutsceneToPlayOnPickup); //play the cutscene
+                GameManager_SwordSwipe.instance.PlayCutscene(cutsceneToPlayOnPickup); //play the cutscene
             }
         }
     }

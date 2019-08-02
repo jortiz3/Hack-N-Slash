@@ -40,10 +40,10 @@ public class Player : Character {
 			if (GameManager_SwordSwipe.currGameState == GameState.Active) {
 				switch (GameManager_SwordSwipe.currGameMode) {
 				case GameMode.Campaign:
-					GameManager_SwordSwipe.currGameManager.FailCurrentCampaignMission (); //fail mission
+					GameManager_SwordSwipe.instance.FailCurrentCampaignMission (); //fail mission
 					break;
 				case GameMode.Survival:
-					GameManager_SwordSwipe.currGameManager.EndSurvivalWave ("Player Death");
+					GameManager_SwordSwipe.instance.EndSurvivalWave ("Player Death");
 					break;
 				}
 			}

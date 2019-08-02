@@ -4,11 +4,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class Boss : AdvancedEnemy {
 
+	[SerializeField]
+	private AudioClip battleBGM;
+	private AudioClip prevBGM;
+
 	public override void Die() {
 		GameManager_SwordSwipe.bossStatus.Hide();
+		GameManager_SwordSwipe.instance.SetBGM(prevBGM);
 		base.Die();
 	}
 
@@ -29,6 +35,11 @@ public class Boss : AdvancedEnemy {
 
 		UpdateStatusText();
 		DisplayStatus();
+
+		if (battleBGM != null) {
+			prevBGM = GameManager_SwordSwipe.instance.CurrentBGM;
+			GameManager_SwordSwipe.instance.SetBGM(battleBGM);
+		}
 	}
 
 	protected override void UpdateEnemy() {

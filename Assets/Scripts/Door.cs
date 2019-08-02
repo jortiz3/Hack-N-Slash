@@ -35,7 +35,7 @@ public class Door : MonoBehaviour {
 				}
 			}
 			if (cutsceneToPlay != null) { //if there is a cutscene
-				GameManager_SwordSwipe.currGameManager.PlayCutscene (cutsceneToPlay); //play the cutscene
+				GameManager_SwordSwipe.instance.PlayCutscene (cutsceneToPlay); //play the cutscene
 			}
 		} else {
 			if (GameManager_SwordSwipe.SoundEnabled && lockedSoundEffect != null) { //sound enabled && sound effect available

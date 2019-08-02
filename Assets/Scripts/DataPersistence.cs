@@ -22,7 +22,7 @@ public class DataPersistence {
 		DeleteAllSaveData();
 #endif
 
-		GameManager_SwordSwipe.currGameManager.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
+		GameManager_SwordSwipe.instance.SetDifficulty (PlayerPrefs.GetInt("Difficulty", 2)); //set the game difficulty using the stored playerpref
 		GameManager_SwordSwipe.SoundEnabled = PlayerPrefs.GetInt ("Sound Enabled", 1) == 1 ? true : false; //set the sound toggle using the stored playerpref
 
 		GameManager_SwordSwipe.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
@@ -59,9 +59,9 @@ public class DataPersistence {
 
 		PlayerData playerData = new PlayerData ();
 		playerData.fileVersion = "v1.0";
-		playerData.currency = GameManager_SwordSwipe.currGameManager.Currency;
-		playerData.highestSurvivalWave = GameManager_SwordSwipe.currGameManager.HighestSurvivalWave;
-		playerData.survivalStreak = GameManager_SwordSwipe.currGameManager.CurrentSurvivalStreak;
+		playerData.currency = GameManager_SwordSwipe.instance.Currency;
+		playerData.highestSurvivalWave = GameManager_SwordSwipe.instance.HighestSurvivalWave;
+		playerData.survivalStreak = GameManager_SwordSwipe.instance.CurrentSurvivalStreak;
 		playerData.unlocks = GameManager_SwordSwipe.Unlocks;
 		playerData.challenges = GameManager_SwordSwipe.Challenges;
 		playerData.missions = GameManager_SwordSwipe.Missions; 

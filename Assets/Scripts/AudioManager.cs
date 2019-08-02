@@ -9,6 +9,7 @@ public class AudioManager : MonoBehaviour {
 	private AudioClip nextClip;
 	private bool fadeInProgress;
 
+	public AudioClip CurrentSong { get { return audioSource_BGM.clip; } }
 	public string CurrentSongName { get { return audioSource_BGM.clip.name; } }
 
 	void Awake() {
