@@ -210,7 +210,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4148150388268394}
-  - {fileID: 4138523823431142}
   m_Father: {fileID: 4628949910082158}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2963,61 +2962,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
---- !u!1 &1485060703675906
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4138523823431142}
-  - component: {fileID: 114467786545295864}
-  m_Layer: 5
-  m_Name: End
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &4138523823431142
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1485060703675906}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.6133308, y: 3.3239975, z: 0}
-  m_LocalScale: {x: 0.003333897, y: 0.004000678, z: 0.012577375}
-  m_Children: []
-  m_Father: {fileID: 4350445072696896}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114467786545295864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1485060703675906}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c7200012c9bde4409f1ff9ef0a1e081, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  alwaysSkippable: 0
-  endMissionOnFinish: 1
-  bossToSpawn: {fileID: 0}
-  bossSpawnLocation: {fileID: 0}
-  gameObjectToEnableOnCutsceneEnd: {fileID: 0}
-  scenes:
-  - sprite: {fileID: 21300004, guid: 71b6c0c6f83f4584d94a7116b58ffb53, type: 3}
-    narration:
-    - text: Ant 1
-      displayTime: 3
-      narration: {fileID: 0}
-      soundEffect: {fileID: 0}
 --- !u!1 &1577486673366054
 GameObject:
   m_ObjectHideFlags: 0
@@ -5293,7 +5237,7 @@ MonoBehaviour:
   keyToUnlockDoor: {fileID: 114696205795124100}
   lockedSoundEffect: {fileID: 0}
   openedSoundEffect: {fileID: 0}
-  cutsceneToPlay: {fileID: 114467786545295864}
+  cutsceneToPlay: {fileID: 0}
   locationToMoveTo: {fileID: 0}
   moveTimeDelay: 0
 --- !u!61 &61712645742811754
@@ -5371,44 +5315,28 @@ MonoBehaviour:
   bossSpawnLocation: {fileID: 0}
   gameObjectToEnableOnCutsceneEnd: {fileID: 0}
   scenes:
-  - sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  - sprite: {fileID: 21300000, guid: 9190633160a41be4c869ebecf89e0820, type: 3}
     narration:
-    - text: '[Loading]'
-      displayTime: 1
+    - text: '[Explosion Noises]'
+      displayTime: 4
       narration: {fileID: 0}
       soundEffect: {fileID: 0}
-    - text: My family is the reason I fight.
+    - text: My Family was taken from me by the crimelords of this city.
       displayTime: 8
       narration: {fileID: 0}
       soundEffect: {fileID: 0}
-  - sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-    narration:
-    - text: '[Explosion Noises]'
-      displayTime: 5
-      narration: {fileID: 0}
-      soundEffect: {fileID: 0}
-    - text: They were taken from me by the crimelords of this city.
-      displayTime: 10
-      narration: {fileID: 0}
-      soundEffect: {fileID: 0}
-  - sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-    narration:
-    - text: So, I joined the Dark Vibrato.
+    - text: I was devastated.. and thirsted for justice.
       displayTime: 6
       narration: {fileID: 0}
       soundEffect: {fileID: 0}
-    - text: They believe they know who the crimelords are.
-      displayTime: 3
-      narration: {fileID: 0}
-      soundEffect: {fileID: 0}
-  - sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  - sprite: {fileID: 21300000, guid: 79d1dd547468dcb45bfb54fc743fde80, type: 3}
     narration:
-    - text: And today.. I prove my worth for a promotion.
-      displayTime: 10
+    - text: So, I joined a vigilante group called the Dark Vibrato.
+      displayTime: 8
       narration: {fileID: 0}
       soundEffect: {fileID: 0}
-    - text: Let's see how I do!
-      displayTime: 6
+    - text: 'Their plan: prevent the crimelords from rising to power.. in the past.'
+      displayTime: 8
       narration: {fileID: 0}
       soundEffect: {fileID: 0}
 --- !u!1 &1897207667757606

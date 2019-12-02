@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class Cutscene : MonoBehaviour {
 
 	private static Image image; //pointer to the image on the cutscene object we will change -- attached to the cutscene object
+	private static Image fade; //pointer to image that will fade in & out as each picture is loaded
 	private static AudioSource narrationAudioSource; //pointer to the component that will emit the narration -- attached to child of the cutscene object
 	private static Text subtitleText; //pointer to the text on the cutscene we will change -- attached to child of the cutscene object
 
@@ -29,6 +30,7 @@ public class Cutscene : MonoBehaviour {
 	private int currNarration; //current narration
 	private float currDisplayTime; //how much time is left for current narration
 	private bool ended;
+	private bool fading;
 
 	public bool AlwaysSkippable { get { return alwaysSkippable; } }
 
@@ -61,12 +63,48 @@ public class Cutscene : MonoBehaviour {
 		ended = true; //ensure we don't spawn multiple bosses
 	}
 
+	private IEnumerator FadeIn() {
+		fading = true; //keep the scenes from progressing while fading
+		SetSprite(); //show the sprite
+
+		Color currColor = Color.black; //starting color
+		while (fade.color.a > 0) { //while still visible
+			yield return new WaitForFixedUpdate(); //wait until end of frame
+			currColor.a -= Time.fixedDeltaTime; //move color towards clear
+			fade.color = currColor; //update image
+		}
+		fading = false; //done fading, so progress scene now
+		NextNarration(); //play narration once fully visible
+	}
+
+	private IEnumerator FadeOut(bool thereIsFollowupScene) {
+		fading = true; //keep scene from progressing
+		ClearNarrationText(); //clear the text to help smooth out transition
+
+		Color currColor = Color.clear; //starting color
+		while (fade.color.a < 1) { //while not fully visible
+			yield return new WaitForFixedUpdate(); //wait until end of frame
+			currColor.a += Time.fixedDeltaTime; //move color towards black
+			fade.color = currColor; //update image
+		}
+
+		//once screen is black
+		if (thereIsFollowupScene) { //if another scene/image follows
+			StartCoroutine(FadeIn()); //fade back in with new picture and narration
+		} else { //no follow-up scene
+			EndCutscene(); //end cutscene
+			fading = false; //no longer fading
+		}
+	}
+
 	void FixedUpdate () {
 		if (GameManager_SwordSwipe.currGameState == GameState.Cutscene) { //cutscene to show, not complete
-			if (currDisplayTime > 0) { //narration is being displayed
-				currDisplayTime -= Time.fixedDeltaTime;
-			} else {
-				NextNarration ();
+			if (!fading) {
+				if (currDisplayTime > 0) { //narration is being displayed
+					currDisplayTime -= Time.fixedDeltaTime;
+				} else {
+					NextNarration();
+				}
 			}
 		}
 	}
@@ -76,10 +114,9 @@ public class Cutscene : MonoBehaviour {
 
 		if (currScene < scenes.Length) { //another scene to show
 			currNarration = -1; //reset narration to -1
-			SetSprite();
-			NextNarration();
+			StartCoroutine(FadeOut(true));
 		} else { //no more scenes
-			EndCutscene();
+			StartCoroutine(FadeOut(false));
 		}
 	}
 
@@ -124,6 +161,7 @@ public class Cutscene : MonoBehaviour {
 		if (narrationAudioSource == null) {
 			narrationAudioSource = GameManager_SwordSwipe.cutsceneParent.Find("Narration").GetComponent<AudioSource>(); //get the narration audio source
 			image = GameManager_SwordSwipe.cutsceneParent.Find("Image").GetComponent<Image> (); //get the image component so we can change the sprite later on
+			fade = GameManager_SwordSwipe.cutsceneParent.Find("Fade").GetComponent<Image>(); //get the image component so we can change the sprite alpha later on
 			subtitleText = GameManager_SwordSwipe.cutsceneParent.Find ("Subtitle").GetComponent<Text>(); //get the text child so we can change narration text later on
 		}
 		
@@ -132,8 +170,7 @@ public class Cutscene : MonoBehaviour {
 		currScene = 0; //set to the first scene
 		currNarration = -1; //set position just behind first narration text
 
-		SetSprite (); //show the first sprite
-		NextNarration (); //increment to first narration
+		StartCoroutine(FadeIn());
 	}
 
 	private void StopAllAudio() {

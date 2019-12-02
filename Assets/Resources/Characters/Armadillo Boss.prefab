@@ -146,7 +146,7 @@ SpriteRenderer:
   m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 71b6c0c6f83f4584d94a7116b58ffb53, type: 3}
-  m_Color: {r: 0.85294116, g: 0.70769894, b: 0.39511245, a: 1}
+  m_Color: {r: 0.42040282, g: 0.3960784, b: 0.85490197, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -250,6 +250,7 @@ MonoBehaviour:
   attackDelay: 1
   flyingHeight: 0
   cutsceneToPlayOnDeath: {fileID: 0}
+  battleBGM: {fileID: 0}
 --- !u!1 &1445246287150968
 GameObject:
   m_ObjectHideFlags: 0
