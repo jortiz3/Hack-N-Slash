@@ -7,6 +7,8 @@ public class Projectile : MonoBehaviour {
 
 	private Weapon owner;
 	private Rigidbody2D rb2D;
+	[SerializeField]
+	private ImpactEffect impactEffect;
 
 	public void Fire(Vector3 startPos, Vector2 force) {
 		transform.position = startPos; //place the projectile at the start position
@@ -19,8 +21,11 @@ public class Projectile : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D otherObj) {
+		bool triggerImpact = false;
+
 		if (otherObj.gameObject.layer == LayerMask.NameToLayer ("World")) { //if projectile collided with the world
 			gameObject.SetActive (false); //hide projectile; do not destroy so we save from having to create another
+			triggerImpact = true;
 			return;
 		}
 
@@ -28,6 +33,15 @@ public class Projectile : MonoBehaviour {
 		if (c != null) {
 			c.ReceiveDamageFrom (owner); //damage the other character
 			gameObject.SetActive (false); //hide the projectile
+			triggerImpact = true;
+		}
+
+		if (triggerImpact) {
+			if (impactEffect != null) {
+				impactEffect.transform.position = transform.position;
+				impactEffect.ResetAnimation();
+				impactEffect.gameObject.SetActive(true);
+			}
 		}
 	}
 
