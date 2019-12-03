@@ -864,8 +864,18 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 		displayedSelectedWeaponInfo.text = WeaponName + "\nDamage: " + w.Damage + "\nType: " + w.Specialization; //update info
 
 		if (unlocks.Contains(WeaponName)) { // if the weapon is unlocked
+			bool isCompatibleWeapon = false;
 			for (int i = 0; i < selectedOutfit_weaponSpecializations.Count; i++) { //go thru all weapon specs
-				if (selectedOutfit_weaponSpecializations[i].Contains(w.Specialization)) { //if the weapon can be used with the current outfit
+				if (w.Specialization.Equals("Unique")) { //if weapon is unique
+					if (selectedOutfit_weaponSpecializations[i].Contains(WeaponName)) { //specialization must have weapon name
+						isCompatibleWeapon = true;
+					}
+				} else if (selectedOutfit_weaponSpecializations[i].Contains(w.Specialization)) { //if weapon non-unique, ensure specialization is included
+					isCompatibleWeapon = true;
+				}
+
+
+				if (isCompatibleWeapon) {
 					displayedSelectedWeaponInfo.color = Color.black; //ensure the text is black
 					displayPurchaseConfirmationButton_Weapon.gameObject.SetActive(false); //hide purchase/unlock button
 
@@ -873,6 +883,7 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 					unlocks_weaponsParent.Find(w.Specialization).Find(WeaponName).Find("Checkmark").gameObject.SetActive(true); //show the checkmark for currently selected weapon
 					selectedWeapon = WeaponName; //update the selected weapon
 					selectedWeaponSpecialization = w.Specialization;
+					break;
 				} else {
 					displayedSelectedWeaponInfo.text += "\nThis weapon cannot be used with the current outfit.";
 				}
@@ -1015,8 +1026,8 @@ public class GameManager_SwordSwipe : MonoBehaviour {
 				highestSurvivalWave = 0;
 				currSurvivalStreak = 0;
 				currency = 0;
-				unlocks.Add("Stick it to 'em"); //default player
-				unlocks.Add("Iron Longsword"); //default weapon
+				unlocks.Add("Ninja"); //default player
+				unlocks.Add("Ninja Sword"); //default weapon
 			}
 
 			SetDifficulty((int)currDifficulty); //set the current difficulty to loaded/preset value

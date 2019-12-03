@@ -144,7 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc177ed757fb5434bb604dedd930d2b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 10
+  damage: 3
   projectiles:
   - {fileID: 114702544267283698}
   - {fileID: 114725599511383690}
@@ -308,6 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec8d90777f02d6489431ac5c395de01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactEffect: {fileID: 0}
 --- !u!50 &50427527855255922
 Rigidbody2D:
   serializedVersion: 4
@@ -463,6 +464,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec8d90777f02d6489431ac5c395de01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactEffect: {fileID: 0}
 --- !u!50 &50469976417084452
 Rigidbody2D:
   serializedVersion: 4
@@ -618,6 +620,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec8d90777f02d6489431ac5c395de01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactEffect: {fileID: 0}
 --- !u!50 &50583228059880936
 Rigidbody2D:
   serializedVersion: 4
@@ -773,6 +776,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ec8d90777f02d6489431ac5c395de01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  impactEffect: {fileID: 0}
 --- !u!50 &50064227997488654
 Rigidbody2D:
   serializedVersion: 4

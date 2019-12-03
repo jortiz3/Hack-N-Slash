@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc177ed757fb5434bb604dedd930d2b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 10
+  damage: 15
   projectiles: []
   attackForce: 500
   attackDelayRanges:

@@ -28,9 +28,9 @@ public class DataPersistence {
 		GameManager_SwordSwipe.BGMVolume = PlayerPrefs.GetFloat ("BGM Volume", 0.5f); //set the background music volume using the stored playerpref
 		GameManager_SwordSwipe.SFXVolume = PlayerPrefs.GetFloat ("SFX Volume", 0.5f); //set the sound effects volume using the stored playerpref
 
-		GameManager_SwordSwipe.SelectedOutfit = PlayerPrefs.GetString ("SelectedCharacter", "Stick it to 'em");
-		GameManager_SwordSwipe.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Iron Longsword");
-		GameManager_SwordSwipe.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Two-handed");
+		GameManager_SwordSwipe.SelectedOutfit = PlayerPrefs.GetString ("SelectedCharacter", "Ninja");
+		GameManager_SwordSwipe.SelectedWeapon = PlayerPrefs.GetString ("SelectedWeapon", "Ninja Sword");
+		GameManager_SwordSwipe.SelectedWeaponSpecialization = PlayerPrefs.GetString ("SelectedWeaponSpecialization", "Unique");
 
 		PlayerInput.currControlScheme = (ControlScheme)PlayerPrefs.GetInt ("Control Scheme", (int)ControlScheme.Default);
 

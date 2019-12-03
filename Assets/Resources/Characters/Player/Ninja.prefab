@@ -133,9 +133,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 2b160dee7c44f3b41bd0f11b799c4c8d, type: 3}
   soundEffect_jump: {fileID: 8300000, guid: eed9cadd4bec6b94cad9c4d76e8f17bb, type: 3}
   soundEffect_impact: {fileID: 8300000, guid: f2da025d7e40f1c4abc2ea83c2de8a2d, type: 3}
-  defaultWeapon: Iron Longsword
+  defaultWeapon: Ninja Sword
   weaponSpecialization:
-  - Two-handed
+  - Unique_Ninja Sword
   infiniteRespawn: 0
   numOfRespawnsRemaining: 0
   unlock_cost: 0
